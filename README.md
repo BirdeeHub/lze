@@ -1,10 +1,7 @@
-# This repository was based on a mistake, and this is me taking it back.
-
 Go check out [`lz.n`](https://github.com/nvim-neorocks/lz.n)
 
-Its great. I will be publishing some handlers and utilities
-for it soon, that will achieve all this one did,
-minus the after hook for handler authors.
+This repo needs time to figure itself out, because the current iteration wasn't as I had envisioned
 
-While I liked that hook, it ultimately is not necessary,
-and the author of `lz.n` offers other abilities to handlers.
+This is fine, because its less than a week old and has never been officially announced.
+
+This repo may contain something else eventually.
