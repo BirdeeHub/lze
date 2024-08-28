@@ -85,10 +85,10 @@ function M.run_modify(plugin)
     ---@diagnostic disable-next-line: undefined-field
     local res = plugin
     local if_has_run = function(hndl, p)
-        if not plugin[hndl.spec_field] then
+        if not hndl.modify then
             return p
         end
-        if not hndl.modify then
+        if not p[hndl.spec_field] then
             return p
         end
         return hndl.modify(p)
