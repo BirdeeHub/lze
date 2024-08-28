@@ -1,7 +1,4 @@
 ---@mod lze.loader
-
-local state = {}
-
 local M = {}
 
 local DEFAULT_PRIORITY = 50
@@ -47,21 +44,6 @@ local function get_eager_plugins(plugins)
     return result
 end
 
---- Loads startup plugins, removing loaded plugins from the table
----@param plugins lze.Plugin[]
-function M.load_startup_plugins(plugins)
-    run_before_all(plugins)
-    -- NOTE: looping and calling 1 at a time
-    -- to map plugins to plugin.name
-    -- is faster than mapping first,
-    -- then passing them all to load
-    -- as we only have to iterate the table once
-    ---@param plugin lze.Plugin
-    for _, plugin in ipairs(get_eager_plugins(plugins)) do
-        M.load(plugin.name)
-    end
-end
-
 ---@alias hook_key "before" | "after"
 
 ---@param hook_key hook_key
@@ -79,31 +61,6 @@ local function hook(hook_key, plugin)
             plugin
         )
     end
-end
-
----@type table<string, lze.Plugin|false>
-state.plugins = {}
-
----@param spec lze.Spec
----@return table
----@return string[]
-function M.add(spec)
-    ---@type string[]
-    local duplicates = {}
-    local final = {}
-    local plugins = require("lze.c.spec").parse(spec)
-    for _, v in ipairs(plugins) do
-        if state.plugins[v.name] == nil then
-            state.plugins[v.name] = v
-            table.insert(final, v)
-        elseif v.allow_again and not state.plugins[v.name] then
-            state.plugins[v.name] = v
-            table.insert(final, v)
-        else
-            table.insert(duplicates, v.name)
-        end
-    end
-    return vim.deepcopy(final), duplicates
 end
 
 local function check_enabled(plugin)
@@ -126,6 +83,52 @@ local function _load(plugin)
     require("lze.c.handler").run_after(plugin.name)
 end
 
+--- Loads startup plugins, removing loaded plugins from the table
+---@param plugins lze.Plugin[]
+function M.load_startup_plugins(plugins)
+    run_before_all(plugins)
+    -- NOTE: looping and calling 1 at a time
+    -- to map plugins to plugin.name
+    -- is faster than mapping first,
+    -- then passing them all to load
+    -- as we only have to iterate the table once
+    ---@param plugin lze.Plugin
+    for _, plugin in ipairs(get_eager_plugins(plugins)) do
+        M.load(plugin.name)
+    end
+end
+
+---@type table<string, lze.Plugin|false>
+local state = {}
+
+---@param spec lze.Spec
+---@return table
+---@return string[]
+function M.add(spec)
+    ---@type string[]
+    local duplicates = {}
+    local final = {}
+    local plugins = require("lze.c.spec").parse(spec)
+    for _, v in ipairs(plugins) do
+        if state[v.name] == nil then
+            state[v.name] = v
+            table.insert(final, v)
+        elseif v.allow_again and not state[v.name] then
+            state[v.name] = v
+            table.insert(final, v)
+        else
+            table.insert(duplicates, v.name)
+        end
+    end
+    return vim.deepcopy(final), duplicates
+end
+
+---@param name string
+---@return false|lze.Plugin?
+function M.query_state(name)
+    return vim.deepcopy(state[name])
+end
+
 ---@overload fun(plugin_names: string[]|string): string[]
 function M.load(plugin_names)
     plugin_names = (type(plugin_names) == "string") and { plugin_names } or plugin_names
@@ -133,9 +136,9 @@ function M.load(plugin_names)
     local skipped = {}
     ---@cast plugin_names string[]
     for _, pname in ipairs(plugin_names) do
-        local plugin = state.plugins[pname]
+        local plugin = state[pname]
         if plugin and check_enabled(plugin) then
-            state.plugins[pname] = false
+            state[pname] = false
             hook("before", plugin)
             _load(plugin)
             hook("after", plugin)
