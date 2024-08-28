@@ -130,7 +130,7 @@ end
 local function enable(plugin)
     ---@param handler lze.Handler
     for _, handler in ipairs(handlers) do
-        handler.add(plugin)
+        handler.add(vim.deepcopy(plugin))
     end
 end
 
