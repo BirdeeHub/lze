@@ -58,6 +58,26 @@ local M = {
     end,
 }
 
+local deferred_ui_enter = vim.schedule_wrap(function()
+    if vim.v.exiting ~= vim.NIL then
+        return
+    end
+    vim.g.lze_did_deferred_ui_enter = true
+    vim.api.nvim_exec_autocmds("User", { pattern = "DeferredUIEnter", modeline = false })
+end)
+
+function M.post_def()
+    if vim.v.vim_did_enter == 1 then
+        deferred_ui_enter()
+    elseif not vim.g.lze_did_create_deferred_ui_enter_autocmd then
+        vim.api.nvim_create_autocmd("UIEnter", {
+            once = true,
+            callback = deferred_ui_enter,
+        })
+        vim.g.lze_did_create_deferred_ui_enter_autocmd = true
+    end
+end
+
 -- Get all augroups for an event
 ---@param event string
 ---@return string[]
@@ -188,10 +208,10 @@ function M.add(plugin)
     end)
 end
 
----@param plugin lze.Plugin
-function M.before(plugin)
+---@param name string
+function M.before(name)
     vim.iter(M.pending):each(function(_, plugins)
-        plugins[plugin.name] = nil
+        plugins[name] = nil
     end)
 end
 

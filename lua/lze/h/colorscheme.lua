@@ -12,10 +12,10 @@ local M = {
     spec_field = "colorscheme",
 }
 
----@param plugin lze.Plugin
-function M.before(plugin)
+---@param name string
+function M.before(name)
     vim.iter(M.pending):each(function(_, plugins)
-        plugins[plugin.name] = nil
+        plugins[name] = nil
     end)
 end
 

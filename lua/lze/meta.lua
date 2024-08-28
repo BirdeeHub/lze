@@ -13,6 +13,9 @@ error("Cannot import a meta module")
 ---Set this to override the `load` function for an individual plugin.
 ---Defaults to `vim.g.lze.load()`, see |lze.Config|.
 ---@field load? fun(name: string)
+---
+---True will allow a plugin to be added to the queue again after it has already been triggered.
+---@field allow_again? boolean
 
 ---@alias lze.Event {id:string, event:string[]|string, pattern?:string[]|string}
 ---@alias lze.EventSpec string|{event?:string|string[], pattern?:string|string[]}|string[]
@@ -87,12 +90,17 @@ error("Cannot import a meta module")
 ---Callback to load a plugin.
 ---Takes the plugin name (not the module name). Defaults to |packadd| if not set.
 ---@field load? fun(name: string)
+---
+---If true, lze will print error messages on more things
+---@field verbose? boolean
 
 ---@class lze.Handler
 ---@field spec_field string
 ---@field add fun(plugin: lze.Plugin)
----@field before? fun(plugin: lze.Plugin)
----@field after? fun(plugin: lze.Plugin)
+---@field modify? fun(plugin: lze.Plugin): lze.Plugin
+---@field before? fun(name: string)
+---@field after? fun(name: string)
+---@field post_def? fun()
 
 ---@class lze.HandlerSpec
 ---@field handler lze.Handler

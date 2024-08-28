@@ -26,24 +26,26 @@ function M.add(plugin)
     if not ft_spec then
         return
     end
-    ---@diagnostic disable-next-line: inject-field
+    ---@type lze.Event[]
     plugin.event = {}
     if type(ft_spec) == "string" then
         local ft = M.parse(ft_spec)
+        ---@diagnostic disable-next-line: param-type-mismatch
         table.insert(plugin.event, ft)
     elseif type(ft_spec) == "table" then
         ---@param ft_spec_ string
         vim.iter(ft_spec):each(function(ft_spec_)
             local ft = M.parse(ft_spec_)
+            ---@diagnostic disable-next-line: param-type-mismatch
             table.insert(plugin.event, ft)
         end)
     end
     event.add(plugin)
 end
 
----@param plugin lze.Plugin
-function M.before(plugin)
-    event.before(plugin)
+---@param name string
+function M.before(name)
+    event.before(name)
 end
 
 return M

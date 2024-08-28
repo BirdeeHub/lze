@@ -68,11 +68,10 @@ local function add_cmd(cmd)
     })
 end
 
----@param plugin lze.Plugin
-function M.before(plugin)
-    pcall(vim.api.nvim_del_user_command, plugin.cmd)
+---@param name string
+function M.before(name)
     vim.iter(M.pending):each(function(_, plugins)
-        plugins[plugin.name] = nil
+        plugins[name] = nil
     end)
 end
 

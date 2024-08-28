@@ -41,12 +41,12 @@ function M.add(plugin)
     end
 end
 
----@param plugin lze.Plugin
-function M.before(plugin)
-    if states[plugin.name] ~= nil and states[plugin.name] ~= false then
-        trigger_load(states[plugin.name])
+---@param name string
+function M.before(name)
+    if states[name] ~= nil and states[name] ~= false then
+        trigger_load(states[name])
     end
-    states[plugin.name] = false
+    states[name] = false
 end
 
 return M

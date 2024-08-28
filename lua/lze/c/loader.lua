@@ -1,31 +1,13 @@
 ---@mod lze.loader
 
-local state = require("lze.c.state")
+local state = {}
 
 local M = {}
 
 local DEFAULT_PRIORITY = 50
 
----@package
----@param plugin lze.Plugin
-function M._load(plugin)
-    if plugin.enabled == false or (type(plugin.enabled) == "function" and not plugin.enabled()) then
-        return
-    end
-    require("lze.c.handler").run_before(plugin)
-    ---@type fun(name: string) | nil
-    local load_impl = plugin.load or vim.tbl_get(vim.g, "lze", "load")
-    if load_impl then
-        load_impl(plugin.name)
-    else
-        vim.cmd.packadd(plugin.name)
-    end
-    require("lze.c.handler").run_after(plugin)
-end
-
----@param plugins table<string, lze.Plugin>
+---@param plugins lze.Plugin[]
 local function run_before_all(plugins)
-    ---@param plugin lze.Plugin
     for _, plugin in ipairs(plugins) do
         if plugin.beforeAll then
             xpcall(
@@ -47,20 +29,16 @@ local function get_priority(plugin)
     return plugin.priority or DEFAULT_PRIORITY
 end
 
----@param plugins table<string, lze.Plugin>
+---@param plugins lze.Plugin[]
 ---@return lze.Plugin[]
 local function get_eager_plugins(plugins)
     ---@type lze.Plugin[]
-    local result = vim
-        .iter(plugins)
-        ---@param plugin lze.Plugin
-        :filter(function(_, plugin)
-            return plugin.lazy ~= true
-        end)
-        :fold({}, function(acc, _, v)
-            table.insert(acc, v)
-            return acc
-        end)
+    local result = {}
+    for _, plugin in ipairs(plugins) do
+        if plugin.lazy == true then
+            table.insert(result, plugin)
+        end
+    end
     table.sort(result, function(a, b)
         ---@cast a lze.Plugin
         ---@cast b lze.Plugin
@@ -70,7 +48,7 @@ local function get_eager_plugins(plugins)
 end
 
 --- Loads startup plugins, removing loaded plugins from the table
----@param plugins table<string, lze.Plugin>
+---@param plugins lze.Plugin[]
 function M.load_startup_plugins(plugins)
     run_before_all(plugins)
     -- NOTE: looping and calling 1 at a time
@@ -103,30 +81,63 @@ local function hook(hook_key, plugin)
     end
 end
 
----@param plugin_names string | string[]
+---@type table<string, lze.Plugin|false>
+state.plugins = {}
+
+---@param spec lze.Spec
+---@return table
 ---@return string[]
+function M.add(spec)
+    ---@type string[]
+    local duplicates = {}
+    local final = {}
+    local plugins = require("lze.c.spec").parse(spec)
+    for _, v in ipairs(plugins) do
+        if state.plugins[v.name] == nil then
+            state.plugins[v.name] = v
+            table.insert(final, v)
+        elseif v.allow_again and not state.plugins[v.name] then
+            state.plugins[v.name] = v
+            table.insert(final, v)
+        else
+            table.insert(duplicates, v.name)
+        end
+    end
+    return vim.deepcopy(final), duplicates
+end
+
+local function check_enabled(plugin)
+    if plugin.enabled == false or (type(plugin.enabled) == "function" and not plugin.enabled()) then
+        return false
+    end
+    return true
+end
+
+---@param plugin lze.Plugin
+local function _load(plugin)
+    require("lze.c.handler").run_before(plugin.name)
+    ---@type fun(name: string) | nil
+    local load_impl = plugin.load or vim.tbl_get(vim.g, "lze", "load")
+    if load_impl then
+        load_impl(plugin.name)
+    else
+        vim.cmd.packadd(plugin.name)
+    end
+    require("lze.c.handler").run_after(plugin.name)
+end
+
+---@overload fun(plugin_names: string[]|string): string[]
 function M.load(plugin_names)
     plugin_names = (type(plugin_names) == "string") and { plugin_names } or plugin_names
     ---@type string[]
     local skipped = {}
     ---@cast plugin_names string[]
     for _, pname in ipairs(plugin_names) do
-        -- NOTE: do not make loading loops into vim.iter
-        -- https://github.com/nvim-neorocks/lz.n/pull/21
-        local loadable = true
         local plugin = state.plugins[pname]
-        if plugin then
-            if state.loaded[pname] then
-                loadable = false
-            else
-                state.loaded[pname] = true
-            end
-        else
-            loadable = false
-        end
-        if loadable then
+        if plugin and check_enabled(plugin) then
+            state.plugins[pname] = false
             hook("before", plugin)
-            M._load(plugin)
+            _load(plugin)
             hook("after", plugin)
         else
             if type(pname) ~= "string" then
@@ -136,10 +147,13 @@ function M.load(plugin_names)
                     { title = "lze" }
                 )
             else
-                if plugin then
-                    table.insert(skipped, pname)
-                else
-                    vim.notify("Plugin " .. pname .. " not found", vim.log.levels.ERROR, { title = "lze" })
+                table.insert(skipped, pname)
+                if vim.tbl_get(vim.g, "lze", "verbose") then
+                    if plugin == nil then
+                        vim.schedule(function()
+                            vim.notify("Plugin " .. pname .. " not found", vim.log.levels.ERROR, { title = "lze" })
+                        end)
+                    end
                 end
             end
         end

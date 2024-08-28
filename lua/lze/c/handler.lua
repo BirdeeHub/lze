@@ -2,15 +2,6 @@ local M = {}
 
 local handlers = require("lze.h")
 
----@param spec lze.PluginSpec
----@return boolean
-function M.is_lazy(spec)
-    ---@diagnostic disable-next-line: undefined-field
-    return spec.lazy or vim.iter(handlers):any(function(hndl)
-        return spec[hndl.spec_field] ~= nil
-    end)
-end
-
 ---@return lze.Handler[]
 function M.clear_handlers()
     local old_handlers = handlers
@@ -74,11 +65,46 @@ function M.register_handlers(handler_list)
         :totable()
 end
 
+---@param spec lze.PluginSpec
+---@return boolean
+function M.is_lazy(spec)
+    ---@diagnostic disable-next-line: undefined-field
+    local lazy = spec.lazy
+    for _, hndl in ipairs(handlers) do
+        if lazy then
+            return lazy
+        end
+        lazy = spec[hndl.spec_field]
+    end
+    return lazy
+end
+
 ---@param plugin lze.Plugin
-local function enable(plugin)
+---@return lze.Plugin
+function M.run_modify(plugin)
+    ---@diagnostic disable-next-line: undefined-field
+    local res = plugin
+    local if_has_run = function(hndl, p)
+        if not plugin[hndl.spec_field] then
+            return p
+        end
+        if not hndl.modify then
+            return p
+        end
+        return hndl.modify(p)
+    end
+    for _, hndl in ipairs(handlers) do
+        res = if_has_run(hndl, res)
+    end
+    return res
+end
+
+function M.run_post_def()
     ---@param handler lze.Handler
     for _, handler in ipairs(handlers) do
-        handler.add(plugin)
+        if handler.post_def then
+            handler.post_def()
+        end
     end
 end
 
@@ -100,10 +126,18 @@ function M.run_before(plugin)
     end
 end
 
----@param plugins table<string, lze.Plugin>
+---@param plugin lze.Plugin
+local function enable(plugin)
+    ---@param handler lze.Handler
+    for _, handler in ipairs(handlers) do
+        handler.add(plugin)
+    end
+end
+
+---@param plugins lze.Plugin[]
 function M.init(plugins)
     ---@param plugin lze.Plugin
-    for _, plugin in pairs(plugins) do
+    for _, plugin in ipairs(plugins) do
         xpcall(
             enable,
             vim.schedule_wrap(function(err)
