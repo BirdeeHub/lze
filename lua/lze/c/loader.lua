@@ -87,11 +87,6 @@ local M = {}
 function M.load_startup_plugins(plugins)
     run_before_all(plugins)
     -- NOTE:
-    -- technically beforeAll hooks can modify the plugin
-    -- that is ran by startup by modifying their argument,
-    -- but an extra deepcopy above is likely not worth the startup penalty
-    -- as they can only modify the plugin item they are within anyway
-    -- NOTE:
     -- looping and calling 1 at a time
     -- to map plugins to plugin.name
     -- is faster than mapping to just names first,
@@ -143,7 +138,7 @@ function M.load(plugin_names)
         local plugin = state[pname]
         if plugin and check_enabled(plugin) then
             -- NOTE:
-            -- technically SPEC hooks can modify the plugin item
+            -- technically SPEC before hooks can modify the plugin item
             -- that is ran by following hooks by modifying their argument,
             -- but an extra deepcopy for each
             -- is likely not worth the performance penalty
