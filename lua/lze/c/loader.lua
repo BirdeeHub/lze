@@ -1,8 +1,3 @@
----@mod lze.loader
-local M = {}
-
-local DEFAULT_PRIORITY = 50
-
 ---@param plugins lze.Plugin[]
 local function run_before_all(plugins)
     for _, plugin in ipairs(plugins) do
@@ -23,7 +18,8 @@ end
 
 ---@param plugin lze.Plugin
 local function get_priority(plugin)
-    return plugin.priority or DEFAULT_PRIORITY
+    -- NOTE: default priority is 50
+    return plugin.priority or 50
 end
 
 ---@param plugins lze.Plugin[]
@@ -83,16 +79,24 @@ local function _load(plugin)
     require("lze.c.handler").run_after(plugin.name)
 end
 
+---@mod lze.loader
+local M = {}
+
 --- Loads startup plugins, removing loaded plugins from the table
 ---@param plugins lze.Plugin[]
 function M.load_startup_plugins(plugins)
     run_before_all(plugins)
-    -- NOTE: looping and calling 1 at a time
+    -- NOTE:
+    -- technically beforeAll hooks can modify the plugin
+    -- that is ran by startup by modifying their argument,
+    -- but an extra deepcopy above is likely not worth the startup penalty
+    -- as they can only modify the plugin item they are within anyway
+    -- NOTE:
+    -- looping and calling 1 at a time
     -- to map plugins to plugin.name
-    -- is faster than mapping first,
+    -- is faster than mapping to just names first,
     -- then passing them all to load
-    -- as we only have to iterate the table once
-    ---@param plugin lze.Plugin
+    -- as we only have to iterate the list once
     for _, plugin in ipairs(get_eager_plugins(plugins)) do
         M.load(plugin.name)
     end
@@ -102,8 +106,8 @@ end
 local state = {}
 
 ---@param spec lze.Spec
----@return table
----@return string[]
+---@return lze.Plugin[] final
+---@return string[] disabled
 function M.add(spec)
     ---@type string[]
     local duplicates = {}
@@ -138,6 +142,12 @@ function M.load(plugin_names)
     for _, pname in ipairs(plugin_names) do
         local plugin = state[pname]
         if plugin and check_enabled(plugin) then
+            -- NOTE:
+            -- technically SPEC hooks can modify the plugin item
+            -- that is ran by following hooks by modifying their argument,
+            -- but an extra deepcopy for each
+            -- is likely not worth the performance penalty
+            -- as they can only modify the plugin item they are within anyway
             state[pname] = false
             hook("before", plugin)
             _load(plugin)
@@ -151,7 +161,7 @@ function M.load(plugin_names)
                 )
             else
                 table.insert(skipped, pname)
-                if vim.tbl_get(vim.g, "lze", "verbose") then
+                if vim.tbl_get(vim.g, "lze", "verbose") ~= false then
                     if plugin == nil then
                         vim.schedule(function()
                             vim.notify("Plugin " .. pname .. " not found", vim.log.levels.ERROR, { title = "lze" })

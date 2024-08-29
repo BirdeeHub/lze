@@ -17,13 +17,19 @@ error("Cannot import a meta module")
 ---True will allow a plugin to be added to the queue again after it has already been triggered.
 ---@field allow_again? boolean
 
----@alias lze.Event {id:string, event:string[]|string, pattern?:string[]|string}
----@alias lze.EventSpec string|{event?:string|string[], pattern?:string|string[]}|string[]
-
 ---@class lze.PluginHooks
----@field beforeAll? fun(self:lze.Plugin) Will be run before loading any plugins in that require('lze').load() call
----@field before? fun(self:lze.Plugin) Will be run before loading this plugin
----@field after? fun(self:lze.Plugin) Will be executed after loading this plugin
+---
+---Will be run before loading any plugins in that require('lze').load() call
+---@field beforeAll? fun(self:lze.Plugin)
+---
+---Will be run before loading this plugin
+---@field before? fun(self:lze.Plugin)
+---
+---Will be executed after loading this plugin
+---@field after? fun(self:lze.Plugin)
+
+-- NOTE:
+-- Builtin Handler Types:
 
 ---@class lze.KeysBase: vim.keymap.set.Opts
 ---@field desc? string
@@ -44,6 +50,9 @@ error("Cannot import a meta module")
 ---@field mode? string
 ---@field id string
 ---@field name string
+
+---@alias lze.Event {id:string, event:string[]|string, pattern?:string[]|string}
+---@alias lze.EventSpec string|{event?:string|string[], pattern?:string|string[]}|string[]
 
 ---@class lze.SpecHandlers
 ---
@@ -68,6 +77,12 @@ error("Cannot import a meta module")
 ---Load a plugin before load of one or more other plugins.
 ---@field dep_of? string[]|string
 
+-- NOTE:
+-- Defintion of lze.Plugin and lze.PluginSpec
+-- combining above types.
+
+---Internal lze.Plugin type, after being parsed.
+---Is the type passed to handlers in modify and add hooks.
 ---@class lze.Plugin: lze.PluginBase,lze.PluginHooks,lze.SpecHandlers
 ---The plugin name (not its main module), e.g. "sweetie.nvim"
 ---@field name string
@@ -75,6 +90,7 @@ error("Cannot import a meta module")
 ---Whether to lazy-load this plugin. Defaults to `false`.
 ---@field lazy? boolean
 
+---The lze.PluginSpec type, passed to require('lze').load() as entries in lze.Spec
 ---@class lze.PluginSpec: lze.PluginBase,lze.PluginHooks,lze.SpecHandlers
 ---The plugin name (not its main module), e.g. "sweetie.nvim"
 ---@field [1] string
@@ -83,7 +99,37 @@ error("Cannot import a meta module")
 ---@field import string spec module to import
 ---@field enabled? boolean|(fun():boolean)
 
+---List of lze.PluginSpec and/or lze.SpecImport
 ---@alias lze.Spec lze.PluginSpec | lze.SpecImport | lze.Spec[]
+
+-- NOTE:
+-- lze.Handler type definition
+
+---Listed in the order they are called by lze if the handler has been registered
+---@class lze.Handler
+---@field spec_field string
+---@field modify? fun(plugin: lze.Plugin): lze.Plugin
+---@field add fun(plugin: lze.Plugin)
+---
+---runs at the end of require('lze').load()
+---for handlers to set up extra triggers such as the
+---event handler's DeferredUIEnter event
+---@field post_def? fun()
+---
+---Plugin's before will run first
+---@field before? fun(name: string)
+---Plugin's load will run here
+---@field after? fun(name: string)
+---Plugin's after will run after
+
+---Optional, for passing to register_handlers,
+---if easily changing if a handler gets added or not is desired
+---@class lze.HandlerSpec
+---@field handler lze.Handler
+---@field enabled? boolean|(fun():boolean)
+
+-- NOTE:
+-- global vim.g.lze config values table
 
 ---@class lze.Config
 ---
@@ -91,20 +137,8 @@ error("Cannot import a meta module")
 ---Takes the plugin name (not the module name). Defaults to |packadd| if not set.
 ---@field load? fun(name: string)
 ---
----If true, lze will print error messages on more things
+---If false, lze will print error messages on fewer things.
 ---@field verbose? boolean
-
----@class lze.Handler
----@field spec_field string
----@field add fun(plugin: lze.Plugin)
----@field modify? fun(plugin: lze.Plugin): lze.Plugin
----@field before? fun(name: string)
----@field after? fun(name: string)
----@field post_def? fun()
-
----@class lze.HandlerSpec
----@field handler lze.Handler
----@field enabled? boolean|(fun():boolean)
 
 ---@type lze.Config
 vim.g.lze = vim.g.lze

@@ -36,22 +36,38 @@ lze.query_state = require("lze.c.loader").query_state
 ---@return string[]
 function lze.load(spec)
     if spec == nil or spec == {} then
-        vim.schedule(function()
-            vim.notify("load has been called, but no spec was provided", vim.log.levels.ERROR, { title = "lze" })
-        end)
+        -- one of only 3 checks to verbose in this plugin,
+        -- if handlers decide to call this function,
+        -- the warnings controlled by vim.g.lze.verbose might get annoying.
+        -- but they are very useful for debugging and for setting up your config
+        -- for the first time. So we allow them to be configureable, but default to true
+        if vim.tbl_get(vim.g, "lze", "verbose") ~= false then
+            vim.schedule(function()
+                vim.notify("load has been called, but no spec was provided", vim.log.levels.ERROR, { title = "lze" })
+            end)
+        end
         return {}
     end
     if type(spec) == "string" then
         spec = { import = spec }
     end
+
+    -- call parse, which deepcopies after ALL ACTIVE HANDLERS FOR THAT ITEM use modify
+    -- add non-duplicates to state. Return copy of result, and names of duplicates
+    -- This prevents handlers from changing state after the handler's modify hooks
+    -- plugins that are parsed as disabled in this stage will not be included
     --- @cast spec lze.Spec
     local final_plugins, duplicates = require("lze.c.loader").add(spec)
 
+    -- calls add for all the handlers, each handler gets a copy, so that they
+    -- cannot change the plugin object recieved by the other handlers
+    -- outside of the modify step
     require("lze.c.handler").init(final_plugins)
 
+    -- will call trigger_load on the non-lazy plugins
     require("lze.c.loader").load_startup_plugins(final_plugins)
 
-    if vim.tbl_get(vim.g, "lze", "verbose") then
+    if vim.tbl_get(vim.g, "lze", "verbose") ~= false then
         for _, v in ipairs(duplicates) do
             vim.schedule(function()
                 vim.notify("attempted to add " .. v .. " twice", vim.log.levels.ERROR, { title = "lze" })
@@ -59,6 +75,8 @@ function lze.load(spec)
         end
     end
 
+    -- handlers can set up any of their own triggers for themselves here
+    -- such as things like the event handler's DeferredUIEnter event
     require("lze.c.handler").run_post_def()
 
     return duplicates

@@ -100,36 +100,38 @@ function M.run_modify(plugin)
 end
 
 function M.run_post_def()
-    ---@param handler lze.Handler
     for _, handler in ipairs(handlers) do
+        ---@cast handler lze.Handler
         if handler.post_def then
             handler.post_def()
         end
     end
 end
 
-function M.run_after(plugin)
-    ---@param handler lze.Handler
+---@param name string
+function M.run_after(name)
     for _, handler in ipairs(handlers) do
+        ---@cast handler lze.Handler
         if handler.after then
-            handler.after(plugin)
+            handler.after(name)
         end
     end
 end
 
-function M.run_before(plugin)
-    ---@param handler lze.Handler
+---@param name string
+function M.run_before(name)
     for _, handler in ipairs(handlers) do
+        ---@cast handler lze.Handler
         if handler.before then
-            handler.before(plugin)
+            handler.before(name)
         end
     end
 end
 
 ---@param plugin lze.Plugin
 local function enable(plugin)
-    ---@param handler lze.Handler
     for _, handler in ipairs(handlers) do
+        ---@cast handler lze.Handler
         handler.add(vim.deepcopy(plugin))
     end
 end

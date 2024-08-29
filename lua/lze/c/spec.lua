@@ -1,7 +1,8 @@
+-- needed so we can use _normalize in import_spec even if its defined later in the file
 local __f__ = {}
 
 ---@param spec lze.SpecImport
----@param result table<string, lze.Plugin>
+---@param result lze.Plugin[]
 local function import_spec(spec, result)
     if type(spec.import) ~= "string" then
         vim.schedule(function()
@@ -99,7 +100,7 @@ function __f__._normalize(spec, result)
     end
 end
 
----@param result table<string, lze.Plugin>
+---@param result lze.Plugin[]
 local function remove_disabled_plugins(result)
     for i = #result, 1, -1 do
         local plugin = result[i]
@@ -113,7 +114,7 @@ end
 local M = {}
 
 ---@param spec lze.Spec
----@return table<string, lze.Plugin>
+---@return lze.Plugin[]
 function M.parse(spec)
     local result = {}
     __f__._normalize(spec, result)
