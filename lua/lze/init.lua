@@ -64,8 +64,10 @@ function lze.load(spec)
     -- outside of the modify step
     require("lze.c.handler").init(final_plugins)
 
-    -- will call trigger_load on the non-lazy plugins
-    -- order depends on priority value, OR the order passed into load
+    -- will call beforeAll of all plugin specs in the order passed in.
+    -- will then call trigger_load on the non-lazy plugins
+    -- the order in which it calls trigger_load depends
+    -- on priority value, OR the order passed into load
     require("lze.c.loader").load_startup_plugins(final_plugins)
 
     -- by default, warn on duplicate entries.
