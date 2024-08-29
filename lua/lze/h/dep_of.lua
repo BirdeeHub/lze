@@ -45,8 +45,8 @@ end
 function M.before(name)
     if states[name] ~= nil and states[name] ~= false then
         trigger_load(states[name])
+        states[name] = false
     end
-    states[name] = false
 end
 
 return M
