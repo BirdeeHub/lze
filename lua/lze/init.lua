@@ -18,7 +18,9 @@ lze.register_handlers = require("lze.c.handler").register_handlers
 
 ---Trigger loading of the lze.Plugin loading hooks.
 ---Used by handlers to load plugins.
----Will return the names of the plugins that have been loaded before.
+---Will return the names of the plugins that were skipped,
+---either because they were already loaded or because they
+---were never added to the queue.
 ---@overload fun(plugin_names: string[]|string): string[]
 lze.trigger_load = require("lze.c.loader").load
 
@@ -27,20 +29,17 @@ lze.trigger_load = require("lze.c.loader").load
 ---@type fun(name: string): false|lze.Plugin?
 lze.query_state = require("lze.c.loader").query_state
 
----May be called as many times as desired if passing it a single spec.
----Will throw an warning if it contains a duplicate plugin
----and return the duplicate lze.Plugin objects.
----Also, priority field only works within a single load call.
+---May be called as many times as desired.
+---Will return the duplicate lze.Plugin objects.
+---Priority spec field only affects order for
+---non-lazy plugins within a single load call.
 ---@overload fun(spec: lze.Spec)
 ---@overload fun(import: string)
 ---@return string[]
 function lze.load(spec)
     if spec == nil or spec == {} then
-        -- one of only 3 checks to verbose in this plugin,
-        -- if handlers decide to call this function,
-        -- the warnings controlled by vim.g.lze.verbose might get annoying.
-        -- but they are very useful for debugging and for setting up your config
-        -- for the first time. So we allow them to be configureable, but default to true
+        -- one of only 3 checks to verbose in this plugin.
+        -- By default, warn if spec was empty
         if vim.tbl_get(vim.g, "lze", "verbose") ~= false then
             vim.schedule(function()
                 vim.notify("load has been called, but no spec was provided", vim.log.levels.ERROR, { title = "lze" })
@@ -65,8 +64,10 @@ function lze.load(spec)
     require("lze.c.handler").init(final_plugins)
 
     -- will call trigger_load on the non-lazy plugins
+    -- order depends on priority value, OR the order passed into load
     require("lze.c.loader").load_startup_plugins(final_plugins)
 
+    -- by default, warn on duplicate entries.
     if vim.tbl_get(vim.g, "lze", "verbose") ~= false then
         for _, v in ipairs(duplicates) do
             vim.schedule(function()
