@@ -1,21 +1,3 @@
----@param plugins lze.Plugin[]
-local function run_before_all(plugins)
-    for _, plugin in ipairs(plugins) do
-        if plugin.beforeAll then
-            xpcall(
-                plugin.beforeAll,
-                vim.schedule_wrap(function(err)
-                    vim.notify(
-                        "Failed to run 'beforeAll' for " .. plugin.name .. ": " .. tostring(err or ""),
-                        vim.log.levels.ERROR
-                    )
-                end),
-                plugin
-            )
-        end
-    end
-end
-
 ---@param plugin lze.Plugin
 local function get_priority(plugin)
     -- NOTE: default priority is 50
@@ -40,7 +22,7 @@ local function get_eager_plugins(plugins)
     return result
 end
 
----@alias hook_key "before" | "after"
+---@alias hook_key "before" | "after" | "beforeAll"
 
 ---@param hook_key hook_key
 ---@param plugin lze.Plugin
@@ -51,7 +33,8 @@ local function hook(hook_key, plugin)
             vim.schedule_wrap(function(err)
                 vim.notify(
                     "Failed to run '" .. hook_key .. "' hook for " .. plugin.name .. ": " .. tostring(err or ""),
-                    vim.log.levels.ERROR
+                    vim.log.levels.ERROR,
+                    { title = "lze.spec." .. hook_key }
                 )
             end),
             plugin
@@ -85,7 +68,9 @@ local M = {}
 --- Loads startup plugins, removing loaded plugins from the table
 ---@param plugins lze.Plugin[]
 function M.load_startup_plugins(plugins)
-    run_before_all(plugins)
+    for _, plugin in ipairs(plugins) do
+        hook("beforeAll", plugin)
+    end
     -- NOTE:
     -- looping and calling 1 at a time
     -- to map plugins to plugin.name
@@ -152,14 +137,18 @@ function M.load(plugin_names)
                 vim.notify(
                     "Invalid plugin name recieved: " .. vim.inspect(pname),
                     vim.log.levels.ERROR,
-                    { title = "lze" }
+                    { title = "lze.trigger_load" }
                 )
             else
                 table.insert(skipped, pname)
                 if vim.tbl_get(vim.g, "lze", "verbose") ~= false then
                     if plugin == nil then
                         vim.schedule(function()
-                            vim.notify("Plugin " .. pname .. " not found", vim.log.levels.ERROR, { title = "lze" })
+                            vim.notify(
+                                "Plugin " .. pname .. " not found",
+                                vim.log.levels.ERROR,
+                                { title = "lze.trigger_load" }
+                            )
                         end)
                     end
                 end

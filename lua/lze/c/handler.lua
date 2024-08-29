@@ -12,7 +12,7 @@ end
 ---@param handler_list lze.Handler[]|lze.Handler|lze.HandlerSpec[]|lze.HandlerSpec
 ---@return string[]
 function M.register_handlers(handler_list)
-    assert(type(handler_list) == "table", "invalid argument to register_handlers")
+    assert(type(handler_list) == "table", "invalid argument to lze.register_handlers")
     -- if single, make it a list anyway
     if handler_list.spec_field or handler_list.handler then
         handler_list = { handler_list }
@@ -143,7 +143,11 @@ function M.init(plugins)
         xpcall(
             enable,
             vim.schedule_wrap(function(err)
-                vim.notify(("Failed to enable handlers for %s: %s"):format(plugin.name, err), vim.log.levels.ERROR)
+                vim.notify(
+                    ([[Failed to call a handler's add function for %s: %s]]):format(plugin.name, err),
+                    vim.log.levels.ERROR,
+                    { title = "lze.handlers" }
+                )
             end),
             plugin
         )

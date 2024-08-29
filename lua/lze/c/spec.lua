@@ -8,7 +8,8 @@ local function import_spec(spec, result)
         vim.schedule(function()
             vim.notify(
                 "Invalid import spec. The 'import' field should be a module name: " .. vim.inspect(spec),
-                vim.log.levels.ERROR
+                vim.log.levels.ERROR,
+                { title = "lze" }
             )
         end)
         return
@@ -21,7 +22,7 @@ local function import_spec(spec, result)
     if not ok then
         vim.schedule(function()
             local err = type(mod) == "string" and ": " .. mod or ""
-            vim.notify("Failed to load module '" .. modname .. err, vim.log.levels.ERROR)
+            vim.notify("Failed to load module '" .. modname .. err, vim.log.levels.ERROR, { title = "lze" })
         end)
         return
     end
@@ -29,7 +30,8 @@ local function import_spec(spec, result)
         vim.schedule(function()
             vim.notify(
                 "Invalid plugin spec module '" .. modname .. "' of type '" .. type(mod) .. "'",
-                vim.log.levels.ERROR
+                vim.log.levels.ERROR,
+                { title = "lze" }
             )
         end)
         return
