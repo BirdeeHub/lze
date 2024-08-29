@@ -1,5 +1,4 @@
--- NOTE: internal handlers must use internal trigger_load
--- because require('lze') requires this module.
+-- NOTE: simply an alias for lze.h.event for filetype
 local event = require("lze.h.event")
 
 ---@class lze.FtHandler: lze.Handler
