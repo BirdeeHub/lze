@@ -10,32 +10,15 @@ lze.register_handlers                                    *lze.register_handlers*
 
 
 lze.load()                                                            *lze.load*
-    May be called as many times as desired if passing it a single spec.
-    Will throw an warning if it contains a duplicate plugin
-    and return the duplicate lze.Plugin objects.
-    Also, priority field only works within a single load call.
+    May be called as many times as desired.
+    Will return the duplicate lze.Plugin objects.
+    Priority spec field only affects order for
+    non-lazy plugins within a single load call.
     @overload fun(spec: lze.Spec)
     @overload fun(import: string)
 
     Returns: ~
         (string[])
-
-
-lze.make_load_with_after()                            *lze.make_load_with_after*
-    Recieves the names of directories from a plugin's after directory
-    that you wish to source files from.
-    Will return a load function that can take a name, or list of names,
-    and will load a plugin and its after directories.
-    The function returned is a suitable substitute for the load field of a plugin spec.
-
-    e.g. load_with_after_plugin will load the plugin names it is given, and their after/plugin dir
-
-    local load_with_after_plugin = require('lze').make_load_with_after({ 'plugin' })
-    load_with_after_plugin('some_plugin')
-    @overload fun(dirs: string[]|string): fun(names: string|string[])
-    It also optionally recieves a function that should load a plugin and return its path
-    for if the plugin is not on the packpath, or return nil to load from the packpath as normal
-    @overload fun(dirs: string[]|string, load: fun(name: string):string|nil): fun(names: string|string[])
 
 
                                              *lze.types*
@@ -56,14 +39,23 @@ lze.make_load_with_after()                            *lze.make_load_with_after*
   ---Set this to override the `load` function for an individual plugin.
   ---Defaults to `vim.g.lze.load()`, see |lze.Config|.
   ---@field load? fun(name: string)
-  
-  ---@alias lze.Event {id:string, event:string[]|string, pattern?:string[]|string}
-  ---@alias lze.EventSpec string|{event?:string|string[], pattern?:string|string[]}|string[]
+  ---
+  ---True will allow a plugin to be added to the queue again after it has already been triggered.
+  ---@field allow_again? boolean
   
   ---@class lze.PluginHooks
-  ---@field beforeAll? fun(self:lze.Plugin) Will be run before loading any plugins in that require('lze').load() call
-  ---@field before? fun(self:lze.Plugin) Will be run before loading this plugin
-  ---@field after? fun(self:lze.Plugin) Will be executed after loading this plugin
+  ---
+  ---Will be run before loading any plugins in that require('lze').load() call
+  ---@field beforeAll? fun(self:lze.Plugin)
+  ---
+  ---Will be run before loading this plugin
+  ---@field before? fun(self:lze.Plugin)
+  ---
+  ---Will be executed after loading this plugin
+  ---@field after? fun(self:lze.Plugin)
+  
+  -- NOTE:
+  -- Builtin Handler Types:
   
   ---@class lze.KeysBase: vim.keymap.set.Opts
   ---@field desc? string
@@ -84,6 +76,9 @@ lze.make_load_with_after()                            *lze.make_load_with_after*
   ---@field mode? string
   ---@field id string
   ---@field name string
+  
+  ---@alias lze.Event {id:string, event:string[]|string, pattern?:string[]|string}
+  ---@alias lze.EventSpec string|{event?:string|string[], pattern?:string|string[]}|string[]
   
   ---@class lze.SpecHandlers
   ---
@@ -108,6 +103,12 @@ lze.make_load_with_after()                            *lze.make_load_with_after*
   ---Load a plugin before load of one or more other plugins.
   ---@field dep_of? string[]|string
   
+  -- NOTE:
+  -- Defintion of lze.Plugin and lze.PluginSpec
+  -- combining above types.
+  
+  ---Internal lze.Plugin type, after being parsed.
+  ---Is the type passed to handlers in modify and add hooks.
   ---@class lze.Plugin: lze.PluginBase,lze.PluginHooks,lze.SpecHandlers
   ---The plugin name (not its main module), e.g. "sweetie.nvim"
   ---@field name string
@@ -115,6 +116,7 @@ lze.make_load_with_after()                            *lze.make_load_with_after*
   ---Whether to lazy-load this plugin. Defaults to `false`.
   ---@field lazy? boolean
   
+  ---The lze.PluginSpec type, passed to require('lze').load() as entries in lze.Spec
   ---@class lze.PluginSpec: lze.PluginBase,lze.PluginHooks,lze.SpecHandlers
   ---The plugin name (not its main module), e.g. "sweetie.nvim"
   ---@field [1] string
@@ -123,23 +125,46 @@ lze.make_load_with_after()                            *lze.make_load_with_after*
   ---@field import string spec module to import
   ---@field enabled? boolean|(fun():boolean)
   
+  ---List of lze.PluginSpec and/or lze.SpecImport
   ---@alias lze.Spec lze.PluginSpec | lze.SpecImport | lze.Spec[]
+  
+  -- NOTE:
+  -- lze.Handler type definition
+  
+  ---Listed in the order they are called by lze if the handler has been registered
+  ---@class lze.Handler
+  ---@field spec_field string
+  ---@field modify? fun(plugin: lze.Plugin): lze.Plugin
+  ---@field add fun(plugin: lze.Plugin)
+  ---
+  ---runs at the end of require('lze').load()
+  ---for handlers to set up extra triggers such as the
+  ---event handler's DeferredUIEnter event
+  ---@field post_def? fun()
+  ---
+  ---Plugin's before will run first
+  ---@field before? fun(name: string)
+  ---Plugin's load will run here
+  ---@field after? fun(name: string)
+  ---Plugin's after will run after
+  
+  ---Optional, for passing to register_handlers,
+  ---if easily changing if a handler gets added or not is desired
+  ---@class lze.HandlerSpec
+  ---@field handler lze.Handler
+  ---@field enabled? boolean|(fun():boolean)
+  
+  -- NOTE:
+  -- global vim.g.lze config values table
   
   ---@class lze.Config
   ---
   ---Callback to load a plugin.
   ---Takes the plugin name (not the module name). Defaults to |packadd| if not set.
   ---@field load? fun(name: string)
-  
-  ---@class lze.Handler
-  ---@field spec_field string
-  ---@field add fun(plugin: lze.Plugin)
-  ---@field before? fun(plugin: lze.Plugin)
-  ---@field after? fun(plugin: lze.Plugin)
-  
-  ---@class lze.HandlerSpec
-  ---@field handler lze.Handler
-  ---@field enabled? boolean|(fun():boolean)
+  ---
+  ---If false, lze will print error messages on fewer things.
+  ---@field verbose? boolean
   
   ---@type lze.Config
   vim.g.lze = vim.g.lze
