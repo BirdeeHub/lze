@@ -3,7 +3,7 @@
 
 [![Neovim][neovim-shield]][neovim-url]
 [![Lua][lua-shield]][lua-url]
-<!-- [![LuaRocks][luarocks-shield]][luarocks-url] -->
+[![LuaRocks][luarocks-shield]][luarocks-url]
 
 A dead simple lazy-loading Lua library for Neovim plugins.
 
@@ -610,7 +610,7 @@ or (at your option) any later version.
 [neovim-url]: https://neovim.io/
 [lua-shield]: https://img.shields.io/badge/lua-%232C2D72.svg?style=for-the-badge&logo=lua&logoColor=white
 [lua-url]: https://www.lua.org/
-<!-- [luarocks-shield]: -->
-<!-- https://img.shields.io/luarocks/v/BirdeeHub/lze?logo=lua&color=purple&style=for-the-badge -->
-<!-- [luarocks-url]: https://luarocks.org/modules/BirdeeHub/lze -->
+[luarocks-shield]:
+https://img.shields.io/luarocks/v/BirdeeHub/lze?logo=lua&color=purple&style=for-the-badge
+[luarocks-url]: https://luarocks.org/modules/BirdeeHub/lze
 <!-- markdownlint-enable MD013 -->
