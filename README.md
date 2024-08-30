@@ -19,7 +19,7 @@ Nope. I quite like `lz.n`. I have contributed to `lz.n` many times.
 In fact, I have contributed to `lz.n` after this plugin has been created.
 
 I have also written 2 custom handlers for it,
-one of which is on its wiki, another which likely will be.
+both of which are on its wiki.
 
 `lz.n` is a great plugin. This is my take on `lz.n`
 
