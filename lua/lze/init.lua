@@ -55,9 +55,9 @@ function lze.load(spec)
     -- call parse, which deepcopies after ALL ACTIVE HANDLERS FOR THAT ITEM use modify
     -- add non-duplicates to state. Return copy of result, and names of duplicates
     -- This prevents handlers from changing state after the handler's modify hooks
-    --
+
     -- plugins that are parsed as disabled in this stage will not be included
-    --
+
     -- plugins that are parsed as enabled in this stage will remain in the queue
     -- until trigger_load is called AND the plugin is parsed as enabled at that time.
     --- @cast spec lze.Spec
