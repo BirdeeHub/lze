@@ -30,7 +30,7 @@ function M.add(plugin)
         return
     end
     for _, name in ipairs(needed_by) do
-        if states[name] == false then
+        if require("lze").query_state(name) == false then
             trigger_load(plugin.name)
         else
             if states[name] == nil then
@@ -43,10 +43,9 @@ end
 
 ---@param name string
 function M.before(name)
-    if states[name] ~= nil and states[name] ~= false then
+    if states[name] and require("lze").query_state(name) ~= nil then
         trigger_load(states[name])
     end
-    states[name] = false
 end
 
 return M
