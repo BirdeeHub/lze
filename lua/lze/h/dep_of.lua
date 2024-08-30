@@ -1,4 +1,4 @@
----@type table<string, string[]|false>
+---@type table<string, string[]>
 local states = {}
 
 -- NOTE: internal handlers must use internal trigger_load
@@ -45,6 +45,7 @@ end
 function M.before(name)
     if states[name] and require("lze").query_state(name) ~= nil then
         trigger_load(states[name])
+        states[name] = nil
     end
 end
 

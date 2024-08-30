@@ -45,6 +45,7 @@ end
 function M.after(name)
     if states[name] and require("lze").query_state(name) ~= nil then
         trigger_load(states[name])
+        states[name] = nil
     end
 end
 
