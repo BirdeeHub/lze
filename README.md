@@ -30,7 +30,8 @@ It shares some code where handlers parse their specs,
 otherwise it works entirely differently, but
 with a largely compatible [plugin spec](#plugin-spec)
 
-It has almost the same exact plugin spec, with 2 extra fields.
+It has almost the same exact plugin spec,
+but with an extra field and 2 more you could add.
 
 However, import specs can only import a
 single module rather than a whole directory.
