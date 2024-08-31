@@ -126,8 +126,10 @@ end
 ---@param plugin lze.Plugin
 local function enable(plugin)
     for _, handler in ipairs(handlers) do
-        ---@cast handler lze.Handler
-        handler.add(vim.deepcopy(plugin))
+        if handler.add then
+            ---@cast handler lze.Handler
+            handler.add(vim.deepcopy(plugin))
+        end
     end
 end
 
@@ -135,17 +137,7 @@ end
 function M.init(plugins)
     ---@param plugin lze.Plugin
     for _, plugin in ipairs(plugins) do
-        xpcall(
-            enable,
-            vim.schedule_wrap(function(err)
-                vim.notify(
-                    ([[Failed to call a handler's add function for %s: %s]]):format(plugin.name, err),
-                    vim.log.levels.ERROR,
-                    { title = "lze.handlers" }
-                )
-            end),
-            plugin
-        )
+        enable(plugin)
     end
 end
 
