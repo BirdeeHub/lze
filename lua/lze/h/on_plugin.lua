@@ -43,7 +43,7 @@ end
 
 ---@param name string
 function M.after(name)
-    if states[name] and require("lze").query_state(name) ~= nil then
+    if states[name] then
         trigger_load(states[name])
         states[name] = nil
     end

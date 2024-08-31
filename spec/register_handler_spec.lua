@@ -15,14 +15,12 @@ describe("handlers.custom", function()
         spec_field = "testfield",
         add = function(_) end,
         before = function(_) end,
-        after = function(plugin)
-            if plugin_state[plugin.name] and plugin_state[plugin.name].load_called then
-                plugin_state[plugin.name] =
-                    vim.tbl_extend("error", plugin_state[plugin.name], { after_load_called_after = true })
+        after = function(name)
+            if plugin_state[name] and plugin_state[name].load_called then
+                plugin_state[name] = vim.tbl_extend("error", plugin_state[name], { after_load_called_after = true })
                 return
             end
-            plugin_state[plugin.name] =
-                vim.tbl_extend("error", plugin_state[plugin.name] or {}, { after_load_called_after = false })
+            plugin_state[name] = vim.tbl_extend("error", plugin_state[name] or {}, { after_load_called_after = false })
         end,
     }
 

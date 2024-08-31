@@ -18,7 +18,7 @@ describe("lze", function()
           cmd = "Baz",
         }
         ]]
-            local spec_file = vim.fs.joinpath(tempdir, "lua", "plugins", "baz.lua")
+            local spec_file = vim.fs.joinpath(tempdir, "lua", "plugins", "init.lua")
             local fh = assert(io.open(spec_file, "w"), "Could not open config file for writing")
             fh:write(plugin_config_content)
             fh:close()
@@ -78,18 +78,6 @@ return {
             fh = assert(io.open(plugin2_spec_file, "w"), "Could not open config file for writing")
             fh:write(plugin2_config_content)
             fh:close()
-            -- FIXME: This fails here, but works with Nix links
-            --             local plugin3_config_content = [[
-            -- return {
-            --   "linked.nvim",
-            --   cmd = "Linked",
-            -- }
-            -- ]]
-            -- local plugin3_spec_file = vim.fs.joinpath(tempdir, "linked.lua")
-            -- fh = assert(io.open(spec_file, "w"), "Could not open config file for writing")
-            -- fh:write(plugin3_config_content)
-            -- fh:close()
-            -- vim.uv.fs_symlink(plugin3_spec_file, vim.fs.joinpath(plugins_dir, "linked.lua"))
             vim.opt.runtimepath:append(tempdir)
             local spy_load = spy.on(loader, "_load")
             lz.load({
