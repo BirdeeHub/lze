@@ -68,22 +68,23 @@ but in a different way. Possibly more, but I am not sure.
 
 > Why does the readme still say it is a dead simple library?
 
-The core of `lze` is simply a read-only table.
+The core of `lze` is simply a read-only table. You queue up
+a plugin, a handler loads it when you tell it to,
+it gets replaced with `false`.
 
 Handlers have 1 chance to prevent a plugin from entering,
 or modify it before it enters **if active for that spec**,
-(none of the default handlers need this) but once it has been entered,
-it will remain until it has been loaded via
+(none of the default handlers need this).
+
+Once it has been entered,
+it will remain there until it has been loaded via
 a call to `require('lze').trigger_load(name)` (or a list of names).
 
 You can only add it to the queue again
 *after* it has been loaded, and specifically allow it to be added again.
 
-Handlers call trigger_load by the plugin's name,
-and have some hooks they may define.
-
 Thats basically it. The handlers call
-`trigger_load` on some sort of event,
+`trigger_load` with some names on some sort of event,
 `lze` loads it if its in the table,
 and if not, it returns the skipped ones,
 by default, warning if it wasnt found at all.
@@ -296,8 +297,8 @@ as Neovim's built-in loading mechanism does not guarantee initialisation order.
 Requiring users to manually call a `setup` function [is an anti pattern](https://github.com/nvim-neorocks/nvim-best-practices?tab=readme-ov-file#zap-initialization).
 Forcing users to think about the order in which they load plugins that
 extend or depend on each other is not great either and we
-strongly suggest opening an issue or submitting
-a PR to fix any of these issues this upstream.
+suggest opening an issue or submitting
+a PR to fix any of these issues upstream.
 
 > [!NOTE]
 >
