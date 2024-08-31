@@ -59,7 +59,7 @@ Its basically down to which design of handlers you prefer.
 
 <!-- markdownlint-disable MD013 -->
 It also has a built-in dep_of handler, rather than you needing to add
-a third party one such as the one I posted to `lz.n` [discussions](https://github.com/nvim-neorocks/lz.n/discussions/47#discussioncomment-10491877),
+a third party one such as the one I posted to `lz.n` [wiki](https://github.com/nvim-neorocks/lz.n/wiki/Custom-handler-examples#dependency-handler),
 as well as an on_plugin handler that loads after load of another plugin.
 <!-- markdownlint-enable MD013 -->
 
