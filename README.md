@@ -559,7 +559,9 @@ each call will append the new handlers (if enabled) to the end of the list.
 
 The handlers define the fields you may use for lazy loading,
 with the fields like `ft` and `event` that exist
-in the default plugin spec being defined by the [default handlers](./lua/lze/h).
+in the default plugin spec being defined by
+the [default handlers](./lua/lze/h) and the
+extra, optional ones being defined [here](./lua/lze/x).
 
 The order of this list of handlers is important.
 
@@ -589,20 +591,29 @@ Again, this is important:
 > because they will not be retroactively applied to
 > the `load` calls that occur before they are registered.
 
+#### lze.HandlerSpec
+
+<!-- markdownlint-disable MD013 -->
+| Property   | Type                         | Description                                               |
+| ---        | ---                          | ---                                                       |
+| handler | `lze.Handler`                   | the `lze.Handler` you wish to add |
+| enabled? | `boolean?` or `fun():boolean?` | determines at time of registration if the handler should be added or not. Defaults to `true` |
+<!-- markdownlint-enable MD013 -->
+
+### Writing Custom Handlers
+
 #### `lze.Handler`
 
 <!-- markdownlint-disable MD013 -->
 | Property   | Type                              | Description                                               |
 | ---        | ---                               | ---                                                       |
 | spec_field | `string`                          | the `lze.PluginSpec` field used to configure the handler |
-| add?        | `fun(plugin: lze.Plugin)`        | called once for each handler before any plugin has been loaded. Tells your handler about each plugin so you can set up a trigger for it if you handler was used. |
+| add?        | `fun(plugin: lze.Plugin)`        | called once for each handler before any plugin has been loaded. Tells your handler about each plugin so you can set up a trigger for it if your handler was used. |
 | before?        | `fun(name: string)`               | called after each plugin spec's before `hook`, and before its `load` hook |
 | after?        | `fun(name: string)`               | called after each plugin spec's `load` hook and before its `after` hook |
 | modify?     | `fun(name: string): lze.Plugin` | This function is called before a plugin is added to state. It is your one chance to modify the plugin spec, it is active only if your spec_field was used in that spec, and is called in the order the handlers have been added. |
 | post_def?        | `fun()`               | For adding custom triggers such as the event handler's `DeferredUIEnter` event, called at the end of `require('lze').load` |
 <!-- markdownlint-enable MD013 -->
-
-#### Writing Custom Handlers
 
 Your handler first has a chance to modify the
 parsed plugin spec before it is loaded into the state of `lze`.
@@ -633,8 +644,9 @@ For debugging purposes, or if necessary, you may use `require('lze').query_state
 which will return a copy of the state of the plugin, false if loaded or being loaded,
 and nil if it was never added.
 
-It *copies* the value from state, so avoid using it unnecessarily,
-you should already have the value from your add function!
+It *copies* the value from state, so you should
+avoid using it unnecessarily for minor performance reasons,
+you should already have the values from your add function!
 
 > [!TIP]
 > You should delete the plugin from your handler's state
