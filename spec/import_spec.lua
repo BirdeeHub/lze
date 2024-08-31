@@ -23,11 +23,12 @@ describe("lze", function()
             fh:write(plugin_config_content)
             fh:close()
             vim.opt.runtimepath:append(tempdir)
-            local spy_load = spy.on(loader, "_load")
+            local spy_load = spy.on(loader, "load")
             lz.load("plugins")
             vim.cmd.Baz()
             assert.spy(spy_load).called(1)
             vim.system({ "rm", spec_file }):wait()
+            package.loaded["plugins"] = nil
         end)
         it("import root file", function()
             local plugin_config_content = [[
@@ -41,12 +42,13 @@ describe("lze", function()
             fh:write(plugin_config_content)
             fh:close()
             vim.opt.runtimepath:append(tempdir)
-            local spy_load = spy.on(loader, "_load")
+            local spy_load = spy.on(loader, "load")
             lz.load("plugins")
             assert.spy(spy_load).called(1)
             vim.cmd.Bat()
             assert.spy(spy_load).called(2)
             vim.system({ "rm", plugin1_spec_file }):wait()
+            package.loaded["plugins"] = nil
         end)
         it("import plugin specs and spec file", function()
             local plugins_dir = vim.fs.joinpath(tempdir, "lua", "plugins")
@@ -65,11 +67,14 @@ return {
             fh:close()
             local plugin2_config_content = [[
 return {
-  "foo.nvim",
-  cmd = "Foo",
-  after = function()
-    vim.g.foo_after = true
-  end,
+  {
+    "foo.nvim",
+    cmd = "Foo",
+    after = function()
+      vim.g.foo_after = true
+    end,
+  },
+  { import = "plugins.telescope", },
 }
 ]]
             local plugin2_dir = vim.fs.joinpath(plugins_dir, "foo")
@@ -79,9 +84,9 @@ return {
             fh:write(plugin2_config_content)
             fh:close()
             vim.opt.runtimepath:append(tempdir)
-            local spy_load = spy.on(loader, "_load")
+            local spy_load = spy.on(loader, "load")
             lz.load({
-                { import = "plugins" },
+                { import = "plugins.foo" },
                 { "sweetie.nvim" },
             })
             assert.spy(spy_load).called(1)
@@ -94,6 +99,7 @@ return {
             -- vim.cmd.Linked()
             -- assert.spy(spy_load).called(4)
             vim.system({ "rm", plugin2_spec_file }):wait()
+            package.loaded["plugins"] = nil
         end)
     end)
 end)
