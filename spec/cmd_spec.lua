@@ -11,33 +11,32 @@ describe("handlers.cmd", function()
         local counter = 0
         ---@type lze.Plugin
         local plugin = {
-            name = "foo",
-            cmd = { "Foo" },
+            name = "foos",
+            cmd = { "Foos" },
             after = function()
-                vim.api.nvim_create_user_command("Foo", function()
+                vim.api.nvim_create_user_command("Foos", function()
                     counter = counter + 1
                 end, {})
             end,
         }
         local spy_load = spy.on(loader, "load")
         lze.load({ plugin })
-        assert.is_not_nil(vim.cmd.Foo)
-        vim.cmd.Foo()
-        vim.cmd.Foo()
+        assert.is_not_nil(vim.cmd.Foos)
+        vim.cmd.Foos()
+        vim.cmd.Foos()
         assert.spy(spy_load).called(1)
         assert.same(2, counter)
     end)
     it("Multiple commands only load plugin once", function()
         ---@param commands string[]
-        local function itt(commands)
+        local function itt(commands, name)
             ---@type lze.Plugin
             local plugin = {
-                name = "foo",
+                name = name,
                 cmd = commands,
-                allow_again = true,
                 after = function()
-                    vim.api.nvim_create_user_command("Foo", function() end, {})
-                    vim.api.nvim_create_user_command("Bar", function() end, {})
+                    vim.api.nvim_create_user_command(commands[1], function() end, {})
+                    vim.api.nvim_create_user_command(commands[2], function() end, {})
                 end,
             }
             local spy_load = spy.on(loader, "load")
@@ -46,7 +45,7 @@ describe("handlers.cmd", function()
             vim.cmd[commands[2]]()
             assert.spy(spy_load).called(1)
         end
-        itt({ "Foo", "Bar" })
-        itt({ "Bar", "Foo" })
+        itt({ "Foo", "Bar" }, "foo5")
+        itt({ "Bar", "Foo" }, "foo4")
     end)
 end)
