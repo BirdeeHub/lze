@@ -2,8 +2,8 @@
 vim.g.lze = {
     load = function() end,
 }
+local lze = require("lze")
 local ft = require("lze.h.ft")
-local state = require("lze.c.state")
 local loader = require("lze.c.loader")
 local spy = require("luassert.spy")
 
@@ -21,9 +21,8 @@ describe("handlers.ft", function()
             name = "Foo",
             ft = { "rust" },
         }
-        local spy_load = spy.on(loader, "_load")
-        state.plugins[plugin.name] = plugin
-        ft.add(plugin)
+        local spy_load = spy.on(loader, "load")
+        lze.load(plugin)
         vim.api.nvim_exec_autocmds("FileType", { pattern = "rust" })
         vim.api.nvim_exec_autocmds("FileType", { pattern = "rust" })
         assert.spy(spy_load).called(1)
