@@ -55,47 +55,42 @@ describe("handlers.dep_of", function()
         plugin_state[plugin.name].after_called = true
     end
 
-    local test_plugin = {
-        "test_plugin",
+    local tpl = {
+        name = "test_plugin_3",
         lazy = true,
         load = test_load_fun,
         before = test_before_fun,
         after = test_after_fun,
     }
-    local test_plugin_2 = {
-        "test_plugin_2",
-        dep_of = { "test_plugin" },
+    local tpl_2 = {
+        name = "test_plugin_4",
+        dep_of = { "test_plugin_3" },
         load = test_load_fun,
         before = test_before_fun,
         after = test_after_fun,
     }
-    local tpl = vim.tbl_extend("keep", test_plugin, { lazy = true })
-    tpl.name = tpl[1]
-    tpl[1] = nil
-
-    local tpl_2 = vim.tbl_extend("error", test_plugin_2, { lazy = true })
-    tpl_2.name = tpl_2[1]
-    tpl_2[1] = nil
 
     it("dep_of loads after before and before load", function()
-        lze.load(test_plugin)
-        lze.load(test_plugin_2)
+        lze.load(tpl_2)
+        lze.load(tpl)
         lze.trigger_load(tpl.name)
+
+        print(vim.inspect(plugin_state))
 
         assert.same(true, plugin_state[tpl.name].load_called)
         assert.same(true, plugin_state[tpl.name].before_called)
         assert.same(true, plugin_state[tpl.name].after_called)
-        assert.same({ "test_plugin_2" }, plugin_state[tpl.name].loaded_after)
-        assert.same({ "test_plugin_2" }, plugin_state[tpl.name].loaded_after_after)
-        assert.True(vim.tbl_contains(plugin_state[tpl.name].loaded_after_before, "test_plugin"))
-        assert.True(vim.tbl_contains(plugin_state[tpl.name].loaded_after_before, "test_plugin_2"))
+        assert.same({ "test_plugin_4" }, plugin_state[tpl.name].loaded_after)
+        assert.same({ "test_plugin_4" }, plugin_state[tpl.name].loaded_after_after)
+        assert.True(vim.tbl_contains(plugin_state[tpl.name].loaded_after_before, "test_plugin_3"))
+        assert.True(vim.tbl_contains(plugin_state[tpl.name].loaded_after_before, "test_plugin_4"))
 
         assert.same(true, plugin_state[tpl_2.name].load_called)
         assert.same(true, plugin_state[tpl_2.name].before_called)
         assert.same(true, plugin_state[tpl_2.name].after_called)
         assert.same({}, plugin_state[tpl_2.name].loaded_after)
         assert.same({}, plugin_state[tpl_2.name].loaded_after_after)
-        assert.True(vim.tbl_contains(plugin_state[tpl_2.name].loaded_after_before, "test_plugin"))
-        assert.True(vim.tbl_contains(plugin_state[tpl_2.name].loaded_after_before, "test_plugin_2"))
+        assert.True(vim.tbl_contains(plugin_state[tpl_2.name].loaded_after_before, "test_plugin_3"))
+        assert.True(vim.tbl_contains(plugin_state[tpl_2.name].loaded_after_before, "test_plugin_4"))
     end)
 end)

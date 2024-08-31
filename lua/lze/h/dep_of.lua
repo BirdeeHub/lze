@@ -32,12 +32,14 @@ function M.add(plugin)
     for _, name in ipairs(needed_by) do
         if require("lze").query_state(name) == false then
             trigger_load(plugin.name)
-        else
-            if states[name] == nil then
-                states[name] = {}
-            end
-            vim.list_extend(states[name], { plugin.name })
+            return
         end
+    end
+    for _, name in ipairs(needed_by) do
+        if states[name] == nil then
+            states[name] = {}
+        end
+        vim.list_extend(states[name], { plugin.name })
     end
 end
 

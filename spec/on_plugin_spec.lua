@@ -78,6 +78,7 @@ describe("handlers.on_plugin", function()
     tpl_2[1] = nil
 
     it("dep_of loads after before and before load", function()
+        lze.register_handlers(require("lze.x.on_plugin"))
         lze.load(test_plugin)
         lze.load(test_plugin_2)
         lze.trigger_load(tpl.name)

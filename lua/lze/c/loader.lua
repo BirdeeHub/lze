@@ -10,7 +10,7 @@ local function get_eager_plugins(plugins)
     ---@type lze.Plugin[]
     local result = {}
     for _, plugin in ipairs(plugins) do
-        if plugin.lazy == true then
+        if not plugin.lazy then
             table.insert(result, plugin)
         end
     end

@@ -69,14 +69,9 @@ end
 ---@return boolean
 function M.is_lazy(spec)
     ---@diagnostic disable-next-line: undefined-field
-    local lazy = spec.lazy
-    for _, hndl in ipairs(handlers) do
-        if lazy then
-            return lazy
-        end
-        lazy = spec[hndl.spec_field]
-    end
-    return lazy
+    return spec.lazy or vim.iter(handlers):any(function(hndl)
+        return spec[hndl.spec_field] ~= nil
+    end)
 end
 
 ---@param plugin lze.Plugin
