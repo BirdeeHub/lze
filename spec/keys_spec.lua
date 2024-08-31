@@ -2,8 +2,8 @@
 vim.g.lze = {
     load = function() end,
 }
+local lze = require("lze")
 local keys = require("lze.h.keys")
-local state = require("lze.c.state")
 local loader = require("lze.c.loader")
 local spy = require("luassert.spy")
 
@@ -26,70 +26,62 @@ describe("handlers.keys", function()
         local lhs = "<leader>tt"
         ---@type lze.Plugin
         local plugin = {
-            name = "foo",
+            name = "food",
             keys = lhs,
         }
-        local spy_load = spy.on(loader, "_load")
-        state.plugins[plugin.name] = plugin
-        keys.add(plugin)
+        local spy_load = spy.on(loader, "load")
+        lze.load(plugin)
         local feed = vim.api.nvim_replace_termcodes("<Ignore>" .. lhs, true, true, true)
         vim.api.nvim_feedkeys(feed, "ix", false)
         vim.api.nvim_feedkeys(feed, "ix", false)
         assert.spy(spy_load).called(1)
-        assert.True(state.loaded[plugin.name])
-        state.loaded[plugin.name] = false
-        --
+        assert.False(lze.query_state("food"))
     end)
     it("Multiple keys only load plugin once", function()
         ---@param lzkeys string[]|lze.KeysSpec[]
-        local function itt(lzkeys)
+        local function itt(lzkeys, name)
+            local timesloaded = 0
             local parsed_keys = {}
             for _, key in ipairs(lzkeys) do
                 table.insert(parsed_keys, keys.parse(key)[1])
             end
             ---@type lze.Plugin
             local plugin = {
-                name = "foo",
+                name = name,
                 keys = lzkeys,
+                load = function()
+                    timesloaded = timesloaded + 1
+                end,
             }
-            local spy_load = spy.on(loader, "_load")
-            state.plugins[plugin.name] = plugin
-            keys.add(plugin)
+            lze.load(plugin)
             local feed1 = vim.api.nvim_replace_termcodes("<Ignore>" .. parsed_keys[1].lhs, true, true, true)
             vim.api.nvim_feedkeys(feed1, "ix", false)
             local feed2 = vim.api.nvim_replace_termcodes("<Ignore>" .. parsed_keys[2].lhs, true, true, true)
             vim.api.nvim_feedkeys(feed2, "ix", false)
-            assert.spy(spy_load).called(1)
-            assert.True(state.loaded[plugin.name])
-            state.loaded[plugin.name] = false
+            assert.Equal(1, timesloaded)
+            assert.False(lze.query_state(name))
         end
-        itt({ "<leader>tt", "<leader>ff" })
-        itt({ "<leader>ff", "<leader>tt" })
+        itt({ "<leader>tt", "<leader>ff" }, "foody1")
+        itt({ "<leader>ff", "<leader>tt" }, "foody2")
     end)
     it("Plugins' keymaps are triggered", function()
         local lhs = "<leader>xy"
+        local triggered = false
         ---@type lze.Plugin
         local plugin = {
-            name = "baz",
+            name = "bazzite",
             keys = lhs,
+            after = function()
+                vim.keymap.set("n", lhs, function()
+                    triggered = true
+                end)
+            end,
         }
-        local triggered = false
-        local orig_load = loader._load
-        ---@diagnostic disable-next-line: duplicate-set-field
-        loader._load = function(...)
-            vim.keymap.set("n", lhs, function()
-                triggered = true
-            end)
-            orig_load(...)
-        end
-        state.plugins[plugin.name] = plugin
-        keys.add(plugin)
+        lze.load(plugin)
         local feed = vim.api.nvim_replace_termcodes("<Ignore>" .. lhs, true, true, true)
         vim.api.nvim_feedkeys(feed, "ix", false)
         vim.api.nvim_feedkeys(feed, "x", false)
         assert.True(triggered)
-        loader._load = orig_load
-        assert.True(state.loaded[plugin.name])
-        state.loaded[plugin.name] = false
+        assert.False(lze.query_state("bazzite"))
     end)
 end)
