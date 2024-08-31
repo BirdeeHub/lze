@@ -16,12 +16,19 @@ It is intended to be used
 
 Nope. I quite like `lz.n`. I have contributed to `lz.n` many times.
 
-In fact, I have contributed to `lz.n` after this plugin has been created.
+In fact, I have even contributed to `lz.n`
+*after* this plugin has been created.
 
-I have also written 2 custom handlers for it,
-both of which are on its wiki.
+`lz.n` is a great plugin.
+I think having the handlers manage the entire
+state of lz.n is an elegant solution.
 
-`lz.n` is a great plugin. This is my take on `lz.n`
+But it also meant I had to be more careful when writing handlers,
+and `lz.n` to that effect has provided an API to make this easier.
+
+I wanted more things to be **guaranteed**, and I started drafting this.
+
+This is my take on `lz.n`.
 
 The core has been entirely rewritten
 and it handles its state entirely differently. [^1]
@@ -30,8 +37,17 @@ It shares some code where handlers parse their specs,
 otherwise it works entirely differently, but
 with a largely compatible [plugin spec](#plugin-spec)
 
-It has almost the same exact plugin spec,
-but with an extra field and 2 more you could add.
+Which one is better? Hard to say.
+
+Neither is appreciably faster than the other.
+
+<!-- markdownlint-disable MD013 -->
+The plugin specs are basically the same,
+with 1-3 more fields thrown in that
+[I have written lz.n equivalents for](https://github.com/nvim-neorocks/lz.n/wiki/Custom-handler-examples).
+<!-- markdownlint-enable MD013 -->
+
+Its basically down to which design of handlers you prefer.
 
 However, import specs can only import a
 single module rather than a whole directory.
@@ -50,28 +66,26 @@ responsibility to manage state for lze.
 Handlers can achieve all the same things,
 but in a different way. Possibly more, but I am not sure.
 
-Which one is better? Hard to say.
+> Why does the readme still say it is a dead simple library?
 
-Neither is appreciably faster than the other.
+The core of `lze` is simply a read-only table.
 
-The plugin specs are basically the same.
+Handlers have 1 chance to prevent a plugin from entering,
+or modify it before it enters **if active for that spec**,
+(none of the default handlers need this) but once it has been entered,
+it will remain until it has been loaded via
+a call to `require('lze').trigger_load(name)` (or a list of names).
 
-Its basically down to which design of handlers you prefer.
+You can only add it to the queue again
+*after* it has been loaded, and specifically allow it to be added again.
 
-<!-- markdownlint-disable MD013 -->
-It also has a built-in dep_of handler, rather than you needing to add
-a third party one such as the one I posted to `lz.n` [wiki](https://github.com/nvim-neorocks/lz.n/wiki/Custom-handler-examples#dependency-handler) called load_before
-<!-- markdownlint-enable MD013 -->
+Handlers call trigger_load by the plugin's name,
+and have some hooks they may define.
 
-It also includes 2 extra handlers you may
-optionally add, on_plugin (load after another plugin) and on_require
-(specify top level modules to load on when `require`d).
-
-<!-- markdownlint-disable MD007 MD032 -->
-[^1]: `lze`'s state is actually authoritative, due to
-    `trigger_load` not accepting a plugin spec like its `lz.n` equivalent does,
-    and the core state is NOT editable outside of a handler's modify hook.
-<!-- markdownlint-enable MD007 MD032 -->
+Thats basically it. The handlers call trigger_load,
+`lze` loads it if its in the table,
+and if not, it returns the skipped ones,
+by default, warning if it wasnt found at all.
 
 ## :star2: Features
 
@@ -205,13 +219,13 @@ require("lze").load(plugins)
 <!-- markdownlint-disable MD013 -->
 | Property         | Type | Description | `lazy.nvim` equivalent |
 |------------------|------|-------------|-----------------------|
-| **[1]** | `string` | REQUIRED. The plugin's name (not the module name). This is the directory name of the plugin in the packpath and is usually the same as the repo name of the repo it was cloned from. | `name`[^2] |
+| **[1]** | `string` | REQUIRED. The plugin's name (not the module name). This is the directory name of the plugin in the packpath and is usually the same as the repo name of the repo it was cloned from. | `name`[^1] |
 | **enabled?** | `boolean` or `fun():boolean` | When `false`, or if the `function` returns false, then this plugin will not be included in the spec. | `enabled` |
 | **beforeAll?** | `fun(lze.Plugin)` | Always executed upon calling `require('lze').load(spec)` before any plugin specs from that call are triggered to be loaded. | `init` |
 | **before?** | `fun(lze.Plugin)` | Executed before a plugin is loaded. | None |
 | **after?** | `fun(lze.Plugin)` | Executed after a plugin is loaded. | `config` |
 | **priority?** | `number` | Only useful for **start** plugins (not lazy-loaded) added within **the same `require('lze').load(spec)` call** to force loading certain plugins first. Default priority is `50`. | `priority` |
-| **load?** | `fun(string)` | Can be used to override the `vim.g.lze.load(name)` function for an individual plugin. (default is `vim.cmd.packadd(name)`)[^3] | None. |
+| **load?** | `fun(string)` | Can be used to override the `vim.g.lze.load(name)` function for an individual plugin. (default is `vim.cmd.packadd(name)`)[^2] | None. |
 | **allow_again?** | `boolean` or `fun():boolean` | When a plugin has ALREADY BEEN LOADED, true would allow you to add it again. No idea why you would want this outside of testing. | None. |
 <!-- markdownlint-enable MD013 -->
 
@@ -224,7 +238,7 @@ require("lze").load(plugins)
 | **cmd?** | `string` or `string[]` | Lazy-load on command. | `cmd` |
 | **ft?** | `string` or `string[]` | Lazy-load on filetype. | `ft` |
 | **keys?** | `string` or `string[]` or `lze.KeysSpec[]` | Lazy-load on key mapping. | `keys` |
-| **colorscheme?** | `string` or `string[]` | Lazy-load on colorscheme. | None. `lazy.nvim` lazy-loads colorschemes automatically[^4]. |
+| **colorscheme?** | `string` or `string[]` | Lazy-load on colorscheme. | None. `lazy.nvim` lazy-loads colorschemes automatically[^3]. |
 | **dep_of?** | `string` or `string[]` | Lazy-load before another plugin but after its `before` hook. Accepts a plugin name or a list of plugin names. |  None but is sorta the reverse of the dependencies key of the `lazy.nvim` plugin spec |
 <!-- markdownlint-enable MD013 -->
 #### Extra fields
@@ -256,13 +270,13 @@ require("lze").register_handlers({
 })
 ```
 
-[^2]: In contrast to `lazy.nvim`'s `name` field, a `lze.PluginSpec`'s `name` *is not optional*.
+[^1]: In contrast to `lazy.nvim`'s `name` field, a `lze.PluginSpec`'s `name` *is not optional*.
       This is because `lze` is not a plugin manager and needs to be told which
       plugins to load.
-[^3]: for example, lazy-loading cmp sources will
+[^2]: for example, lazy-loading cmp sources will
       require you to source its `after/plugin` file,
       as packadd does not do this automatically for you.
-[^4]: The reason this library doesn't lazy-load colorschemes automatically is that
+[^3]: The reason this library doesn't lazy-load colorschemes automatically is that
       it would have to know where the plugin is installed in order to determine
       which plugin to load.
 
@@ -270,9 +284,9 @@ require("lze").register_handlers({
 
 - `DeferredUIEnter`: Triggered when `require('lze').load()` is done and after `UIEnter`.
   Can be used as an `event` to lazy-load plugins that are not immediately needed
-  for the initial UI[^5].
+  for the initial UI[^4].
 
-[^5]: This is equivalent to `lazy.nvim`'s `VeryLazy` event.
+[^4]: This is equivalent to `lazy.nvim`'s `VeryLazy` event.
 
 ### Plugins with after directories
 
@@ -280,10 +294,9 @@ Relying on another plugin's `plugin` or `after/plugin` scripts is considered a b
 as Neovim's built-in loading mechanism does not guarantee initialisation order.
 Requiring users to manually call a `setup` function [is an anti pattern](https://github.com/nvim-neorocks/nvim-best-practices?tab=readme-ov-file#zap-initialization).
 Forcing users to think about the order in which they load plugins that
-extend or depend on each other is even worse. We strongly suggest opening
-an issue or submitting a PR to fix this upstream.
-However, if you're looking for a temporary workaround, you can use
-`trigger_load` in a `before` or `after` hook, or bundle the relevant plugin configurations.
+extend or depend on each other is not great either and we
+strongly suggest opening an issue or submitting
+a PR to fix any of these issues this upstream.
 
 > [!NOTE]
 >
