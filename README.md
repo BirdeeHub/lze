@@ -59,9 +59,12 @@ Its basically down to which design of handlers you prefer.
 
 <!-- markdownlint-disable MD013 -->
 It also has a built-in dep_of handler, rather than you needing to add
-a third party one such as the one I posted to `lz.n` [wiki](https://github.com/nvim-neorocks/lz.n/wiki/Custom-handler-examples#dependency-handler),
-as well as an on_plugin handler that loads after load of another plugin.
+a third party one such as the one I posted to `lz.n` [wiki](https://github.com/nvim-neorocks/lz.n/wiki/Custom-handler-examples#dependency-handler) called load_before
 <!-- markdownlint-enable MD013 -->
+
+It also includes 2 extra handlers you may
+optionally add, on_plugin (load after another plugin) and on_require
+(specify top level modules to load on when `require`d).
 
 <!-- markdownlint-disable MD007 MD032 -->
 [^1]: `lze`'s state is actually authoritative, due to
@@ -107,8 +110,8 @@ the same mechanism through which the builtin handlers are created.
 >
 > See [nvim-neorocks "DO's and DONT's" guide for plugin developers](https://github.com/nvim-neorocks/nvim-best-practices?tab=readme-ov-file#sleeping_bed-lazy-loading).
 >
-> Regardless, the current status quo is horrible, and some authors may
-> not have the will or capacity to improve their plugins' startup impact.
+> Regardless, some authors may not have the capacity
+> or knowledge to improve their plugins' startup impact.
 >
 > If you find a plugin that takes too long to load,
 > or worse, forces you to load it manually at startup with a
@@ -222,8 +225,33 @@ require("lze").load(plugins)
 | **keys?** | `string` or `string[]` or `lze.KeysSpec[]` | Lazy-load on key mapping. | `keys` |
 | **colorscheme?** | `string` or `string[]` | Lazy-load on colorscheme. | None. `lazy.nvim` lazy-loads colorschemes automatically[^4]. |
 | **dep_of?** | `string` or `string[]` | Lazy-load before another plugin but after its `before` hook. Accepts a plugin name or a list of plugin names. |  None but is sorta the reverse of the dependencies key of the `lazy.nvim` plugin spec |
-| **on_plugin?** | `string` or `string[]` | Lazy-load after another plugin but before its `after` hook. Accepts a plugin name or a list of plugin names. | None. |
 <!-- markdownlint-enable MD013 -->
+There are also 2 more optional handlers you may add to your spec.
+<!-- markdownlint-disable MD013 -->
+| Property | Type | Description | `lazy.nvim` equivalent |
+|----------|------|-------------|----------------------|
+| **on_plugin?** | `string` or `string[]` | Lazy-load after another plugin but before its `after` hook. Accepts a plugin name or a list of plugin names. | None. |
+| **on_require?** | `string` or `string[]` | Accepts a top-level **lua module** name or a list of top-level **lua module** names. Will load when any submodule of those listed is `require`d | None. `lazy.nvim` does this automatically. |
+<!-- markdownlint-enable MD013 -->
+
+To add them, **before you call load** use:
+
+```lua
+require("lze").register_handlers(require('lze.x'))
+```
+
+or individually with:
+
+```lua
+require("lze").register_handlers(require('lze.x.on_require'))
+-- or
+require("lze").register_handlers(require('lze.x.on_plugin'))
+-- or
+require("lze").register_handlers({
+  require('lze.x.on_plugin'),
+  require('lze.x.on_require'),
+})
+```
 
 [^2]: In contrast to `lazy.nvim`'s `name` field, a `lze.PluginSpec`'s `name` *is not optional*.
       This is because `lze` is not a plugin manager and needs to be told which
