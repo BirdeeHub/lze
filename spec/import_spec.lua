@@ -99,7 +99,8 @@ return {
             -- vim.cmd.Linked()
             -- assert.spy(spy_load).called(4)
             vim.system({ "rm", plugin2_spec_file }):wait()
-            package.loaded["plugins"] = nil
+            package.loaded["plugins.foo"] = nil
+            package.loaded["plugins.telescope"] = nil
         end)
     end)
 end)
