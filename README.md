@@ -82,7 +82,8 @@ You can only add it to the queue again
 Handlers call trigger_load by the plugin's name,
 and have some hooks they may define.
 
-Thats basically it. The handlers call trigger_load on some sort of event,
+Thats basically it. The handlers call
+`trigger_load` on some sort of event,
 `lze` loads it if its in the table,
 and if not, it returns the skipped ones,
 by default, warning if it wasnt found at all.
