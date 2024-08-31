@@ -75,8 +75,6 @@ describe("handlers.dep_of", function()
         lze.load(tpl)
         lze.trigger_load(tpl.name)
 
-        print(vim.inspect(plugin_state))
-
         assert.same(true, plugin_state[tpl.name].load_called)
         assert.same(true, plugin_state[tpl.name].before_called)
         assert.same(true, plugin_state[tpl.name].after_called)
