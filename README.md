@@ -226,7 +226,9 @@ require("lze").load(plugins)
 | **colorscheme?** | `string` or `string[]` | Lazy-load on colorscheme. | None. `lazy.nvim` lazy-loads colorschemes automatically[^4]. |
 | **dep_of?** | `string` or `string[]` | Lazy-load before another plugin but after its `before` hook. Accepts a plugin name or a list of plugin names. |  None but is sorta the reverse of the dependencies key of the `lazy.nvim` plugin spec |
 <!-- markdownlint-enable MD013 -->
-There are also 2 more optional handlers you may add to your spec.
+#### Extra fields
+
+There are also 2 more **optional** handlers you may add to your spec.
 <!-- markdownlint-disable MD013 -->
 | Property | Type | Description | `lazy.nvim` equivalent |
 |----------|------|-------------|----------------------|
