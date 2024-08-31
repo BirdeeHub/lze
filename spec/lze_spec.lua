@@ -8,7 +8,7 @@ local spy = require("luassert.spy")
 describe("lze", function()
     describe("load", function()
         it("list of plugin specs", function()
-            local spy_load = spy.on(loader, "_load")
+            local spy_load = spy.on(loader, "load")
             lz.load({
                 {
                     "neorg",
@@ -24,40 +24,16 @@ describe("lze", function()
                 },
             })
             assert.spy(spy_load).called(1)
-            assert.spy(spy_load).called_with({
-                name = "neorg",
-                lazy = false,
-            })
+            assert.spy(spy_load).called_with("neorg")
             vim.api.nvim_exec_autocmds("FileType", { pattern = "toml" })
             assert.spy(spy_load).called(2)
-            assert.spy(spy_load).called_with({
-                name = "crates.nvim",
-                lazy = true,
-                ft = { "toml", "rust" },
-                event = {
-                    {
-                        event = "FileType",
-                        id = "toml",
-                        pattern = "toml",
-                    },
-                    {
-                        event = "FileType",
-                        id = "rust",
-                        pattern = "rust",
-                    },
-                },
-            })
+            assert.spy(spy_load).called_with({ "crates.nvim" })
             vim.cmd.Telescope()
             assert.spy(spy_load).called(3)
-            assert.spy(spy_load).called_with({
-                name = "telescope.nvim",
-                lazy = true,
-                cmd = "Telescope",
-                keys = { { "<leader>tt", mode = { "n", "v" } } },
-            })
+            assert.spy(spy_load).called_with({ "telescope.nvim" })
         end)
         it("individual plugin specs", function()
-            local spy_load = spy.on(loader, "_load")
+            local spy_load = spy.on(loader, "load")
             lz.load({
                 "foo.nvim",
                 keys = "<leader>ff",
@@ -88,7 +64,7 @@ describe("lze", function()
             assert.True(loaded)
         end)
         it("list with a single plugin spec", function()
-            local spy_load = spy.on(loader, "_load")
+            local spy_load = spy.on(loader, "load")
             lz.load({
                 {
                     "single.nvim",
@@ -98,11 +74,7 @@ describe("lze", function()
             assert.spy(spy_load).called(0)
             pcall(vim.cmd.Single)
             assert.spy(spy_load).called(1)
-            assert.spy(spy_load).called_with({
-                name = "single.nvim",
-                lazy = true,
-                cmd = "Single",
-            })
+            assert.spy(spy_load).called_with({ "single.nvim" })
         end)
     end)
 end)
