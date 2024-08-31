@@ -579,7 +579,7 @@ Again, this is important:
 | Property   | Type                              | Description                                               |
 | ---        | ---                               | ---                                                       |
 | spec_field | `string`                          | the `lze.PluginSpec` field used to configure the handler |
-| add        | `fun(plugin: lze.Plugin)`        | called once for each handler before any plugin has been loaded. Tells your handler about each plugin so you can set up a trigger for it if you handler was used. |
+| add?        | `fun(plugin: lze.Plugin)`        | called once for each handler before any plugin has been loaded. Tells your handler about each plugin so you can set up a trigger for it if you handler was used. |
 | before?        | `fun(name: string)`               | called after each plugin spec's before `hook`, and before its `load` hook |
 | after?        | `fun(name: string)`               | called after each plugin spec's `load` hook and before its `after` hook |
 | modify?     | `fun(name: string): lze.Plugin` | This function is called before a plugin is added to state. It is your one chance to modify the plugin spec, it is active only if your spec_field was used in that spec, and is called in the order the handlers have been added. |
@@ -601,7 +601,8 @@ Then, your handler will have a chance to add plugins to its list to trigger,
 via its `add` function, which is called before any plugins have been loaded
 in that `require('lze').load` call.
 
-You can manually load a plugin and run its associated hooks
+Your handler will then decide when to load
+a plugin and run its associated hooks
 using the `trigger_load` function.
 
 ```lua
@@ -615,6 +616,9 @@ It will return the list of names it skipped.
 For debugging purposes, or if necessary, you may use `require('lze').query_state(name)`
 which will return a copy of the state of the plugin, false if loaded or being loaded,
 and nil if it was never added.
+
+It *copies* the value from state, so avoid using it unnecessarily,
+you should already have the value from your add function!
 
 > [!TIP]
 > You should delete the plugin from your handler's state

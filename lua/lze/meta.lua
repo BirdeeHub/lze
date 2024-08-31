@@ -116,7 +116,7 @@ error("Cannot import a meta module")
 ---@class lze.Handler
 ---@field spec_field string
 ---@field modify? fun(plugin: lze.Plugin): lze.Plugin
----@field add fun(plugin: lze.Plugin)
+---@field add? fun(plugin: lze.Plugin)
 ---
 ---runs at the end of require('lze').load()
 ---for handlers to set up extra triggers such as the
