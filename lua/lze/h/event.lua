@@ -72,6 +72,7 @@ function M.post_def()
     elseif not vim.g.lze_did_create_deferred_ui_enter_autocmd then
         vim.api.nvim_create_autocmd("UIEnter", {
             once = true,
+            nested = true,
             callback = deferred_ui_enter,
         })
         vim.g.lze_did_create_deferred_ui_enter_autocmd = true
@@ -164,6 +165,7 @@ local function add_event(event)
     vim.api.nvim_create_autocmd(event.event, {
         group = M.group,
         once = true,
+        nested = true,
         pattern = event.pattern,
         callback = function(ev)
             if done or not M.pending[event.id] then

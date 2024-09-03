@@ -124,6 +124,7 @@ local function add_keys(keys)
     if keys.ft then
         vim.api.nvim_create_autocmd("FileType", {
             pattern = keys.ft,
+            nested = true,
             callback = function(event)
                 if M.pending[keys.id] then
                     add(event.buf)
