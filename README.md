@@ -12,7 +12,7 @@ It is intended to be used
 - by users of plugin managers that don't provide a convenient API for lazy-loading.
 - by plugin managers, to provide a convenient API for lazy-loading.
 
-## :question: Is this [lz.n](https://github.com/nvim-neorocks/lz.n)?
+## :question: Is this [`lz.n`](https://github.com/nvim-neorocks/lz.n)?
 
 Nope. I quite like `lz.n`. I have contributed to `lz.n` many times.
 
@@ -21,7 +21,7 @@ In fact, I have even contributed to `lz.n`
 
 `lz.n` is a great plugin.
 I think having the handlers manage the entire
-state of lz.n is an elegant solution.
+state of `lz.n` is an elegant solution.
 
 But it also meant I had to be more careful when writing handlers,
 and `lz.n` to that effect has provided an API to make this easier.
@@ -44,7 +44,7 @@ Neither is appreciably faster than the other.
 <!-- markdownlint-disable MD013 -->
 The plugin specs are basically the same,
 with 1-3 more fields thrown in that
-[I have written lz.n equivalents for](https://github.com/nvim-neorocks/lz.n/wiki/Custom-handler-examples).
+[I have written `lz.n` equivalents for](https://github.com/nvim-neorocks/lz.n/wiki/Custom-handler-examples).
 <!-- markdownlint-enable MD013 -->
 
 Its basically down to which design of handlers you prefer.
@@ -61,7 +61,7 @@ they load in the order passed in.
 What order should the directory be imported in? I left it up to you.
 
 Handlers are very different. They have much less
-responsibility to manage state for lze.
+responsibility to manage state for `lze`.
 
 Handlers can achieve all the same things,
 but in a different way. Possibly more, but I am not sure.
@@ -83,11 +83,11 @@ a call to `require('lze').trigger_load(name)` (or a list of names).
 You can only add it to the queue again
 *after* it has been loaded, and specifically allow it to be added again.
 
-Thats basically it. The handlers call
+That's basically it. The handlers call
 `trigger_load` with some names on some sort of event,
 `lze` loads it if its in the table,
 and if not, it returns the skipped ones,
-by default, warning if it wasnt found at all.
+by default, warning if it wasn't found at all.
 
 ## :star2: Features
 
@@ -404,7 +404,7 @@ require("lze").load {
   # without needing this part
 ```
 Then, pass your home manager module your inputs,
-and retrieve lze with `inputs.lze.packages.${pkgs.system}.default`:
+and retrieve `lze` with `inputs.lze.packages.${pkgs.system}.default`:
 
   ```nix
   programs.neovim = {
@@ -439,11 +439,11 @@ and retrieve lze with `inputs.lze.packages.${pkgs.system}.default`:
 
   - [nixCats](https://github.com/BirdeeHub/nixCats-nvim)
 
-  While the home manager syntax is also accepted by nixCats anywhere we can add plugins,
-  nixCats allows you to configure it in your normal lua files.
+  While the home manager syntax is also accepted by `nixCats` anywhere we can add plugins,
+  `nixCats` allows you to configure it in your normal lua files.
 
-  Add it to your startupPlugins set as shown below,
-  put the desired plugins in optionalPlugins so they dont auto-load,
+  Add it to your `startupPlugins` set as shown below,
+  put the desired plugins in `optionalPlugins` so they don't auto-load,
   then configure as in [the regular examples](#examples)
   wherever you want in your config.
 
@@ -486,7 +486,7 @@ and retrieve lze with `inputs.lze.packages.${pkgs.system}.default`:
 
 ### Structuring Your Plugins
 
-The import spec of lze allows for importing a single lua module,
+The import spec of `lze` allows for importing a single lua module,
 unlike `lz.n` or `lazy.nvim`, where it imports an entire directory.
 
 That module may return a list of specs,
@@ -499,7 +499,7 @@ have files in that directory that are not imported if you wish.
 require("lze").load("plugins")
 ```
 
-where lua/plugins in your config contains an init.lua with something like,
+where `lua/plugins` in your config contains an `init.lua` with something like,
 
 <!-- markdownlint-disable -->
 ```lua
@@ -651,10 +651,10 @@ you should already have the values from your add function!
 > [!TIP]
 > You should delete the plugin from your handler's state
 > in either the `before` or `after` hooks
-> so that you dont have to carry around
+> so that you don't have to carry around
 > unnecessary state and increase your chance of error and your memory usage.
-> However, not doing so would not cause any bugs in lze.
-> It just might let you call trigger_load multiple times unnecessarily
+> However, not doing so would not cause any bugs in `lze`.
+> It just might let you call `trigger_load` multiple times unnecessarily
 
 ## :green_heart: Contributing
 
