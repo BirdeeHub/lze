@@ -472,6 +472,8 @@ require("lze").load {
   # ... the rest of your nix where you call the builder and export packages
   ```
 
+  - Not on nixkgs-unstable?
+
   If your neovim is not on the `nixpkgs-unstable` channel,
   `vimPlugins.lze` will not yet be in nixpkgs for you.
   You may instead get it from this flake!
