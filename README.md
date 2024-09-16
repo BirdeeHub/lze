@@ -403,7 +403,7 @@ require("lze").load {
     plugins = with pkgs.vimPlugins [
       lze
       {
-        plugin = pkgs.vimPlugins.telescope-nvim;
+        plugin = telescope-nvim;
         config = ''
           require("lze").load {
             "telescope.nvim",
@@ -414,7 +414,7 @@ require("lze").load {
         optional = true;
       }
       {
-        plugin = pkgs.vimPlugins.sweetie-nvim;
+        plugin = sweetie-nvim;
         config = ''
           require("lze").load {
             "sweetie.nvim",
@@ -442,13 +442,13 @@ require("lze").load {
   # in your categoryDefinitions
   categoryDefinitions = { pkgs, settings, categories, name, ... }: {
   # :help nixCats.flake.outputs.categories
-    startupPlugins = {
+    startupPlugins = with pkgs.vimPlugins; {
       someName = [
         # in startupPlugins so that it is available
         lze
       ];
     };
-    optionalPlugins = {
+    optionalPlugins = with pkgs.vimPlugins; {
       someName = [
         # the plugins you wish to load via lze
       ];
