@@ -396,21 +396,10 @@ require("lze").load {
   </summary>
 
   ```nix
-  # in your flake inputs:
-  inputs.lze.url = "github:BirdeeHub/lze";
-
-  # when it makes it onto nixpkgs, it will eventually
-  # be available as pkgs.vimPlugins.lze
-  # without needing this part
-```
-Then, pass your home manager module your inputs,
-and retrieve `lze` with `inputs.lze.packages.${pkgs.system}.default`:
-
-  ```nix
   programs.neovim = {
     enable = true;
     plugins = with pkgs.vimPlugins [
-      inputs.lze.packages.${pkgs.system}.default
+      lze
       {
         plugin = pkgs.vimPlugins.telescope-nvim;
         config = ''
@@ -454,7 +443,7 @@ and retrieve `lze` with `inputs.lze.packages.${pkgs.system}.default`:
     startupPlugins = {
       someName = [
         # in startupPlugins so that it is available
-        inputs.lze.packages.${pkgs.system}.default
+        lze
       ];
     };
     optionalPlugins = {
@@ -480,6 +469,17 @@ and retrieve `lze` with `inputs.lze.packages.${pkgs.system}.default`:
   };
   # ... the rest of your nix where you call the builder and export packages
   ```
+
+  > [!IMPORTANT]
+  > If your neovim is not on the `nixpkgs-unstable` channel,
+  > `vimPlugins.lze` will not yet be in nixpkgs for you.
+  > You may instead get it from this flake!
+  ```nix
+  # in your flake inputs:
+  inputs.lze.url = "github:BirdeeHub/lze";
+```
+Then, pass your config your inputs from your flake,
+and retrieve `lze` with `inputs.lze.packages.${pkgs.system}.default`:
 
 </details>
 <!-- markdownlint-restore -->
