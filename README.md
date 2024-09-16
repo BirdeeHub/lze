@@ -395,6 +395,8 @@ require("lze").load {
     <b><a href="https://wiki.nixos.org/wiki/Neovim">Nix examples</a></b>
   </summary>
 
+  - Home Manager:
+
   ```nix
   programs.neovim = {
     enable = true;
@@ -470,16 +472,15 @@ require("lze").load {
   # ... the rest of your nix where you call the builder and export packages
   ```
 
-  > [!IMPORTANT]
-  > If your neovim is not on the `nixpkgs-unstable` channel,
-  > `vimPlugins.lze` will not yet be in nixpkgs for you.
-  > You may instead get it from this flake!
+  If your neovim is not on the `nixpkgs-unstable` channel,
+  `vimPlugins.lze` will not yet be in nixpkgs for you.
+  You may instead get it from this flake!
   ```nix
   # in your flake inputs:
   inputs.lze.url = "github:BirdeeHub/lze";
-```
-Then, pass your config your inputs from your flake,
-and retrieve `lze` with `inputs.lze.packages.${pkgs.system}.default`:
+  ```
+  Then, pass your config your inputs from your flake,
+  and retrieve `lze` with `inputs.lze.packages.${pkgs.system}.default`:
 
 </details>
 <!-- markdownlint-restore -->
