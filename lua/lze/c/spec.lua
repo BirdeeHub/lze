@@ -16,7 +16,8 @@ local function import_spec(spec, result)
     if type(spec.import) ~= "string" then
         vim.schedule(function()
             vim.notify(
-                "Invalid import spec. The 'import' field should be a module name: " .. vim.inspect(spec),
+                "Invalid import spec. The 'import' field should be a module name, but was instead: "
+                    .. vim.inspect(spec),
                 vim.log.levels.ERROR,
                 { title = "lze" }
             )
@@ -94,10 +95,8 @@ function __f__.normalize(spec, result)
     elseif is_single_plugin_spec(spec) then
         ---@cast spec lze.PluginSpec
         local parsed = parse(spec)
-        if type(parsed) == "table" and type(parsed.name) == "string" then
-            if is_enabled(parsed) then
-                table.insert(result, parsed)
-            end
+        if type(parsed) == "table" and type(parsed.name) == "string" and is_enabled(parsed) then
+            table.insert(result, parsed)
         else
             vim.schedule(function()
                 vim.notify(

@@ -38,7 +38,7 @@ function M.register_handlers(handler_list)
         end)
         -- filter our active, valid handlerSpecs
         :filter(function(spec)
-            return spec.handler ~= nil and is_enabled(spec)
+            return type(spec.handler) == "table" and is_enabled(spec)
         end)
         -- normalize active handlers
         :map(function(spec)
