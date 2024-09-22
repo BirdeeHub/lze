@@ -1,5 +1,14 @@
--- needed so we can use _normalize in import_spec even if its defined later in the file
+-- needed so we can use normalize in import_spec even if its defined later in the file
 local __f__ = {}
+
+-- It turns out that its faster when you copy paste
+-- Would be nice to just define it
+-- once, but then you lose 10ms
+---@param spec lze.Plugin|lze.HandlerSpec|lze.SpecImport
+local function is_enabled(spec)
+    local disabled = spec.enabled == false or (type(spec.enabled) == "function" and not spec.enabled())
+    return not disabled
+end
 
 ---@param spec lze.SpecImport
 ---@param result lze.Plugin[]
@@ -14,7 +23,7 @@ local function import_spec(spec, result)
         end)
         return
     end
-    if spec.enabled == false or (type(spec.enabled) == "function" and not spec.enabled()) then
+    if not is_enabled(spec) then
         return
     end
     local modname = spec.import
@@ -36,7 +45,7 @@ local function import_spec(spec, result)
         end)
         return
     end
-    __f__._normalize(mod, result)
+    __f__.normalize(mod, result)
 end
 
 ---@param spec lze.PluginSpec
@@ -76,17 +85,19 @@ end
 ---@private
 ---@param spec lze.Spec
 ---@param result lze.Plugin[]
-function __f__._normalize(spec, result)
+function __f__.normalize(spec, result)
     if is_spec_list(spec) then
         for _, sp in ipairs(spec) do
             ---@cast sp lze.Spec
-            __f__._normalize(sp, result)
+            __f__.normalize(sp, result)
         end
     elseif is_single_plugin_spec(spec) then
         ---@cast spec lze.PluginSpec
         local parsed = parse(spec)
         if type(parsed) == "table" and type(parsed.name) == "string" then
-            table.insert(result, parsed)
+            if is_enabled(parsed) then
+                table.insert(result, parsed)
+            end
         else
             vim.schedule(function()
                 vim.notify(
@@ -102,25 +113,13 @@ function __f__._normalize(spec, result)
     end
 end
 
----@param result lze.Plugin[]
-local function remove_disabled_plugins(result)
-    for i = #result, 1, -1 do
-        local plugin = result[i]
-        local disabled = plugin.enabled == false or (type(plugin.enabled) == "function" and not plugin.enabled())
-        if disabled then
-            table.remove(result, i)
-        end
-    end
-end
-
 local M = {}
 
 ---@param spec lze.Spec
 ---@return lze.Plugin[]
 function M.parse(spec)
     local result = {}
-    __f__._normalize(spec, result)
-    remove_disabled_plugins(result)
+    __f__.normalize(spec, result)
     return result
 end
 

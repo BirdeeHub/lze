@@ -9,6 +9,15 @@ function M.clear_handlers()
     return old_handlers
 end
 
+-- It turns out that its faster when you copy paste
+-- Would be nice to just define it
+-- once, but then you lose 10ms
+---@param spec lze.Plugin|lze.HandlerSpec|lze.SpecImport
+local function is_enabled(spec)
+    local disabled = spec.enabled == false or (type(spec.enabled) == "function" and not spec.enabled())
+    return not disabled
+end
+
 ---@param handler_list lze.Handler[]|lze.Handler|lze.HandlerSpec[]|lze.HandlerSpec
 ---@return string[]
 function M.register_handlers(handler_list)
@@ -29,11 +38,7 @@ function M.register_handlers(handler_list)
         end)
         -- filter our active, valid handlerSpecs
         :filter(function(spec)
-            return spec.handler ~= nil
-                and (
-                    (spec.enabled == nil or spec.enabled == true)
-                    or (type(spec.enabled) == "function" and spec.enabled())
-                )
+            return spec.handler ~= nil and is_enabled(spec)
         end)
         -- normalize active handlers
         :map(function(spec)

@@ -76,5 +76,46 @@ describe("lze", function()
             assert.spy(spy_load).called(1)
             assert.spy(spy_load).called_with({ "single.nvim" })
         end)
+        it("can disable plugin specs as specified", function()
+            lz.load({
+                "fool.nvim",
+                keys = "<leader>ff",
+                enabled = false,
+            })
+            assert(lz.query_state("fool.nvim") == nil)
+            lz.load({
+                "bard.nvim",
+                enabled = function(_)
+                    return false
+                end,
+            })
+            assert(lz.query_state("bard.nvim") == nil)
+            local checked = 0
+            lz.load({
+                "barz.nvim",
+                lazy = true,
+                enabled = function(_)
+                    if checked == 0 then
+                        checked = checked + 1
+                        return true
+                    elseif checked == 1 then
+                        checked = checked + 1
+                        return false
+                    elseif checked == 2 then
+                        checked = checked + 1
+                        return nil
+                    else
+                        return true
+                    end
+                end,
+            })
+            assert(type(lz.query_state("barz.nvim")) == "table")
+            lz.trigger_load("barz.nvim")
+            assert(type(lz.query_state("barz.nvim")) == "table")
+            lz.trigger_load("barz.nvim")
+            assert(type(lz.query_state("barz.nvim")) == "table")
+            lz.trigger_load("barz.nvim")
+            assert(lz.query_state("barz.nvim") == false)
+        end)
     end)
 end)

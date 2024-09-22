@@ -222,7 +222,7 @@ require("lze").load(plugins)
 | Property         | Type | Description | `lazy.nvim` equivalent |
 |------------------|------|-------------|-----------------------|
 | **[1]** | `string` | REQUIRED. The plugin's name (not the module name). This is the directory name of the plugin in the packpath and is usually the same as the repo name of the repo it was cloned from. | `name`[^1] |
-| **enabled?** | `boolean` or `fun():boolean` | When `false`, or if the `function` returns false, then this plugin will not be included in the spec. | `enabled` |
+| **enabled?** | `boolean` or `fun():boolean` | When `false`, or if the `function` returns `nil` or `false`, then this plugin will not be included in the spec. | `enabled` |
 | **beforeAll?** | `fun(lze.Plugin)` | Always executed upon calling `require('lze').load(spec)` before any plugin specs from that call are triggered to be loaded. | `init` |
 | **before?** | `fun(lze.Plugin)` | Executed before a plugin is loaded. | None |
 | **after?** | `fun(lze.Plugin)` | Executed after a plugin is loaded. | `config` |

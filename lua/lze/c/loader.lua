@@ -42,11 +42,13 @@ local function hook(hook_key, plugin)
     end
 end
 
-local function check_enabled(plugin)
-    if plugin.enabled == false or (type(plugin.enabled) == "function" and not plugin.enabled()) then
-        return false
-    end
-    return true
+-- It turns out that its faster when you copy paste
+-- Would be nice to just define it
+-- once, but then you lose 10ms
+---@param spec lze.Plugin|lze.HandlerSpec|lze.SpecImport
+local function is_enabled(spec)
+    local disabled = spec.enabled == false or (type(spec.enabled) == "function" and not spec.enabled())
+    return not disabled
 end
 
 ---@param plugin lze.Plugin
@@ -121,7 +123,7 @@ function M.load(plugin_names)
     ---@cast plugin_names string[]
     for _, pname in ipairs(plugin_names) do
         local plugin = state[pname]
-        if plugin and check_enabled(plugin) then
+        if plugin and is_enabled(plugin) then
             -- NOTE:
             -- technically SPEC before hooks can modify the plugin item
             -- that is ran by following hooks by modifying their argument,
