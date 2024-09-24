@@ -96,8 +96,10 @@ function __f__.normalize(spec, result)
     elseif is_single_plugin_spec(spec) then
         ---@cast spec lze.PluginSpec
         local parsed = parse(spec)
-        if type(parsed) == "table" and type(parsed.name) == "string" and is_enabled(parsed) then
-            table.insert(result, parsed)
+        if type(parsed) == "table" and type(parsed.name) == "string" then
+            if is_enabled(parsed) then
+                table.insert(result, parsed)
+            end
         else
             vim.schedule(function()
                 vim.notify(
