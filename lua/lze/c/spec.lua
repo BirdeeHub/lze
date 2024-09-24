@@ -52,12 +52,13 @@ end
 ---@param spec lze.PluginSpec
 ---@return lze.Plugin
 local function parse(spec)
-    ---@type lze.Plugin
     ---@diagnostic disable-next-line: inject-field
     spec.name = spec.name or spec[1]
     spec[1] = nil
     ---@diagnostic disable-next-line: inject-field
     spec.lazy = require("lze.c.handler").is_lazy(spec)
+    ---@type lze.Plugin
+    ---@diagnostic disable-next-line: param-type-mismatch
     local result = require("lze.c.handler").run_modify(spec)
     return vim.deepcopy(result)
 end
