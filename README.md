@@ -31,7 +31,7 @@ I wanted more things to be **guaranteed**, and I started drafting this.
 This is my take on `lz.n`.
 
 The core has been entirely rewritten
-and it handles its state entirely differently. [^1]
+and it handles its state entirely differently.
 
 It shares some code where handlers parse their specs,
 otherwise it works entirely differently, but
