@@ -401,7 +401,14 @@ require("lze").load {
   programs.neovim = {
     enable = true;
     plugins = with pkgs.vimPlugins [
-      lze
+      {
+        plugin = lze;
+        config = ''
+          -- optional, add extra handlers
+          -- require("lze").register_handlers(require('lze.x'))
+        '';
+        type = "lua";
+      }
       {
         plugin = telescope-nvim;
         config = ''
