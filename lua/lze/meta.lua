@@ -27,6 +27,10 @@ error("Cannot import a meta module")
 ---
 ---Will be executed after loading this plugin
 ---@field after? fun(self:lze.Plugin)
+---
+---Whether to lazy-load this plugin. Defaults to `false`.
+---Using a handler's field sets this automatically.
+---@field lazy? boolean
 
 -- NOTE:
 -- Builtin Handler Types:
@@ -93,9 +97,6 @@ error("Cannot import a meta module")
 ---@class lze.Plugin: lze.PluginBase,lze.PluginHooks,lze.SpecHandlers, lze.ExtraSpecHandlers
 ---The plugin name (not its main module), e.g. "sweetie.nvim"
 ---@field name string
----
----Whether to lazy-load this plugin. Defaults to `false`.
----@field lazy? boolean
 
 ---The lze.PluginSpec type, passed to require('lze').load() as entries in lze.Spec
 ---@class lze.PluginSpec: lze.PluginBase,lze.PluginHooks,lze.SpecHandlers, lze.ExtraSpecHandlers

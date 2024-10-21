@@ -229,6 +229,7 @@ require("lze").load(plugins)
 | **priority?** | `number` | Only useful for **start** plugins (not lazy-loaded) added within **the same `require('lze').load(spec)` call** to force loading certain plugins first. Default priority is `50`. | `priority` |
 | **load?** | `fun(string)` | Can be used to override the `vim.g.lze.load(name)` function for an individual plugin. (default is `vim.cmd.packadd(name)`)[^2] | None. |
 | **allow_again?** | `boolean` or `fun():boolean` | When a plugin has ALREADY BEEN LOADED, true would allow you to add it again. No idea why you would want this outside of testing. | None. |
+| **lazy?** | `boolean` | Using a handler's field sets this automatically, but if you want to ONLY call `trigger_load` for a plugin spec manually, you can set this to true yourself. | `lazy` |
 <!-- markdownlint-enable MD013 -->
 
 #### Lazy-loading triggers provided by the default handlers
