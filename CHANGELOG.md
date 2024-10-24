@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/BirdeeHub/lze/compare/v0.1.2...v0.1.3) (2024-10-24)
+
+
+### Performance Improvements
+
+* **spec.parse:** slight improvement on last change ([d919d28](https://github.com/BirdeeHub/lze/commit/d919d28faab5edded746d1c2dd8bc12473a42af8))
+
 ## [0.1.2](https://github.com/BirdeeHub/lze/compare/v0.1.1...v0.1.2) (2024-10-24)
 
 
