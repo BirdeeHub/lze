@@ -229,7 +229,7 @@ require("lze").load(plugins)
 | **priority?** | `number` | Only useful for **start** plugins (not lazy-loaded) added within **the same `require('lze').load(spec)` call** to force loading certain plugins first. Default priority is `50`. | `priority` |
 | **load?** | `fun(string)` | Can be used to override the `vim.g.lze.load(name)` function for an individual plugin. (default is `vim.cmd.packadd(name)`)[^2] | None. |
 | **allow_again?** | `boolean` or `fun():boolean` | When a plugin has ALREADY BEEN LOADED, true would allow you to add it again. No idea why you would want this outside of testing. | None. |
-| **lazy?** | `boolean` | Using a handler's field sets this automatically, but if you want to ONLY call `trigger_load` for a plugin spec manually, you can set this to true yourself. [^3] | `lazy` |
+| **lazy?** | `boolean` | Using a handler's field sets this automatically, but you can set this manually as well. | `lazy` |
 <!-- markdownlint-enable MD013 -->
 
 #### Lazy-loading triggers provided by the default handlers
@@ -241,7 +241,7 @@ require("lze").load(plugins)
 | **cmd?** | `string` or `string[]` | Lazy-load on command. | `cmd` |
 | **ft?** | `string` or `string[]` | Lazy-load on filetype. | `ft` |
 | **keys?** | `string` or `string[]` or `lze.KeysSpec[]` | Lazy-load on key mapping. | `keys` |
-| **colorscheme?** | `string` or `string[]` | Lazy-load on colorscheme. | None. `lazy.nvim` lazy-loads colorschemes automatically[^4]. |
+| **colorscheme?** | `string` or `string[]` | Lazy-load on colorscheme. | None. `lazy.nvim` lazy-loads colorschemes automatically[^3]. |
 | **dep_of?** | `string` or `string[]` | Lazy-load before another plugin but after its `before` hook. Accepts a plugin name or a list of plugin names. |  None but is sorta the reverse of the dependencies key of the `lazy.nvim` plugin spec |
 <!-- markdownlint-enable MD013 -->
 #### Extra fields
@@ -279,8 +279,7 @@ require("lze").register_handlers({
 [^2]: for example, lazy-loading cmp sources will
       require you to source its `after/plugin` file,
       as packadd does not do this automatically for you.
-[^3]: values of `lazy = false` will be overridden if you set any handler fields.
-[^4]: The reason this library doesn't lazy-load colorschemes automatically is that
+[^3]: The reason this library doesn't lazy-load colorschemes automatically is that
       it would have to know where the plugin is installed in order to determine
       which plugin to load.
 
@@ -288,9 +287,9 @@ require("lze").register_handlers({
 
 - `DeferredUIEnter`: Triggered when `require('lze').load()` is done and after `UIEnter`.
   Can be used as an `event` to lazy-load plugins that are not immediately needed
-  for the initial UI[^5].
+  for the initial UI[^4].
 
-[^5]: This is equivalent to `lazy.nvim`'s `VeryLazy` event.
+[^4]: This is equivalent to `lazy.nvim`'s `VeryLazy` event.
 
 ### Plugins with after directories
 
