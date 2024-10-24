@@ -55,7 +55,9 @@ local function parse(spec)
     ---@diagnostic disable-next-line: inject-field
     spec.name = spec.name or spec[1]
     spec[1] = nil
-    spec.lazy = require("lze.c.handler").is_lazy(spec)
+    if spec.lazy == nil then
+        spec.lazy = require("lze.c.handler").is_lazy(spec)
+    end
     local result = require("lze.c.handler").run_modify(spec)
     return vim.deepcopy(result)
 end

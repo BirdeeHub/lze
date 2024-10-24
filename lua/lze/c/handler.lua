@@ -73,10 +73,7 @@ end
 ---@param spec lze.PluginSpec
 ---@return boolean
 function M.is_lazy(spec)
-    if spec.lazy == false then
-        return false
-    end
-    return spec.lazy or vim.iter(handlers):any(function(hndl)
+    return vim.iter(handlers):any(function(hndl)
         return spec[hndl.spec_field] ~= nil
     end)
 end
