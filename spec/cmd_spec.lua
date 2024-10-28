@@ -48,4 +48,22 @@ describe("handlers.cmd", function()
         itt({ "Foo", "Bar" }, "foo5")
         itt({ "Bar", "Foo" }, "foo4")
     end)
+    it("Deletes command before loading the plugin when other specs load it", function()
+        local should_be_inc = 0
+        local plugin = {
+            name = "my_other_plus_cmd",
+            cmd = "MyTestCMD",
+            load = function(_)
+                if vim.fn.exists(":MyTestCMD") == 0 then
+                    vim.api.nvim_create_user_command("MyTestCMD", function(_)
+                        should_be_inc = should_be_inc + 1
+                    end, {})
+                end
+            end,
+        }
+        lze.load(plugin)
+        lze.trigger_load(plugin.name)
+        vim.cmd[plugin.cmd]()
+        assert.equal(1, should_be_inc)
+    end)
 end)

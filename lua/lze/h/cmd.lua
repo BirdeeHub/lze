@@ -12,7 +12,6 @@ local M = {
 
 ---@param cmd string
 local function load(cmd)
-    vim.api.nvim_del_user_command(cmd)
     loader.load(vim.tbl_values(M.pending[cmd]))
 end
 
@@ -70,9 +69,12 @@ end
 
 ---@param name string
 function M.before(name)
-    vim.iter(M.pending):each(function(_, plugins)
+    for cmd, plugins in pairs(M.pending) do
+        if plugins[name] then
+            vim.api.nvim_del_user_command(cmd)
+        end
         plugins[name] = nil
-    end)
+    end
 end
 
 ---@param plugin lze.Plugin
