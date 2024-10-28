@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/BirdeeHub/lze/compare/v0.1.3...v0.1.4) (2024-10-28)
+
+
+### Bug Fixes
+
+* **cmd:** dummy cmd hanging around ([7a2649f](https://github.com/BirdeeHub/lze/commit/7a2649fe921d54f16910e1c062bb0c6be55c0c0a))
+
 ## [0.1.3](https://github.com/BirdeeHub/lze/compare/v0.1.2...v0.1.3) (2024-10-24)
 
 
