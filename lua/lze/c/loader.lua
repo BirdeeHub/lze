@@ -54,13 +54,9 @@ end
 ---@param plugin lze.Plugin
 local function _load(plugin)
     require("lze.c.handler").run_before(plugin.name)
-    ---@type fun(name: string) | nil
-    local load_impl = plugin.load or vim.tbl_get(vim.g, "lze", "load")
-    if load_impl then
-        load_impl(plugin.name)
-    else
-        vim.cmd.packadd(plugin.name)
-    end
+    ---@type fun(name: string)
+    local load_impl = plugin.load or vim.tbl_get(vim.g, "lze", "load") or vim.cmd.packadd
+    load_impl(plugin.name)
     require("lze.c.handler").run_after(plugin.name)
 end
 
