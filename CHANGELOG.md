@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/BirdeeHub/lze/compare/v0.1.4...v0.2.0) (2024-11-02)
+
+
+### Features
+
+* **lze.State:** cheaper state query ([4b0fd7a](https://github.com/BirdeeHub/lze/commit/4b0fd7adb49835641bc6a01b3ea08066498e95a2))
+
 ## [0.1.4](https://github.com/BirdeeHub/lze/compare/v0.1.3...v0.1.4) (2024-10-28)
 
 
