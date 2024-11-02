@@ -108,8 +108,43 @@ end
 ---@param name string
 ---@return false|lze.Plugin?
 function M.query_state(name)
+    vim.notify(
+        [[Being depreciated for equivalent `require('lze').state[name]` and the new,
+        faster but less informative, `require('lze').state(name):boolean?`]],
+        vim.log.levels.WARN,
+        { title = "lze.state" }
+    )
     return vim.deepcopy(state[name])
 end
+
+---@type lze.State
+M.state = setmetatable({}, {
+    __index = function(_, k)
+        return vim.deepcopy(state[k])
+    end,
+    ---@param name string
+    ---@return boolean?
+    __call = function(_, name)
+        if not state[name] then
+            return state[name]
+        else
+            return true
+        end
+    end,
+    __newindex = function(_, k, v)
+        vim.schedule(function()
+            vim.notify(
+                "Arbitrary modification of lze's internal state is not allowed outside of an lze.Handler's modify hook.\n"
+                    .. "value: '"
+                    .. vim.inspect(v)
+                    .. "' NOT added to require('lze').state."
+                    .. tostring(k),
+                vim.log.levels.ERROR,
+                { title = "lze.state" }
+            )
+        end)
+    end,
+})
 
 ---@overload fun(plugin_names: string[]|string): string[]
 function M.load(plugin_names)

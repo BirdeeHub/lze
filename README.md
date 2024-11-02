@@ -651,13 +651,22 @@ using the `trigger_load` function.
 `trigger_load` will resist being called multiple times on the same plugin name.
 It will return the list of names it skipped.
 
-For debugging purposes, or if necessary, you may use `require('lze').query_state(name)`
-which will return a copy of the state of the plugin, false if loaded or being loaded,
+There exists a function to check if a plugin is available to be loaded.
+
+`require('lze').state(name)` will return true
+if the plugin is ready to be loaded,
+false if already loaded or currently being loaded,
 and nil if it was never added.
 
-It *copies* the value from state, so you should
-avoid using it unnecessarily for minor performance reasons,
-you should already have the values from your add function!
+Less performant, but more informative:
+
+For debugging purposes, or if necessary,
+you may use the table access form `require('lze').state[name]`
+which will return a COPY of the internal state of the plugin.
+
+You should already have a copy of the plugin
+via your handler's add function so you shouldn't
+ever NEED to get a copy. But it is nice for troubleshooting.
 
 > [!TIP]
 > You should delete the plugin from your handler's state

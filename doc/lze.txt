@@ -9,6 +9,23 @@ lze.register_handlers                                    *lze.register_handlers*
         (fun(handlers:lze.Handler[]|lze.Handler|lze.HandlerSpec[]|lze.HandlerSpec):string[])
 
 
+lze.State                                                            *lze.State*
+     `false` for already loaded (or being loaded currently),
+     `nil` for never added. READ ONLY TABLE
+     Function access only checks; table access returns a COPY.
+
+    Variants: ~
+
+
+
+lze.state                                                            *lze.state*
+     | fun(name: string): boolean? # Faster, returns `boolean?`.
+     | table # Returns copy of state for that plugin name.
+
+    Type: ~
+        (lze.State)
+
+
 lze.load()                                                            *lze.load*
     May be called as many times as desired.
     Will return the duplicate lze.Plugin objects.

@@ -24,10 +24,16 @@ lze.register_handlers = require("lze.c.handler").register_handlers
 ---@overload fun(plugin_names: string[]|string): string[]
 lze.trigger_load = require("lze.c.loader").load
 
----returns a COPY of the plugin from state,
----or false for already loaded (or being loaded currently),
----nil for never added. Useful in debug and possibly niche scenarios
----@type fun(name: string): false|lze.Plugin?
+--- `false` for already loaded (or being loaded currently),
+--- `nil` for never added. READ ONLY TABLE
+--- Function access only checks; table access returns a COPY.
+---@alias lze.State
+--- | fun(name: string): boolean? # Faster, returns `boolean?`.
+--- | table # Returns copy of state for that plugin name.
+---@type lze.State
+lze.state = require("lze.c.loader").state
+
+--- Depreciated for require('lze').state
 lze.query_state = require("lze.c.loader").query_state
 
 ---May be called as many times as desired.

@@ -82,14 +82,14 @@ describe("lze", function()
                 keys = "<leader>ff",
                 enabled = false,
             })
-            assert(lz.query_state("fool.nvim") == nil)
+            assert(lz.state("fool.nvim") == nil)
             lz.load({
                 "bard.nvim",
                 enabled = function(_)
                     return false
                 end,
             })
-            assert(lz.query_state("bard.nvim") == nil)
+            assert(lz.state("bard.nvim") == nil)
             local checked = 0
             lz.load({
                 "barz.nvim",
@@ -109,13 +109,13 @@ describe("lze", function()
                     end
                 end,
             })
-            assert(type(lz.query_state("barz.nvim")) == "table")
+            assert(type(lz.state["barz.nvim"]) == "table")
             lz.trigger_load("barz.nvim")
-            assert(type(lz.query_state("barz.nvim")) == "table")
+            assert(type(lz.state["barz.nvim"]) == "table")
             lz.trigger_load("barz.nvim")
-            assert(type(lz.query_state("barz.nvim")) == "table")
+            assert(type(lz.state["barz.nvim"]) == "table")
             lz.trigger_load("barz.nvim")
-            assert(lz.query_state("barz.nvim") == false)
+            assert(lz.state("barz.nvim") == false)
         end)
     end)
 end)

@@ -28,7 +28,7 @@ function M.add(plugin)
         return
     end
     for _, name in ipairs(loaded_on) do
-        if require("lze").query_state(name) == false then
+        if require("lze").state(name) == false then
             trigger_load(plugin.name)
             return
         end
