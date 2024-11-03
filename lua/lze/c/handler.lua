@@ -22,52 +22,39 @@ end
 ---@return string[]
 function M.register_handlers(handler_list)
     assert(type(handler_list) == "table", "invalid argument to lze.register_handlers")
-    -- if single, make it a list anyway
     if handler_list.spec_field or handler_list.handler then
         handler_list = { handler_list }
     end
-    local new_handlers = vim
-        .iter(handler_list)
-        -- normalize to handlerSpecs
-        :map(function(spec)
-            if spec.spec_field ~= nil then
-                return { handler = spec }
-            else
-                return spec
-            end
-        end)
-        -- filter our active, valid handlerSpecs
-        :filter(function(spec)
-            return type(spec.handler) == "table" and is_enabled(spec)
-        end)
-        -- normalize active handlers
-        :map(function(spec)
-            return spec.handler
-        end)
-        -- remove handlers already registered from list to add
-        :filter(function(hndl)
-            return vim.iter(handlers):all(function(hndlOG)
-                return hndlOG.spec_field ~= hndl.spec_field
-            end)
-        end)
-        :totable()
 
-    -- remove internal duplicates
-    local seen = {}
     local filtered_handlers = {}
-    for _, item in ipairs(new_handlers) do
-        if not seen[item] then
-            seen[item] = true
-            table.insert(filtered_handlers, item)
+    local added_names = {}
+    for _, spec in ipairs(handler_list) do
+        if
+            spec.spec_field
+            and not vim.list_contains(added_names, spec.spec_field)
+            and vim.iter(handlers):all(function(hndl)
+                return hndl.spec_field ~= spec.spec_field
+            end)
+        then
+            table.insert(added_names, spec.spec_field)
+            table.insert(filtered_handlers, spec)
+        elseif
+            spec.handler
+            and spec.handler.spec_field
+            ---@cast spec lze.HandlerSpec
+            and is_enabled(spec)
+            and not vim.list_contains(added_names, spec.handler.spec_field)
+            and vim.iter(handlers):all(function(hndl)
+                return hndl.spec_field ~= spec.handler.spec_field
+            end)
+        then
+            table.insert(added_names, spec.handler.spec_field)
+            table.insert(filtered_handlers, spec.handler)
         end
     end
 
     vim.list_extend(handlers, filtered_handlers)
-    return vim.iter(filtered_handlers)
-        :map(function(hndl)
-            return hndl.spec_field
-        end)
-        :totable()
+    return added_names
 end
 
 ---@param spec lze.PluginSpec
