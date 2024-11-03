@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/BirdeeHub/lze/compare/v0.2.0...v0.3.0) (2024-11-03)
+
+
+### Features
+
+* **lze.state:** added ability to snapshot state ([0474c38](https://github.com/BirdeeHub/lze/commit/0474c38e4c91020c2894adcbbb67ca46a837ba82))
+
 ## [0.2.0](https://github.com/BirdeeHub/lze/compare/v0.1.4...v0.2.0) (2024-11-02)
 
 
