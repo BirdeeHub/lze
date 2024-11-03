@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/BirdeeHub/lze/compare/v0.4.0...v0.4.1) (2024-11-03)
+
+
+### Performance Improvements
+
+* **register_handlers:** removed a loop processing the spec ([8f8a62a](https://github.com/BirdeeHub/lze/commit/8f8a62ae54e41f7bbb5f52a39b968b225d9e225d))
+
 ## [0.4.0](https://github.com/BirdeeHub/lze/compare/v0.3.0...v0.4.0) (2024-11-03)
 
 
