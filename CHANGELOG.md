@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/BirdeeHub/lze/compare/v0.3.0...v0.4.0) (2024-11-03)
+
+
+### Features
+
+* **handler.set_lazy:** ability to choose if a handler affects laziness ([58f3ff4](https://github.com/BirdeeHub/lze/commit/58f3ff4936396c556efedca33bf984169a24d1a3))
+
 ## [0.3.0](https://github.com/BirdeeHub/lze/compare/v0.2.0...v0.3.0) (2024-11-03)
 
 
