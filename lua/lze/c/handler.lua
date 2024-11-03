@@ -26,16 +26,15 @@ function M.register_handlers(handler_list)
         handler_list = { handler_list }
     end
 
-    local filtered_handlers = {}
+    local existing_handler_fields = {}
+    for _, hndl in ipairs(handlers) do
+        existing_handler_fields[hndl.spec_field] = true
+    end
     local added_names = {}
+    local filtered_handlers = {}
     for _, spec in ipairs(handler_list) do
-        if
-            spec.spec_field
-            and not vim.list_contains(added_names, spec.spec_field)
-            and vim.iter(handlers):all(function(hndl)
-                return hndl.spec_field ~= spec.spec_field
-            end)
-        then
+        if spec.spec_field and not existing_handler_fields[spec.spec_field] then
+            existing_handler_fields[spec.spec_field] = true
             table.insert(added_names, spec.spec_field)
             table.insert(filtered_handlers, spec)
         elseif
@@ -43,11 +42,9 @@ function M.register_handlers(handler_list)
             and spec.handler.spec_field
             ---@cast spec lze.HandlerSpec
             and is_enabled(spec)
-            and not vim.list_contains(added_names, spec.handler.spec_field)
-            and vim.iter(handlers):all(function(hndl)
-                return hndl.spec_field ~= spec.handler.spec_field
-            end)
+            and not existing_handler_fields[spec.handler.spec_field]
         then
+            existing_handler_fields[spec.handler.spec_field] = true
             table.insert(added_names, spec.handler.spec_field)
             table.insert(filtered_handlers, spec.handler)
         end
