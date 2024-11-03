@@ -74,7 +74,7 @@ end
 ---@return boolean
 function M.is_lazy(spec)
     return vim.iter(handlers):any(function(hndl)
-        return spec[hndl.spec_field] ~= nil
+        return hndl.set_lazy ~= false and spec[hndl.spec_field]
     end)
 end
 

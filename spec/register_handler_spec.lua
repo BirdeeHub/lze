@@ -24,6 +24,13 @@ describe("handlers.custom", function()
         end,
     }
 
+    ---@class TestHandler: lze.Handler
+    ---@type TestHandler
+    local hndl2 = {
+        spec_field = "testfield2",
+        set_lazy = false,
+    }
+
     local test_plugin = {
         "testplugin",
         testfield = { "a", "b" },
@@ -37,6 +44,22 @@ describe("handlers.custom", function()
     test_plugin_loaded.name = test_plugin_loaded[1]
     test_plugin_loaded[1] = nil
 
+    local test_plugin2 = {
+        "test_plugin2-not-lazy",
+        testfield2 = { "a", "b" },
+        load = function() end,
+    }
+
+    local test_plugin3 = {
+        "testplugin3-is-lazy",
+        testfield = { "a", "b" },
+        testfield2 = { "a", "b" },
+        load = function() end,
+    }
+    local test_plugin3_loaded = vim.tbl_extend("error", test_plugin3, { lazy = true })
+    test_plugin3_loaded.name = test_plugin3_loaded[1]
+    test_plugin3_loaded[1] = nil
+
     local addspy = spy.on(hndl, "add")
     local delspy = spy.on(hndl, "before")
     local afterspy = spy.on(hndl, "after")
@@ -46,6 +69,7 @@ describe("handlers.custom", function()
     end)
     it("can add plugins to the handler", function()
         assert.same({ hndl.spec_field }, lze.register_handlers(hndl))
+        assert.same({ hndl2.spec_field }, lze.register_handlers(hndl2))
         lze.load(test_plugin)
         assert.spy(addspy).called_with(test_plugin_loaded)
     end)
@@ -57,5 +81,10 @@ describe("handlers.custom", function()
         assert.spy(afterspy).called_with("testplugin")
         assert.True(plugin_state["testplugin"].load_called)
         assert.True(plugin_state["testplugin"].after_load_called_after)
+    end)
+    it("can choose if it affects lazy setting", function()
+        lze.load({ test_plugin2, test_plugin3 })
+        assert.False(lze.state(test_plugin2.name))
+        assert.same(lze.state[test_plugin3.name], test_plugin3_loaded)
     end)
 end)

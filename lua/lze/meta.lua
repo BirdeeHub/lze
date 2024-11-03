@@ -116,8 +116,18 @@ error("Cannot import a meta module")
 ---Listed in the order they are called by lze if the handler has been registered
 ---@class lze.Handler
 ---@field spec_field string
+---
+---Your handler's 1 chance to modify plugins before they are entered into state!
+---Called only if your field was present.
 ---@field modify? fun(plugin: lze.Plugin): lze.Plugin
+---
+---Called after being entered into state but before any loading has occurred
 ---@field add? fun(plugin: lze.Plugin)
+---
+---Whether using this handler's field should have an effect on the lazy setting
+---True or nil is true
+---Default: nil
+---@field set_lazy? boolean
 ---
 ---runs at the end of require('lze').load()
 ---for handlers to set up extra triggers such as the
