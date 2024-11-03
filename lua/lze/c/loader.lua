@@ -147,13 +147,6 @@ M.state = setmetatable({}, {
             )
         end)
     end,
-    __len = function() -- not that performant, but, may as well
-        local count = 0
-        for _ in pairs(state) do
-            count = count + 1
-        end
-        return count
-    end,
 })
 
 ---@type fun(plugin_names: string[]|string): string[]
