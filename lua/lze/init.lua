@@ -6,43 +6,31 @@ if vim.fn.has("nvim-0.10.0") ~= 1 then
     error("lze requires Neovim >= 0.10.0")
 end
 
----THIS SHOULD BE CALLED BEFORE ANY CALLS TO lze.load ARE MADE
----Returns the cleared handlers
----@return lze.Handler[]
-lze.clear_handlers = require("lze.c.handler").clear_handlers
-
----THIS SHOULD BE CALLED BEFORE ANY CALLS TO lze.load ARE MADE
+---registers a handler with lze to add new spec fields
 ---Returns the list of spec_field values added.
+---THIS SHOULD BE CALLED BEFORE ANY CALLS TO lze.load ARE MADE
 ---@type fun(handlers: lze.Handler[]|lze.Handler|lze.HandlerSpec[]|lze.HandlerSpec): string[]
 lze.register_handlers = require("lze.c.handler").register_handlers
+
+---Returns the cleared handlers
+---THIS SHOULD BE CALLED BEFORE ANY CALLS TO lze.load ARE MADE
+---@type fun():lze.Handler[]
+lze.clear_handlers = require("lze.c.handler").clear_handlers
 
 ---Trigger loading of the lze.Plugin loading hooks.
 ---Used by handlers to load plugins.
 ---Will return the names of the plugins that were skipped,
 ---either because they were already loaded or because they
 ---were never added to the queue.
----@overload fun(plugin_names: string[]|string): string[]
+---@type fun(plugin_names: string[]|string): string[]
 lze.trigger_load = require("lze.c.loader").load
-
---- `false` for already loaded (or being loaded currently),
---- `nil` for never added. READ ONLY TABLE
---- Function access only checks; table access returns a COPY.
----@alias lze.State
---- | fun(name: string): boolean? # Faster, returns `boolean?`.
---- | table # Returns copy of state for that plugin name.
----@type lze.State
-lze.state = require("lze.c.loader").state
-
---- Depreciated for require('lze').state
-lze.query_state = require("lze.c.loader").query_state
 
 ---May be called as many times as desired.
 ---Will return the duplicate lze.Plugin objects.
 ---Priority spec field only affects order for
 ---non-lazy plugins within a single load call.
----@overload fun(spec: lze.Spec)
----@overload fun(import: string)
----@return string[]
+---@overload fun(spec: lze.Spec):string[]
+---@overload fun(import: string):string[]
 function lze.load(spec)
     if spec == nil or spec == {} then
         -- one of only 3 checks to verbose in this plugin.
@@ -95,5 +83,21 @@ function lze.load(spec)
 
     return duplicates
 end
+
+--- `false` for already loaded (or being loaded currently),
+--- `nil` for never added. READ ONLY TABLE
+--- Function access only checks; table access returns a COPY.
+--- unary minus is defined as vim.deepcopy of the actual state table
+--- local snapshot = -require('lze').state
+--- whereas the following will return this object, and thus remain up to date
+--- local state = require('lze').state
+---@alias lze.State
+--- | fun(name: string): boolean? # Faster, returns `boolean?`.
+--- | table<string, lze.Plugin|false?> # Access returns COPY of state for that plugin name.
+---@type lze.State
+lze.state = require("lze.c.loader").state
+
+--- Depreciated for require('lze').state
+lze.query_state = require("lze.c.loader").query_state
 
 return lze

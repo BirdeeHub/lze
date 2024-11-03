@@ -131,6 +131,9 @@ M.state = setmetatable({}, {
             return true
         end
     end,
+    __unm = function(_)
+        return vim.deepcopy(state)
+    end,
     __newindex = function(_, k, v)
         vim.schedule(function()
             vim.notify(
@@ -144,9 +147,16 @@ M.state = setmetatable({}, {
             )
         end)
     end,
+    __len = function() -- not that performant, but, may as well
+        local count = 0
+        for _ in pairs(state) do
+            count = count + 1
+        end
+        return count
+    end,
 })
 
----@overload fun(plugin_names: string[]|string): string[]
+---@type fun(plugin_names: string[]|string): string[]
 function M.load(plugin_names)
     plugin_names = (type(plugin_names) == "string") and { plugin_names } or plugin_names
     ---@type string[]
