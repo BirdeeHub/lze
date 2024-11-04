@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.4](https://github.com/BirdeeHub/lze/compare/v0.4.3...v0.4.4) (2024-11-04)
+
+
+### Performance Improvements
+
+* **register_handlers:** improved it further ([041aa70](https://github.com/BirdeeHub/lze/commit/041aa70cb606b2a1a22b7d714656b3d7b15af706))
+
 ## [0.4.3](https://github.com/BirdeeHub/lze/compare/v0.4.2...v0.4.3) (2024-11-04)
 
 
