@@ -31,7 +31,6 @@ function M.register_handlers(handler_list)
         existing_handler_fields[hndl.spec_field] = true
     end
     local added_names = {}
-    local filtered_handlers = {}
     for _, spec in ipairs(handler_list) do
         local handler = spec.spec_field and spec
             ---@cast spec lze.HandlerSpec
@@ -40,11 +39,9 @@ function M.register_handlers(handler_list)
         if spec_field and not existing_handler_fields[spec_field] then
             existing_handler_fields[spec_field] = true
             table.insert(added_names, spec_field)
-            table.insert(filtered_handlers, handler)
+            table.insert(handlers, handler)
         end
     end
-
-    vim.list_extend(handlers, filtered_handlers)
     return added_names
 end
 
