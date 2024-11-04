@@ -33,20 +33,14 @@ function M.register_handlers(handler_list)
     local added_names = {}
     local filtered_handlers = {}
     for _, spec in ipairs(handler_list) do
-        if spec.spec_field and not existing_handler_fields[spec.spec_field] then
-            existing_handler_fields[spec.spec_field] = true
-            table.insert(added_names, spec.spec_field)
-            table.insert(filtered_handlers, spec)
-        elseif
-            spec.handler
-            and spec.handler.spec_field
+        local handler = spec.spec_field and spec
             ---@cast spec lze.HandlerSpec
-            and is_enabled(spec)
-            and not existing_handler_fields[spec.handler.spec_field]
-        then
-            existing_handler_fields[spec.handler.spec_field] = true
-            table.insert(added_names, spec.handler.spec_field)
-            table.insert(filtered_handlers, spec.handler)
+            or spec.handler and is_enabled(spec) and spec.handler
+        local spec_field = handler and handler.spec_field or nil
+        if spec_field and not existing_handler_fields[spec_field] then
+            existing_handler_fields[spec_field] = true
+            table.insert(added_names, spec_field)
+            table.insert(filtered_handlers, handler)
         end
     end
 
