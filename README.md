@@ -622,7 +622,7 @@ Again, this is important:
 | add?        | `fun(plugin: lze.Plugin)`        | called once for each handler before any plugin has been loaded. Tells your handler about each plugin so you can set up a trigger for it if your handler was used. |
 | before?        | `fun(name: string)`               | called after each plugin spec's before `hook`, and before its `load` hook |
 | after?        | `fun(name: string)`               | called after each plugin spec's `load` hook and before its `after` hook |
-| modify?     | `fun(name: string): lze.Plugin` | This function is called before a plugin is added to state. It is your one chance to modify the plugin spec, it is active only if your spec_field was used in that spec, and is called in the order the handlers have been added. |
+| modify?     | `fun(plugin: lze.Plugin): lze.Plugin` | This function is called before a plugin is added to state. It is your one chance to modify the plugin spec, it is active only if your spec_field was used in that spec, and is called in the order the handlers have been added. |
 | set_lazy?     | `boolean` | Whether using this handler's field should have an effect on the lazy setting. True or nil is true. Default: nil |
 | post_def?        | `fun()`               | For adding custom triggers such as the event handler's `DeferredUIEnter` event, called at the end of `require('lze').load` |
 <!-- markdownlint-enable MD013 -->
