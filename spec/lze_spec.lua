@@ -85,7 +85,7 @@ describe("lze", function()
             assert(lz.state("fool.nvim") == nil)
             lz.load({
                 "bard.nvim",
-                enabled = function(_)
+                enabled = function()
                     return false
                 end,
             })
@@ -94,7 +94,7 @@ describe("lze", function()
             lz.load({
                 "barz.nvim",
                 lazy = true,
-                enabled = function(_)
+                enabled = function()
                     if checked == 0 then
                         checked = checked + 1
                         return true
@@ -103,6 +103,7 @@ describe("lze", function()
                         return false
                     elseif checked == 2 then
                         checked = checked + 1
+                        ---@diagnostic disable-next-line: return-type-mismatch
                         return nil
                     else
                         return true

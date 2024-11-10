@@ -58,6 +58,7 @@ local function parse(spec)
     if spec.lazy == nil then
         spec.lazy = require("lze.c.handler").is_lazy(spec)
     end
+    ---@diagnostic disable-next-line: param-type-mismatch
     local result = require("lze.c.handler").run_modify(spec)
     return vim.deepcopy(result)
 end

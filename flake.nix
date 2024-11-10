@@ -62,6 +62,9 @@
         luarc = pkgs.mk-luarc {
           nvim = pkgs.neovim-nightly;
         };
+        luarccurrent = pkgs.mk-luarc {
+          nvim = pkgs.neovim;
+        };
 
         type-check-nightly = pre-commit-hooks.lib.${system}.run {
           src = self;
@@ -78,7 +81,13 @@
           hooks = {
             alejandra.enable = true;
             stylua.enable = true;
-            luacheck.enable = true;
+            luacheck = {
+              enable = true;
+            };
+            lua-ls = {
+              enable = true;
+              settings.configuration = luarccurrent;
+            };
             editorconfig-checker.enable = true;
             markdownlint = {
               enable = true;
