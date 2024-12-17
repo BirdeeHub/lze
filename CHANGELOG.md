@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.5](https://github.com/BirdeeHub/lze/compare/v0.4.4...v0.4.5) (2024-12-17)
+
+
+### Bug Fixes
+
+* **query_state:** depreciated query_state ([4b9e2ce](https://github.com/BirdeeHub/lze/commit/4b9e2ce774f6241ce7ec675145f9139f3395dd3f))
+
 ## [0.4.4](https://github.com/BirdeeHub/lze/compare/v0.4.3...v0.4.4) (2024-11-04)
 
 
