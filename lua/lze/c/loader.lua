@@ -105,18 +105,6 @@ function M.add(spec)
     return vim.deepcopy(final), duplicates
 end
 
----@param name string
----@return false|lze.Plugin?
-function M.query_state(name)
-    vim.notify(
-        [[Being depreciated for equivalent `require('lze').state[name]` and the new,
-        faster but less informative, `require('lze').state(name):boolean?`]],
-        vim.log.levels.WARN,
-        { title = "lze.state" }
-    )
-    return vim.deepcopy(state[name])
-end
-
 ---@type lze.State
 M.state = setmetatable({}, {
     __index = function(_, k)

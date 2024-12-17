@@ -97,7 +97,4 @@ end
 ---@type lze.State
 lze.state = require("lze.c.loader").state
 
---- Depreciated for require('lze').state
-lze.query_state = require("lze.c.loader").query_state
-
 return lze
