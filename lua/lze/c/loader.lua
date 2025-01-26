@@ -70,11 +70,7 @@ M.state = setmetatable({}, {
     ---@param name string
     ---@return boolean?
     __call = function(_, name)
-        if not state[name] then
-            return state[name]
-        else
-            return true
-        end
+        return state[name] and true or state[name]
     end,
     __unm = function(_)
         return vim.deepcopy(state)
