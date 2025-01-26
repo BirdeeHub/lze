@@ -48,7 +48,7 @@ end
 ---@return boolean
 function M.is_lazy(spec)
     for _, hndl in ipairs(handlers) do
-        if hndl.set_lazy ~= false and spec[hndl.spec_field] then
+        if hndl.set_lazy ~= false and spec[hndl.spec_field] ~= nil then
             return true
         end
     end
@@ -64,7 +64,7 @@ function M.run_modify(plugin)
         if not hndl.modify then
             return p
         end
-        if not p[hndl.spec_field] then
+        if p[hndl.spec_field] ~= nil then
             return p
         end
         return hndl.modify(p)
