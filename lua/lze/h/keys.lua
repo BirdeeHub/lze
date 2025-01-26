@@ -25,6 +25,11 @@ local function parse(value, mode)
     return ret
 end
 
+---@param keys lze.Keys
+local function is_nop(keys)
+    return type(keys.rhs) == "string" and (keys.rhs == "" or keys.rhs:lower() == "<nop>")
+end
+
 ---@type lze.KeysHandler
 local M = {
     pending = {},
@@ -94,6 +99,9 @@ local function add_keys(keys)
 
     ---@param buf? number
     local function add(buf)
+        if is_nop(keys) then
+            return set(keys, buf)
+        end
         vim.keymap.set(keys.mode, lhs, function()
             local plugins = M.pending[keys.id]
             -- always delete the mapping immediately to prevent recursive mappings
