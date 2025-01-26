@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/BirdeeHub/lze/compare/v0.5.0...v0.5.1) (2025-01-26)
+
+
+### Bug Fixes
+
+* **handler.spec_field:** can now accept false without losing laziness ([7956430](https://github.com/BirdeeHub/lze/commit/7956430e015158b66b62c492e6cf15c96b13cc2e))
+
 ## [0.5.0](https://github.com/BirdeeHub/lze/compare/v0.4.6...v0.5.0) (2025-01-26)
 
 
