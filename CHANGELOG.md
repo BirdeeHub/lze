@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.6](https://github.com/BirdeeHub/lze/compare/v0.4.5...v0.4.6) (2025-01-26)
+
+
+### Bug Fixes
+
+* **beforeAll:** fixed unintended spec mutability ([01cf37f](https://github.com/BirdeeHub/lze/commit/01cf37fc70ab946045580a9d16cbd57cc33926da))
+
 ## [0.4.5](https://github.com/BirdeeHub/lze/compare/v0.4.4...v0.4.5) (2024-12-17)
 
 
