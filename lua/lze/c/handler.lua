@@ -64,7 +64,7 @@ function M.run_modify(plugin)
         if not hndl.modify then
             return p
         end
-        if p[hndl.spec_field] ~= nil then
+        if p[hndl.spec_field] == nil then
             return p
         end
         return hndl.modify(p)
