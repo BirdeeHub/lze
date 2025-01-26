@@ -39,11 +39,8 @@ with a largely compatible [plugin spec](#plugin-spec)
 
 Which one is better? Hard to say.
 
-<!-- markdownlint-disable MD013 -->
 The plugin specs are basically the same,
-with 3 more fields thrown in that
-[I have written `lz.n` equivalents for](https://github.com/nvim-neorocks/lz.n/wiki/Custom-handler-examples).
-<!-- markdownlint-enable MD013 -->
+with 3 more fields thrown in.
 
 However, import specs can only import a
 single module rather than a whole directory.
