@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.3](https://github.com/BirdeeHub/lze/compare/v0.6.2...v0.6.3) (2025-01-26)
+
+
+### Bug Fixes
+
+* **nop:** support for nop keybindings ([d0cc725](https://github.com/BirdeeHub/lze/commit/d0cc72559b81b1c7588e539a5392bfa7d4f28120))
+
 ## [0.6.2](https://github.com/BirdeeHub/lze/compare/v0.6.1...v0.6.2) (2025-01-26)
 
 
