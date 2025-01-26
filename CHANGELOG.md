@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/BirdeeHub/lze/compare/v0.5.0...v0.6.0) (2025-01-26)
+
+
+### Features
+
+* **plz_ignore:** removed loadbearing comment ([b45c6e5](https://github.com/BirdeeHub/lze/commit/b45c6e546481a130bd6eaf0a9c3e6f6c445df451))
+
 ## [0.5.0](https://github.com/BirdeeHub/lze/compare/v0.4.6...v0.5.0) (2025-01-26)
 
 
