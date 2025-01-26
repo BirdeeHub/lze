@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/BirdeeHub/lze/compare/v0.4.6...v0.5.0) (2025-01-26)
+
+
+### Features
+
+* **lze.x by default:** lze.x now included by default. ([a49ff1f](https://github.com/BirdeeHub/lze/commit/a49ff1fe9afbea0fe4beff106baad5438ab44027))
+
 ## [0.4.6](https://github.com/BirdeeHub/lze/compare/v0.4.5...v0.4.6) (2025-01-26)
 
 
