@@ -48,7 +48,7 @@ end
 ---@return boolean
 function M.is_lazy(spec)
     for _, hndl in ipairs(handlers) do
-        if hndl.set_lazy ~= false and spec[hndl.spec_field] ~= nil then
+        if hndl.set_lazy ~= false and spec[hndl.spec_field] then
             return true
         end
     end
