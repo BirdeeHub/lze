@@ -1,7 +1,7 @@
 ---@type table<string, function>
 local states = {}
 
-local trigger_load = require("lze").trigger_load
+local trigger_load = require("lze.c.loader").load
 
 ---@param mod_path string
 ---@return boolean

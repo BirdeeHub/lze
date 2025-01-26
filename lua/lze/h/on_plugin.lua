@@ -1,7 +1,7 @@
 ---@type table<string, string[]>
 local states = {}
 
-local trigger_load = require("lze").trigger_load
+local trigger_load = require("lze.c.loader").load
 
 ---@type lze.Handler
 ---@diagnostic disable-next-line: missing-fields
