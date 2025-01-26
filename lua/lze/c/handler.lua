@@ -9,9 +9,8 @@ function M.clear_handlers()
     return old_handlers
 end
 
--- It turns out that its faster when you copy paste
--- Would be nice to just define it
--- once, but then you lose 10ms
+-- It turns out that its faster when you copy paste.
+-- Would be nice to just define it once, but then you lose 10ms
 ---@param spec lze.Plugin|lze.HandlerSpec|lze.SpecImport
 local function is_enabled(spec)
     local disabled = spec.enabled == false or (type(spec.enabled) == "function" and not spec.enabled())
@@ -48,9 +47,12 @@ end
 ---@param spec lze.PluginSpec
 ---@return boolean
 function M.is_lazy(spec)
-    return vim.iter(handlers):any(function(hndl)
-        return hndl.set_lazy ~= false and spec[hndl.spec_field]
-    end)
+    for _, hndl in ipairs(handlers) do
+        if hndl.set_lazy ~= false and spec[hndl.spec_field] then
+            return true
+        end
+    end
+    return false
 end
 
 ---@param plugin lze.Plugin

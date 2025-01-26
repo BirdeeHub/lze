@@ -1,9 +1,8 @@
 -- needed so we can use normalize in import_spec even if its defined later in the file
-local __f__ = {}
+local lib = {}
 
--- It turns out that its faster when you copy paste
--- Would be nice to just define it
--- once, but then you lose 10ms
+-- It turns out that its faster when you copy paste.
+-- Would be nice to just define it once, but then you lose 10ms
 ---@param spec lze.Plugin|lze.HandlerSpec|lze.SpecImport
 local function is_enabled(spec)
     local disabled = spec.enabled == false or (type(spec.enabled) == "function" and not spec.enabled())
@@ -46,7 +45,7 @@ local function import_spec(spec, result)
         end)
         return
     end
-    __f__.normalize(mod, result)
+    lib.normalize(mod, result)
 end
 
 ---@param spec lze.PluginSpec
@@ -63,18 +62,10 @@ local function parse(spec)
     return vim.deepcopy(result)
 end
 
----XXX: This is unsafe because we assume a prior `vim.islist` check
----
----@param spec lze.Spec
----@return boolean
-local function is_list_with_single_spec_unsafe(spec)
-    return #spec == 1 and type(spec[1]) == "table"
-end
-
 ---@param spec lze.Spec
 ---@return boolean
 local function is_spec_list(spec)
-    return #spec > 1 or vim.islist(spec) and #spec > 1 or is_list_with_single_spec_unsafe(spec)
+    return #spec > 1 or vim.islist(spec) and #spec > 1 or #spec == 1 and type(spec[1]) == "table"
 end
 
 ---@param spec lze.Spec
@@ -84,14 +75,13 @@ local function is_single_plugin_spec(spec)
     return type(spec[1]) == "string" or type(spec.name) == "string"
 end
 
----@private
 ---@param spec lze.Spec
 ---@param result lze.Plugin[]
-function __f__.normalize(spec, result)
+function lib.normalize(spec, result)
     if is_spec_list(spec) then
         for _, sp in ipairs(spec) do
             ---@cast sp lze.Spec
-            __f__.normalize(sp, result)
+            lib.normalize(sp, result)
         end
     elseif is_single_plugin_spec(spec) then
         ---@cast spec lze.PluginSpec
@@ -115,14 +105,10 @@ function __f__.normalize(spec, result)
     end
 end
 
-local M = {}
-
 ---@param spec lze.Spec
 ---@return lze.Plugin[]
-function M.parse(spec)
+return function(spec)
     local result = {}
-    __f__.normalize(spec, result)
+    lib.normalize(spec, result)
     return result
 end
-
-return M
