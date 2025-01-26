@@ -5,4 +5,6 @@ return {
     require("lze.h.ft"),
     require("lze.h.keys"),
     require("lze.h.dep_of"),
+    require("lze.h.on_plugin"),
+    require("lze.h.on_require"),
 }

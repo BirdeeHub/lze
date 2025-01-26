@@ -39,15 +39,11 @@ with a largely compatible [plugin spec](#plugin-spec)
 
 Which one is better? Hard to say.
 
-Neither is appreciably faster than the other.
-
 <!-- markdownlint-disable MD013 -->
 The plugin specs are basically the same,
-with 1-3 more fields thrown in that
+with 3 more fields thrown in that
 [I have written `lz.n` equivalents for](https://github.com/nvim-neorocks/lz.n/wiki/Custom-handler-examples).
 <!-- markdownlint-enable MD013 -->
-
-Its basically down to which design of handlers you prefer.
 
 However, import specs can only import a
 single module rather than a whole directory.
@@ -66,7 +62,7 @@ responsibility to manage state for `lze`.
 Handlers can achieve all the same things,
 but in a different way. Possibly more, but I am not sure.
 
-> Why does the readme still say it is a dead simple library?
+> Why does the readme say it is a dead simple library?
 
 The core of `lze` is simply a read-only table. You queue up
 a plugin, a handler loads it when you tell it to,
@@ -243,35 +239,9 @@ require("lze").load(plugins)
 | **keys?** | `string` or `string[]` or `lze.KeysSpec[]` | Lazy-load on key mapping. | `keys` |
 | **colorscheme?** | `string` or `string[]` | Lazy-load on colorscheme. | None. `lazy.nvim` lazy-loads colorschemes automatically[^3]. |
 | **dep_of?** | `string` or `string[]` | Lazy-load before another plugin but after its `before` hook. Accepts a plugin name or a list of plugin names. |  None but is sorta the reverse of the dependencies key of the `lazy.nvim` plugin spec |
-<!-- markdownlint-enable MD013 -->
-#### Extra fields
-
-There are also 2 more **optional** handlers you may add to your spec.
-<!-- markdownlint-disable MD013 -->
-| Property | Type | Description | `lazy.nvim` equivalent |
-|----------|------|-------------|----------------------|
 | **on_plugin?** | `string` or `string[]` | Lazy-load after another plugin but before its `after` hook. Accepts a plugin name or a list of plugin names. | None. |
 | **on_require?** | `string` or `string[]` | Accepts a top-level **lua module** name or a list of top-level **lua module** names. Will load when any submodule of those listed is `require`d | None. `lazy.nvim` does this automatically. |
 <!-- markdownlint-enable MD013 -->
-
-To add them, **before you call load** use:
-
-```lua
-require("lze").register_handlers(require('lze.x'))
-```
-
-or individually with:
-
-```lua
-require("lze").register_handlers(require('lze.x.on_require'))
--- or
-require("lze").register_handlers(require('lze.x.on_plugin'))
--- or
-require("lze").register_handlers({
-  require('lze.x.on_plugin'),
-  require('lze.x.on_require'),
-})
-```
 
 [^1]: In contrast to `lazy.nvim`'s `name` field, a `lze.PluginSpec`'s `name` *is not optional*.
       This is because `lze` is not a plugin manager and needs to be told which
@@ -404,11 +374,11 @@ require("lze").load {
     plugins = with pkgs.vimPlugins [
       {
         plugin = lze;
-        config = ''
-          -- optional, add extra handlers
-          -- require("lze").register_handlers(require('lze.x'))
-        '';
-        type = "lua";
+        # config = ''
+        #   -- optional, add extra handlers
+        #   -- require("lze").register_handlers(some_custom_handler_here)
+        # '';
+        # type = "lua";
       }
       {
         plugin = telescope-nvim;
@@ -571,8 +541,7 @@ each call will append the new handlers (if enabled) to the end of the list.
 The handlers define the fields you may use for lazy loading,
 with the fields like `ft` and `event` that exist
 in the default plugin spec being defined by
-the [default handlers](./lua/lze/h) and the
-extra, optional ones being defined [here](./lua/lze/x).
+the [default handlers](./lua/lze/h).
 
 The order of this list of handlers is important.
 
