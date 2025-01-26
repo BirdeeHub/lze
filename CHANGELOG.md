@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2](https://github.com/BirdeeHub/lze/compare/v0.6.1...v0.6.2) (2025-01-26)
+
+
+### Bug Fixes
+
+* **handler.spec_field:** false is now an allowed value ([586f744](https://github.com/BirdeeHub/lze/commit/586f7448b11f213510318b3b8c9f594c5576919f))
+
 ## [0.6.1](https://github.com/BirdeeHub/lze/compare/v0.6.0...v0.6.1) (2025-01-26)
 
 
