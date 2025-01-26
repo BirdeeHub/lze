@@ -1,7 +1,9 @@
+-- NOTE: internal handlers must use internal trigger_load
+-- because require('lze') requires this module.
+local trigger_load = require("lze.c.loader").load
+
 ---@type table<string, string[]>
 local states = {}
-
-local trigger_load = require("lze.c.loader").load
 
 ---@type lze.Handler
 ---@diagnostic disable-next-line: missing-fields

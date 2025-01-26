@@ -1,7 +1,9 @@
+-- NOTE: internal handlers must use internal trigger_load
+-- because require('lze') requires this module.
+local trigger_load = require("lze.c.loader").load
+
 ---@type table<string, function>
 local states = {}
-
-local trigger_load = require("lze.c.loader").load
 
 ---@param mod_path string
 ---@return boolean

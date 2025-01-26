@@ -45,6 +45,7 @@ function M.load_startup_plugins(plugins)
         if not plugin.lazy then
             table.insert(startups, {
                 name = plugin.name,
+                -- NOTE: default priority is 50
                 priority = plugin.priority or 50,
             })
         end
