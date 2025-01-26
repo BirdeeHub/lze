@@ -597,7 +597,7 @@ Your handler first has a chance to modify the
 parsed plugin spec before it is loaded into the state of `lze`.
 
 The modify field of a handler will only be called if that handler's
-`spec_field` was used in that [plugin spec](#plugin-spec).
+`spec_field` was used in that [plugin spec](#plugin-spec) (meaning, it is not nil).
 
 They will be called in the order in which your handlers are registered,
 and none of the builtin handlers use it.
