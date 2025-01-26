@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.2](https://github.com/BirdeeHub/lze/compare/v0.5.1...v0.5.2) (2025-01-26)
+
+
+### Bug Fixes
+
+* **nevermind:** lze.spec_field cannot be false ([8875aee](https://github.com/BirdeeHub/lze/commit/8875aeec15e6a7b7183366f5327289812fad3562))
+
 ## [0.5.1](https://github.com/BirdeeHub/lze/compare/v0.5.0...v0.5.1) (2025-01-26)
 
 
