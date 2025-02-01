@@ -55,9 +55,7 @@ What order should the directory be imported in? I left it up to you.
 
 Handlers are very different. They have much less
 responsibility to manage state for `lze`.
-
-Handlers can achieve all the same things,
-but in a different way. Possibly more, but I am not sure.
+But they are not less capable.
 
 > Why does the readme say it is a dead simple library?
 
