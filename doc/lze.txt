@@ -18,6 +18,14 @@ lze.clear_handlers                                          *lze.clear_handlers*
         (fun():lze.Handler[])
 
 
+lze.remove_handlers                                        *lze.remove_handlers*
+    Returns the cleared handlers
+    THIS SHOULD BE CALLED BEFORE ANY CALLS TO lze.load ARE MADE
+
+    Type: ~
+        (fun(handler_names:string|string[]):lze.Handler[])
+
+
 lze.trigger_load                                              *lze.trigger_load*
     Trigger loading of the lze.Plugin loading hooks.
     Used by handlers to load plugins.

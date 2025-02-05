@@ -545,7 +545,8 @@ It is the same as the order in which their hooks are called.
 If you wish to redefine a default handler, or change the order
 in which the default handlers are called,
 there exists a `require('lze').clear_handlers()`
-function for this purpose. It returns the removed handlers.
+and a `require('lze').remove_handlers(handler_names: string|string[])`
+function for this purpose. They return the removed handlers.
 
 Here is an example of how you would add a custom handler
 BEFORE the default list of handlers:

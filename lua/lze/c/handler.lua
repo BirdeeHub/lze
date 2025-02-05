@@ -9,6 +9,25 @@ function M.clear_handlers()
     return old_handlers
 end
 
+---@param names string|string[]
+---@return lze.Handler[]
+function M.remove_handlers(names)
+    ---@type string[]
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    local handler_names = type(names) ~= "table" and { names } or names
+    local removed_handlers = {}
+    for _, name in ipairs(handler_names) do
+        for i, handler in ipairs(handlers) do
+            if handler.spec_field == name then
+                table.remove(handlers, i)
+                table.insert(removed_handlers, handler)
+                break
+            end
+        end
+    end
+    return removed_handlers
+end
+
 -- It turns out that its faster when you copy paste.
 -- Would be nice to just define it once, but then you lose 10ms
 ---@param spec lze.Plugin|lze.HandlerSpec|lze.SpecImport

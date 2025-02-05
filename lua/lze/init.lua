@@ -17,6 +17,11 @@ lze.register_handlers = require("lze.c.handler").register_handlers
 ---@type fun():lze.Handler[]
 lze.clear_handlers = require("lze.c.handler").clear_handlers
 
+---Returns the cleared handlers
+---THIS SHOULD BE CALLED BEFORE ANY CALLS TO lze.load ARE MADE
+---@type fun(handler_names: string|string[]):lze.Handler[]
+lze.remove_handlers = require("lze.c.handler").remove_handlers
+
 ---Trigger loading of the lze.Plugin loading hooks.
 ---Used by handlers to load plugins.
 ---Will return the names of the plugins that were skipped,
