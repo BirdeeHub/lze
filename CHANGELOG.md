@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/BirdeeHub/lze/compare/v0.6.3...v0.7.0) (2025-02-05)
+
+
+### Features
+
+* **handlers:** lze.remove_handlers(string|string[]):lze.Handler[] ([9fd946f](https://github.com/BirdeeHub/lze/commit/9fd946fc3109f685fbebff74b785c0d596cb40b5))
+
 ## [0.6.3](https://github.com/BirdeeHub/lze/compare/v0.6.2...v0.6.3) (2025-01-26)
 
 
