@@ -1,5 +1,6 @@
 local M = {}
 
+---@type lze.Handler[]
 local handlers = require("lze.h")
 
 ---Removes and returns all handlers
@@ -106,7 +107,6 @@ end
 ---such as things like the event handler's DeferredUIEnter event
 function M.run_post_def()
     for _, handler in ipairs(handlers) do
-        ---@cast handler lze.Handler
         if handler.post_def then
             handler.post_def()
         end
@@ -118,7 +118,6 @@ end
 ---@param name string
 function M.run_after(name)
     for _, handler in ipairs(handlers) do
-        ---@cast handler lze.Handler
         if handler.after then
             handler.after(name)
         end
@@ -130,7 +129,6 @@ end
 ---@param name string
 function M.run_before(name)
     for _, handler in ipairs(handlers) do
-        ---@cast handler lze.Handler
         if handler.before then
             handler.before(name)
         end
@@ -141,7 +139,6 @@ end
 local function enable(plugin)
     for _, handler in ipairs(handlers) do
         if handler.add then
-            ---@cast handler lze.Handler
             handler.add(vim.deepcopy(plugin))
         end
     end
@@ -152,7 +149,6 @@ end
 -- outside of the modify step
 ---@param plugins lze.Plugin[]
 function M.init(plugins)
-    ---@param plugin lze.Plugin
     for _, plugin in ipairs(plugins) do
         enable(plugin)
     end
