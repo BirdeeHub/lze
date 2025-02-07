@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.4](https://github.com/BirdeeHub/lze/compare/v0.7.3...v0.7.4) (2025-02-07)
+
+
+### Bug Fixes
+
+* **load_return:** lze.load returns duplicate plugins, not a list of strings ([48b335a](https://github.com/BirdeeHub/lze/commit/48b335a06b780d51d4469b31f74a27e1999d13e3))
+
 ## [0.7.3](https://github.com/BirdeeHub/lze/compare/v0.7.2...v0.7.3) (2025-02-07)
 
 
