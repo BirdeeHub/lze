@@ -129,15 +129,10 @@ local function load_startup_plugins(plugins)
     end
 end
 
----@param spec lze.Spec
+---@param plugins lze.Plugin[]
 ---@return lze.Plugin[] final
 ---@return lze.Plugin[] disabled
-local function add(spec)
-    -- plugins that are parsed as disabled in this stage will not be included
-    -- plugins that are parsed as enabled in this stage will remain in the queue
-    -- until trigger_load is called AND the plugin is parsed as enabled at that time.
-    local plugins = require("lze.c.parse")(spec, require("lze.c.handler").is_lazy, require("lze.c.handler").run_modify)
-    -- add non-duplicates to state.
+local function add(plugins)
     local final = {}
     local duplicates = {}
     -- deepcopy after all handlers use modify
@@ -173,8 +168,12 @@ function M.define(spec)
     if type(spec) == "string" then
         spec = { import = spec }
     end
-    --- @cast spec lze.Spec
-    local final_plugins, duplicates = add(spec)
+    -- plugins that are parsed as disabled in this stage will not be included
+    -- plugins that are parsed as enabled in this stage will remain in the queue
+    -- until trigger_load is called AND the plugin is parsed as enabled at that time.
+    local plugins = require("lze.c.parse")(spec, require("lze.c.handler").is_lazy, require("lze.c.handler").run_modify)
+    -- add non-duplicates to state.
+    local final_plugins, duplicates = add(plugins)
     -- calls handler adds with copies to prevent handlers messing with each other
     require("lze.c.handler").init(final_plugins)
     -- will call beforeAll of all plugin specs in the order passed in.
