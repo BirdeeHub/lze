@@ -131,7 +131,7 @@ end
 
 ---@param spec lze.Spec
 ---@return lze.Plugin[] final
----@return string[] disabled
+---@return lze.Plugin[] disabled
 local function add(spec)
     -- plugins that are parsed as disabled in this stage will not be included
     -- plugins that are parsed as enabled in this stage will remain in the queue
@@ -187,7 +187,6 @@ function M.define(spec)
     if verbose then
         for _, v in ipairs(duplicates) do
             vim.schedule(function()
-                ---@diagnostic disable-next-line: undefined-field
                 vim.notify("attempted to add " .. v.name .. " twice", vim.log.levels.ERROR, { title = "lze" })
             end)
         end
