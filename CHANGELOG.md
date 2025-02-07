@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.3](https://github.com/BirdeeHub/lze/compare/v0.7.2...v0.7.3) (2025-02-07)
+
+
+### Bug Fixes
+
+* **internal:** performance ([c6b9067](https://github.com/BirdeeHub/lze/commit/c6b9067783b8ae96fa02b604b23ba5fcdf6dfdce))
+
 ## [0.7.2](https://github.com/BirdeeHub/lze/compare/v0.7.1...v0.7.2) (2025-02-07)
 
 
