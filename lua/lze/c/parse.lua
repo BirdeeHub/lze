@@ -107,8 +107,12 @@ end
 ---@return lze.Plugin[]
 return function(spec, is_lazy, run_modify)
     local result = {}
-    lib.is_lazy = is_lazy or require("lze.c.handler").is_lazy
-    lib.run_modify = run_modify or require("lze.c.handler").run_modify
+    lib.is_lazy = is_lazy or function(p)
+        return p.lazy
+    end
+    lib.run_modify = run_modify or function(p)
+        return p
+    end
     lib.normalize(spec, result)
     return result
 end

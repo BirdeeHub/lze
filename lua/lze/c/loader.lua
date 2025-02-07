@@ -136,7 +136,7 @@ local function add(spec)
     -- plugins that are parsed as disabled in this stage will not be included
     -- plugins that are parsed as enabled in this stage will remain in the queue
     -- until trigger_load is called AND the plugin is parsed as enabled at that time.
-    local plugins = require("lze.c.parse")(spec)
+    local plugins = require("lze.c.parse")(spec, require("lze.c.handler").is_lazy, require("lze.c.handler").run_modify)
     -- add non-duplicates to state.
     local final = {}
     local duplicates = {}
