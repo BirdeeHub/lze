@@ -140,10 +140,9 @@ local function add(spec)
     -- add non-duplicates to state.
     local final = {}
     local duplicates = {}
-    for _, val in ipairs(plugins) do
-        -- deepcopy after all handlers use modify
-        -- now we have a copy the handlers can't change
-        local v = vim.deepcopy(val)
+    -- deepcopy after all handlers use modify
+    -- now we have a copy the handlers can't change
+    for _, v in ipairs(vim.deepcopy(plugins)) do
         local name = v.name
         if state[name] == nil then
             state[name] = v
