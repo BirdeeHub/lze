@@ -2,6 +2,7 @@ local M = {}
 
 local handlers = require("lze.h")
 
+---Removes and returns all handlers
 ---@return lze.Handler[]
 function M.clear_handlers()
     local old_handlers = handlers
@@ -9,6 +10,7 @@ function M.clear_handlers()
     return old_handlers
 end
 
+---Removes and returns the named handlers (named by spec_field)
 ---@param names string|string[]
 ---@return lze.Handler[]
 function M.remove_handlers(names)
@@ -36,6 +38,8 @@ local function is_enabled(spec)
     return not disabled
 end
 
+---Register new handlers.
+---Will refuse duplicates, and return a list of added handler spec_fields
 ---@param handler_list lze.Handler[]|lze.Handler|lze.HandlerSpec[]|lze.HandlerSpec
 ---@return string[]
 function M.register_handlers(handler_list)
@@ -63,6 +67,7 @@ function M.register_handlers(handler_list)
     return added_names
 end
 
+---gets value for plugin.lazy by checking handler field useage
 ---@param spec lze.PluginSpec
 ---@return boolean
 function M.is_lazy(spec)
@@ -74,6 +79,9 @@ function M.is_lazy(spec)
     return false
 end
 
+---modify is called if the handler has a modify hook
+---and then spec_field for that handler on the plugin
+---is not nil
 ---@param plugin lze.Plugin
 ---@return lze.Plugin
 function M.run_modify(plugin)
@@ -94,6 +102,8 @@ function M.run_modify(plugin)
     return res
 end
 
+---handlers can set up any of their own triggers for themselves here
+---such as things like the event handler's DeferredUIEnter event
 function M.run_post_def()
     for _, handler in ipairs(handlers) do
         ---@cast handler lze.Handler
@@ -103,6 +113,8 @@ function M.run_post_def()
     end
 end
 
+---called after the plugin's load hook
+---but before its after hook
 ---@param name string
 function M.run_after(name)
     for _, handler in ipairs(handlers) do
@@ -113,6 +125,8 @@ function M.run_after(name)
     end
 end
 
+---called before the plugin's load hook
+---but after its before hook
 ---@param name string
 function M.run_before(name)
     for _, handler in ipairs(handlers) do
@@ -133,6 +147,9 @@ local function enable(plugin)
     end
 end
 
+-- calls add for all the handlers, each handler gets a copy, so that they
+-- cannot change the plugin object recieved by the other handlers
+-- outside of the modify step
 ---@param plugins lze.Plugin[]
 function M.init(plugins)
     ---@param plugin lze.Plugin

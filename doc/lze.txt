@@ -37,13 +37,16 @@ lze.trigger_load                                              *lze.trigger_load*
         (fun(plugin_names:string[]|string):string[])
 
 
-lze.load()                                                            *lze.load*
+lze.load                                                              *lze.load*
     May be called as many times as desired.
-    Will return the duplicate lze.Plugin objects.
+    Will return the names of duplicate lze.Plugin objects.
     Priority spec field only affects order for
     non-lazy plugins within a single load call.
-    @overload fun(spec: lze.Spec):string[]
-    @overload fun(import: string):string[]
+    accepts a list of lze.Spec or a single lze.Spec
+    may accept a module name to require instead
+
+    Type: ~
+        (fun(spec:string|lze.Spec):string[])
 
 
 lze.State                                                            *lze.State*

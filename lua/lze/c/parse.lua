@@ -1,4 +1,4 @@
--- needed so we can use normalize in import_spec even if its defined later in the file
+-- needed so we can use stuff defined later in the file
 local lib = {}
 
 -- It turns out that its faster when you copy paste.
@@ -55,11 +55,9 @@ local function parse(spec)
     spec.name = spec.name or spec[1]
     spec[1] = nil
     if spec.lazy == nil then
-        spec.lazy = require("lze.c.handler").is_lazy(spec)
+        spec.lazy = lib.is_lazy(spec)
     end
-    ---@diagnostic disable-next-line: param-type-mismatch
-    local result = require("lze.c.handler").run_modify(spec)
-    return vim.deepcopy(result)
+    return lib.run_modify(spec)
 end
 
 ---@param spec lze.Spec
@@ -107,8 +105,10 @@ end
 
 ---@param spec lze.Spec
 ---@return lze.Plugin[]
-return function(spec)
+return function(spec, is_lazy, run_modify)
     local result = {}
+    lib.is_lazy = is_lazy or require("lze.c.handler").is_lazy
+    lib.run_modify = run_modify or require("lze.c.handler").run_modify
     lib.normalize(spec, result)
     return result
 end
