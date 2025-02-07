@@ -159,7 +159,7 @@ local function add(spec)
     return vim.deepcopy(final), duplicates
 end
 
----@type fun(spec: string|lze.Spec): string[]
+---@type fun(spec: string|lze.Spec): lze.Plugin[]
 function M.define(spec)
     local verbose = vim.tbl_get(vim.g, "lze", "verbose") ~= false
     if spec == nil or spec == {} then
@@ -187,7 +187,7 @@ function M.define(spec)
     if verbose then
         for _, v in ipairs(duplicates) do
             vim.schedule(function()
-                vim.notify("attempted to add " .. v .. " twice", vim.log.levels.ERROR, { title = "lze" })
+                vim.notify("attempted to add " .. vim.inspect(v) .. " twice", vim.log.levels.ERROR, { title = "lze" })
             end)
         end
     end

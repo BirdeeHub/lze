@@ -31,12 +31,12 @@ lze.remove_handlers = require("lze.c.handler").remove_handlers
 lze.trigger_load = require("lze.c.loader").load
 
 ---May be called as many times as desired.
----Will return the names of duplicate lze.Plugin objects.
+---Will return the duplicate lze.Plugin objects.
 ---Priority spec field only affects order for
 ---non-lazy plugins within a single load call.
 ---accepts a list of lze.Spec or a single lze.Spec
 ---may accept a module name to require instead
----@type fun(spec: string|lze.Spec): string[]
+---@type fun(spec: string|lze.Spec): lze.Plugin[]
 lze.load = require("lze.c.loader").define
 
 --- `false` for already loaded (or being loaded currently),
