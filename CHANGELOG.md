@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.2](https://github.com/BirdeeHub/lze/compare/v0.7.1...v0.7.2) (2025-02-07)
+
+
+### Bug Fixes
+
+* **internal:** prevent misuse of internal functions ([09213be](https://github.com/BirdeeHub/lze/commit/09213beb1b7ddf256e8c0227796a167f753d34ad))
+
 ## [0.7.1](https://github.com/BirdeeHub/lze/compare/v0.7.0...v0.7.1) (2025-02-07)
 
 
