@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.5](https://github.com/BirdeeHub/lze/compare/v0.7.4...v0.7.5) (2025-02-07)
+
+
+### Bug Fixes
+
+* **warning:** made warning less verbose ([c76bc2c](https://github.com/BirdeeHub/lze/commit/c76bc2c885ec02ac53f0b2889b6c9d1601d163a5))
+
 ## [0.7.4](https://github.com/BirdeeHub/lze/compare/v0.7.3...v0.7.4) (2025-02-07)
 
 
