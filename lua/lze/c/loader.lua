@@ -187,7 +187,8 @@ function M.define(spec)
     if verbose then
         for _, v in ipairs(duplicates) do
             vim.schedule(function()
-                vim.notify("attempted to add " .. vim.inspect(v) .. " twice", vim.log.levels.ERROR, { title = "lze" })
+                ---@diagnostic disable-next-line: undefined-field
+                vim.notify("attempted to add " .. v.name .. " twice", vim.log.levels.ERROR, { title = "lze" })
             end)
         end
     end
