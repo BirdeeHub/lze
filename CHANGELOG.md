@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.7](https://github.com/BirdeeHub/lze/compare/v0.7.6...v0.7.7) (2025-02-08)
+
+
+### Bug Fixes
+
+* **trigger_load:** further improve error handling ([97d3a29](https://github.com/BirdeeHub/lze/commit/97d3a29cc4d4d123d0e8c7892d56eccd85e2352f))
+
 ## [0.7.6](https://github.com/BirdeeHub/lze/compare/v0.7.5...v0.7.6) (2025-02-08)
 
 
