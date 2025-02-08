@@ -118,5 +118,23 @@ describe("lze", function()
             lz.trigger_load("barz.nvim")
             assert(lz.state("barz.nvim") == false)
         end)
+        it("handles errors in startup plugins without stopping", function()
+            local spy_load = spy.on(loader, "load")
+            pcall(lz.load, {
+                {
+                    "rustyness",
+                    load = function()
+                        error("I shouldn't break anything")
+                    end,
+                },
+                {
+                    "create",
+                },
+                {
+                    "noscope.nvim",
+                },
+            })
+            assert.spy(spy_load).called(3)
+        end)
     end)
 end)

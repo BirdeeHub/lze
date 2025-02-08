@@ -109,7 +109,8 @@ function M.load(plugin_names)
 end
 
 ---@param plugins lze.Plugin[]
-local function load_startup_plugins(plugins)
+---@param verbose boolean
+local function load_startup_plugins(plugins, verbose)
     local startups = {}
     for _, plugin in ipairs(plugins) do
         if not plugin.lazy then
@@ -125,7 +126,16 @@ local function load_startup_plugins(plugins)
         return a.priority > b.priority
     end)
     for _, plugin in ipairs(startups) do
-        M.load(plugin.name)
+        local ok, v = pcall(M.load, plugin.name)
+        if verbose and not ok then
+            vim.schedule(function()
+                vim.notify(
+                    "Error occurred in '" .. plugin.name .. "'\nError text: " .. vim.inspect(v),
+                    vim.log.levels.ERROR,
+                    { title = "lze.load_startup_plugins" }
+                )
+            end)
+        end
     end
 end
 
@@ -179,7 +189,7 @@ function M.define(spec)
     -- will call beforeAll of all plugin specs in the order passed in.
     -- will then call trigger_load on the non-lazy plugins
     -- in order of priority and the order passed in.
-    load_startup_plugins(final_plugins)
+    load_startup_plugins(final_plugins, verbose)
     -- handlers can set up any of their own triggers for themselves here
     -- such as things like the event handler's DeferredUIEnter event
     require("lze.c.handler").run_post_def()

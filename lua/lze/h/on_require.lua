@@ -5,35 +5,24 @@ local trigger_load = require("lze.c.loader").load
 ---@type table<string, function>
 local states = {}
 
----@param mod_path string
----@return boolean
-local function call(mod_path)
+-- NOTE: the thing that calls the load...
+-- replacing the global require function
+
+local old_require = require
+require("_G").require = function(mod_path)
+    local ok, value = pcall(old_require, mod_path)
+    if ok then
+        return value
+    end
     local plugins = {}
-    for _, has in pairs(states) do
-        local plugin = has(mod_path)
-        if plugin ~= nil then
-            table.insert(plugins, plugin)
+    for name, has in pairs(states) do
+        if has(mod_path) then
+            table.insert(plugins, name)
         end
     end
     if plugins ~= {} then
         trigger_load(plugins)
-        return true
-    end
-    return false
-end
-
--- NOTE: the thing that calls the load...
--- replacing the global require function with one that calls our call function
-
-local oldrequire = require
-require("_G").require = function(mod_path)
-    local ok, value = pcall(oldrequire, mod_path)
-    if ok then
-        return value
-    end
-    package.loaded[mod_path] = nil
-    if call(mod_path) == true then
-        return oldrequire(mod_path)
+        return old_require(mod_path)
     end
     error(value)
 end
@@ -46,6 +35,7 @@ end
 ---@type lze.Handler
 ---@diagnostic disable-next-line: missing-fields
 local M = {
+    old_require = old_require,
     spec_field = "on_require",
     ---@param name string
     before = function(name)
@@ -74,14 +64,14 @@ function M.add(plugin)
         return
     end
     ---@param mod_path string
-    ---@return string|nil
+    ---@return boolean
     states[plugin.name] = function(mod_path)
         for _, v in ipairs(mod_paths) do
             if vim.startswith(mod_path, v) then
-                return plugin.name
+                return true
             end
         end
-        return nil
+        return false
     end
 end
 
