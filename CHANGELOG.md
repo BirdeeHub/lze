@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.6](https://github.com/BirdeeHub/lze/compare/v0.7.5...v0.7.6) (2025-02-08)
+
+
+### Bug Fixes
+
+* **startup_plugins:** errors in startup_plugins are now handled more gracefully ([2cc19e6](https://github.com/BirdeeHub/lze/commit/2cc19e6c9eedc7f0a8efc15b69dd9f209bdf0d53))
+
 ## [0.7.5](https://github.com/BirdeeHub/lze/compare/v0.7.4...v0.7.5) (2025-02-07)
 
 
