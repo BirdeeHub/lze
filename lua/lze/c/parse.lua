@@ -54,10 +54,11 @@ local function parse(spec)
     ---@diagnostic disable-next-line: inject-field
     spec.name = spec.name or spec[1]
     spec[1] = nil
+    local result = lib.run_modify(spec)
     if spec.lazy == nil then
         spec.lazy = lib.is_lazy(spec)
     end
-    return lib.run_modify(spec)
+    return result
 end
 
 ---@param spec lze.Spec
