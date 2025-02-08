@@ -8,6 +8,17 @@ end
 
 ---@alias hook_key "before" | "after" | "beforeAll"
 
+---@param hook_key hook_key | "load"
+---@param pname string
+---@param err any
+local function mk_hook_err(hook_key, pname, err)
+    vim.notify(
+        "Failed to run '" .. hook_key .. "' hook for " .. pname .. ": " .. tostring(err or ""),
+        vim.log.levels.ERROR,
+        { title = "lze.spec." .. hook_key }
+    )
+end
+
 ---@param hook_key hook_key
 ---@param plugin lze.Plugin
 local function hook(hook_key, plugin)
@@ -15,11 +26,7 @@ local function hook(hook_key, plugin)
         xpcall(
             plugin[hook_key],
             vim.schedule_wrap(function(err)
-                vim.notify(
-                    "Failed to run '" .. hook_key .. "' hook for " .. plugin.name .. ": " .. tostring(err or ""),
-                    vim.log.levels.ERROR,
-                    { title = "lze.spec." .. hook_key }
-                )
+                mk_hook_err(hook_key, plugin.name, err)
             end),
             plugin
         )
@@ -79,7 +86,12 @@ function M.load(plugin_names)
             require("lze.c.handler").run_before(plugin.name)
             ---@type fun(name: string)
             local load_impl = plugin.load or vim.tbl_get(vim.g, "lze", "load") or vim.cmd.packadd
-            load_impl(plugin.name)
+            local ok, err = pcall(load_impl, plugin.name)
+            if not ok and vim.tbl_get(vim.g, "lze", "verbose") ~= false then
+                vim.schedule(function()
+                    mk_hook_err("load", plugin.name, err)
+                end)
+            end
             require("lze.c.handler").run_after(plugin.name)
             hook("after", plugin)
         else
@@ -91,16 +103,14 @@ function M.load(plugin_names)
                 )
             else
                 table.insert(skipped, pname)
-                if vim.tbl_get(vim.g, "lze", "verbose") ~= false then
-                    if plugin == nil then
-                        vim.schedule(function()
-                            vim.notify(
-                                "Plugin " .. pname .. " not found",
-                                vim.log.levels.ERROR,
-                                { title = "lze.trigger_load" }
-                            )
-                        end)
-                    end
+                if plugin == nil and vim.tbl_get(vim.g, "lze", "verbose") ~= false then
+                    vim.schedule(function()
+                        vim.notify(
+                            "Plugin " .. pname .. " not found",
+                            vim.log.levels.ERROR,
+                            { title = "lze.trigger_load" }
+                        )
+                    end)
                 end
             end
         end
