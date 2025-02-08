@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.8](https://github.com/BirdeeHub/lze/compare/v0.7.7...v0.7.8) (2025-02-08)
+
+
+### Bug Fixes
+
+* **modify:** modify now runs before is lazy so that it can know the original setting ([ab2282d](https://github.com/BirdeeHub/lze/commit/ab2282d3745b6e6f9b61cfa42c8165124dbd9bb4))
+
 ## [0.7.7](https://github.com/BirdeeHub/lze/compare/v0.7.6...v0.7.7) (2025-02-08)
 
 
