@@ -55,8 +55,8 @@ local function parse(spec)
     spec.name = spec.name or spec[1]
     spec[1] = nil
     local result = lib.run_modify(spec)
-    if spec.lazy == nil then
-        spec.lazy = lib.is_lazy(spec)
+    if result.lazy == nil then
+        result.lazy = lib.is_lazy(result)
     end
     return result
 end
