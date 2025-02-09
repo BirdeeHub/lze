@@ -77,22 +77,20 @@ function M.load(plugin_names)
         local plugin = state[pname]
         if plugin and is_enabled(plugin) then
             state[pname] = false
-            -- technically SPEC before hooks can modify the plugin item
-            -- that is ran by following hooks by modifying their argument,
-            -- but an extra deepcopy for each
-            -- is likely not worth the performance penalty
-            -- as they can only modify the plugin item they are within anyway
+            -- technically plugin spec before hooks can modify
+            -- the plugin item provided to their own after hook
+            -- This is not worth a deepcopy and should be considered a feature
             hook("before", plugin)
-            require("lze.c.handler").run_before(plugin.name)
+            require("lze.c.handler").run_before(pname)
             ---@type fun(name: string)
             local load_impl = plugin.load or vim.tbl_get(vim.g, "lze", "load") or vim.cmd.packadd
-            local ok, err = pcall(load_impl, plugin.name)
+            local ok, err = pcall(load_impl, pname)
             if not ok and vim.tbl_get(vim.g, "lze", "verbose") ~= false then
                 vim.schedule(function()
-                    mk_hook_err("load", plugin.name, err)
+                    mk_hook_err("load", pname, err)
                 end)
             end
-            require("lze.c.handler").run_after(plugin.name)
+            require("lze.c.handler").run_after(pname)
             hook("after", plugin)
         else
             if type(pname) ~= "string" then
