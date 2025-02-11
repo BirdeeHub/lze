@@ -123,9 +123,8 @@
                 echo "" >> $BASHCACHE
                 echo ">lua" >> $BASHCACHE
                 awk '{print "  " $0}' "$luameta" >> $BASHCACHE
-                echo "" >> $BASHCACHE
                 echo "<" >> $BASHCACHE
-                echo "" >> $BASHCACHE
+                echo "==============================================================================" >> $BASHCACHE
                 echo "$modeline" >> $BASHCACHE
                 cat "$BASHCACHE" > "$maindoc"
                 rm "$BASHCACHE"
