@@ -104,9 +104,10 @@
                   exit 1
                 fi
                 maindoc="$(realpath "$gitroot/doc/lze.txt")"
+                luamain="$(realpath "$gitroot/lua/lze/init.lua")"
                 mkdir -p "$(dirname "$maindoc")"
                 export DOCOUT=$(mktemp)
-                ${pkgs.lemmy-help}/bin/lemmy-help ${./lua/lze/init.lua} > "$DOCOUT"
+                ${pkgs.lemmy-help}/bin/lemmy-help "$luamain" > "$DOCOUT"
                 export BASHCACHE=$(mktemp)
                 modeline="vim:tw=78:ts=8:noet:ft=help:norl:"
                 sed "/$modeline/d" "$DOCOUT" > $BASHCACHE
