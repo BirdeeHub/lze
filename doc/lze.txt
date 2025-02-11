@@ -235,7 +235,7 @@ lze.state                                                            *lze.state*
   
   ---@type lze.Config
   vim.g.lze = vim.g.lze
-  
+
 <
 
 vim:tw=78:ts=8:noet:ft=help:norl:

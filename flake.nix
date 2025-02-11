@@ -96,25 +96,33 @@
               ];
             };
             lemmy-docgen = let
-              indentedMeta = builtins.toFile "types.txt" ("  " + (builtins.replaceStrings ["\n"] ["\n  "] (builtins.readFile ./lua/lze/meta.lua)));
+              genpath = pkgs.lib.makeBinPath (with pkgs; [
+                gawk
+                git
+                gnused
+                coreutils
+                lemmy-help
+              ]);
               lemmyscript = pkgs.writeShellScript "lemmy-helper" ''
-                gitroot="$(${pkgs.git}/bin/git rev-parse --show-toplevel)"
+                export PATH="${genpath}:$PATH"
+                gitroot="$(git rev-parse --show-toplevel)"
                 if [ -z "$gitroot" ]; then
                   echo "Error: Unable to determine Git root."
                   exit 1
                 fi
                 maindoc="$(realpath "$gitroot/doc/lze.txt")"
                 luamain="$(realpath "$gitroot/lua/lze/init.lua")"
+                luameta="$(realpath "$gitroot/lua/lze/meta.lua")"
                 mkdir -p "$(dirname "$maindoc")"
                 export DOCOUT=$(mktemp)
-                ${pkgs.lemmy-help}/bin/lemmy-help "$luamain" > "$DOCOUT"
+                lemmy-help "$luamain" > "$DOCOUT"
                 export BASHCACHE=$(mktemp)
                 modeline="vim:tw=78:ts=8:noet:ft=help:norl:"
                 sed "/$modeline/d" "$DOCOUT" > $BASHCACHE
                 echo "                                             *lze.types*" >> $BASHCACHE
                 echo "" >> $BASHCACHE
                 echo ">lua" >> $BASHCACHE
-                cat ${indentedMeta} >> $BASHCACHE
+                awk '{print "  " $0}' "$luameta" >> $BASHCACHE
                 echo "" >> $BASHCACHE
                 echo "<" >> $BASHCACHE
                 echo "" >> $BASHCACHE
