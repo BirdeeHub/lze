@@ -80,10 +80,10 @@ function M.load(plugin_names)
             -- technically plugin spec before hooks can modify
             -- the plugin item provided to their own after hook
             -- This is not worth a deepcopy and should be considered a feature
-            hook("before", plugin)
-            require("lze.c.handler").run_before(pname)
             ---@type fun(name: string)
             local load_impl = plugin.load or vim.tbl_get(vim.g, "lze", "load") or vim.cmd.packadd
+            hook("before", plugin)
+            require("lze.c.handler").run_before(pname)
             local ok, err = pcall(load_impl, pname)
             if not ok and vim.tbl_get(vim.g, "lze", "verbose") ~= false then
                 vim.schedule(function()
