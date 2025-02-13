@@ -71,7 +71,7 @@ end
 function M.before(name)
     for cmd, plugins in pairs(M.pending) do
         if plugins[name] then
-            vim.api.nvim_del_user_command(cmd)
+            pcall(vim.api.nvim_del_user_command, cmd)
         end
         plugins[name] = nil
     end

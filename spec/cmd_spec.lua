@@ -66,4 +66,17 @@ describe("handlers.cmd", function()
         vim.cmd[plugin.cmd]()
         assert.equal(1, should_be_inc)
     end)
+    it("Doesn't error when deleting command if the command doesn't exist", function()
+        local plugin = {
+            name = "my_test_cmd",
+            cmd = "TestCMD",
+        }
+        local plugin2 = {
+            name = "my_other_cmd_dep",
+            dep_of = { "my_test_cmd" },
+            cmd = "TestCMD",
+        }
+        lze.load({ plugin, plugin2 })
+        lze.trigger_load(plugin.name)
+    end)
 end)
