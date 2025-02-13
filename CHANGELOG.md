@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.10](https://github.com/BirdeeHub/lze/compare/v0.7.9...v0.7.10) (2025-02-13)
+
+
+### Bug Fixes
+
+* **cmd:** doesnt error when asked to delete a command that doesnt exist ([4d0ef68](https://github.com/BirdeeHub/lze/commit/4d0ef68a08cf17a4ecc41201bb5716af7020829b))
+
 ## [0.7.9](https://github.com/BirdeeHub/lze/compare/v0.7.8...v0.7.9) (2025-02-08)
 
 
