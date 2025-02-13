@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.11](https://github.com/BirdeeHub/lze/compare/v0.7.10...v0.7.11) (2025-02-13)
+
+
+### Bug Fixes
+
+* **trigger_load:** before can no longer alter load ([ed7f60e](https://github.com/BirdeeHub/lze/commit/ed7f60e4d1f21520028c2cfd8a413572fb69a819))
+
 ## [0.7.10](https://github.com/BirdeeHub/lze/compare/v0.7.9...v0.7.10) (2025-02-13)
 
 
