@@ -1,12 +1,9 @@
 -- needed so we can use stuff defined later in the file
 local lib = {}
 
--- It turns out that its faster when you copy paste.
--- Would be nice to just define it once, but then you lose 10ms
----@param spec lze.Plugin|lze.HandlerSpec|lze.SpecImport
-local function is_enabled(spec)
-    local disabled = spec.enabled == false or (type(spec.enabled) == "function" and not spec.enabled())
-    return not disabled
+---@param spec lze.Plugin|lze.SpecImport
+local function is_disabled(spec)
+    return spec.enabled == false or (type(spec.enabled) == "function" and not spec.enabled())
 end
 
 ---@param spec lze.SpecImport
@@ -23,7 +20,7 @@ local function import_spec(spec, result)
         end)
         return
     end
-    if not is_enabled(spec) then
+    if is_disabled(spec) then
         return
     end
     local modname = spec.import
@@ -86,7 +83,7 @@ function lib.normalize(spec, result)
         ---@cast spec lze.PluginSpec
         local parsed = parse(spec)
         if type(parsed) == "table" and type(parsed.name) == "string" then
-            if is_enabled(parsed) then
+            if not is_disabled(parsed) then
                 table.insert(result, parsed)
             end
         else

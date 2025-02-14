@@ -9,73 +9,83 @@ local loader = require("lze.c.loader")
 ---@field data? unknown
 ---@field buffer? number
 
----@class lze.EventHandler: lze.Handler
----@field events table<string,true>
----@field group number
----@field parse fun(spec: lze.EventSpec): lze.Event
-
-local lze_events = {
-    DeferredUIEnter = { id = "DeferredUIEnter", event = "User", pattern = "DeferredUIEnter" },
+local alias_events = {
+    DeferredUIEnter = { id = "User DeferredUIEnter", event = "User", pattern = "DeferredUIEnter" },
 }
 
-lze_events["User DeferredUIEnter"] = lze_events.DeferredUIEnter
+local pending = {}
+---@type integer
+local augroup = nil
+local deferred_enter_event_id = nil
 
----@type lze.EventHandler
-local M = {
-    pending = {},
-    events = {},
-    group = vim.api.nvim_create_augroup("lze_handler_event", { clear = true }),
-    spec_field = "event",
-    ---@param spec lze.EventSpec
-    parse = function(spec)
-        local ret = lze_events[spec]
-        if ret then
-            return ret
-        end
-        if type(spec) == "string" then
-            local event, pattern = spec:match("^(%w+)%s+(.*)$")
-            event = event or spec
-            return { id = spec, event = event, pattern = pattern }
-        elseif vim.islist(spec) then
-            ret = { id = table.concat(spec, "|"), event = spec }
-        else
-            ret = spec --[[@as lze.Event]]
-            if not ret.id then
+---@type fun(spec: lze.EventSpec): lze.Event
+local parse = function(spec)
+    local ret = alias_events[spec]
+    if ret then
+        ret.augroup = ret.augroup or augroup
+        return ret
+    end
+    if type(spec) == "string" then
+        local event, pattern = spec:match("^(%w+)%s+(.*)$")
+        event = event or spec
+        return { id = spec, event = event, pattern = pattern, augroup = augroup }
+    elseif vim.islist(spec) then
+        ret = { id = table.concat(spec, "|"), event = spec, augroup = augroup }
+    else
+        ret = spec --[[@as lze.Event]]
+        if not ret.id then
+            ---@diagnostic disable-next-line: assign-type-mismatch, param-type-mismatch
+            ret.id = type(ret.event) == "string" and ret.event
+                or ret.event == nil and "*"
+                ---@diagnostic disable-next-line: param-type-mismatch
+                or table.concat(ret.event, "|")
+            if ret.pattern then
                 ---@diagnostic disable-next-line: assign-type-mismatch, param-type-mismatch
-                ret.id = type(ret.event) == "string" and ret.event or table.concat(ret.event, "|")
-                if ret.pattern then
-                    ---@diagnostic disable-next-line: assign-type-mismatch, param-type-mismatch
-                    ret.id = ret.id
-                        .. " "
-                        .. (
-                            type(ret.pattern) == "string" and ret.pattern
-                            or table.concat(ret.pattern --[[@as table]], ", ")
-                        )
-                end
+                ret.id = ret.id
+                    .. " "
+                    .. (
+                        type(ret.pattern) == "string" and ret.pattern
+                        or table.concat(ret.pattern --[[@as table]], ", ")
+                    )
             end
         end
-        return ret
-    end,
+        ret.augroup = ret.augroup or augroup
+    end
+    return ret
+end
+
+---@type lze.Handler
+local M = {
+    spec_field = "event",
+    lib = {
+        parse = parse,
+        ---@param name string
+        ---@param spec lze.EventSpec
+        set_event_alias = function(name, spec)
+            alias_events[name] = spec and parse(spec) or nil
+        end,
+    },
 }
 
 local deferred_ui_enter = vim.schedule_wrap(function()
     if vim.v.exiting ~= vim.NIL then
         return
     end
-    vim.g.lze_did_deferred_ui_enter = true
     vim.api.nvim_exec_autocmds("User", { pattern = "DeferredUIEnter", modeline = false })
 end)
+
+function M.init()
+    augroup = vim.api.nvim_create_augroup("lze_handler_event", { clear = true })
+    deferred_enter_event_id = vim.api.nvim_create_autocmd("UIEnter", {
+        once = true,
+        nested = true,
+        callback = deferred_ui_enter,
+    })
+end
 
 function M.post_def()
     if vim.v.vim_did_enter == 1 then
         deferred_ui_enter()
-    elseif not vim.g.lze_did_create_deferred_ui_enter_autocmd then
-        vim.api.nvim_create_autocmd("UIEnter", {
-            once = true,
-            nested = true,
-            callback = deferred_ui_enter,
-        })
-        vim.g.lze_did_create_deferred_ui_enter_autocmd = true
     end
 end
 
@@ -163,19 +173,19 @@ end
 local function add_event(event)
     local done = false
     vim.api.nvim_create_autocmd(event.event, {
-        group = M.group,
+        group = event.augroup,
         once = true,
         nested = true,
         pattern = event.pattern,
         callback = function(ev)
-            if done or not M.pending[event.id] then
+            if done or not pending[event.id] then
                 return
             end
             -- HACK: work-around for https://github.com/neovim/neovim/issues/25526
             done = true
             local state = get_state(ev.event, ev.buf, ev.data)
             -- load the plugins
-            loader.load(vim.tbl_values(M.pending[event.id]))
+            loader.load(vim.tbl_keys(pending[event.id]))
             -- check if any plugin created an event handler for this event and fire the group
             ---@param s lze.EventOpts
             vim.iter(state):each(function(s)
@@ -193,28 +203,47 @@ function M.add(plugin)
     end
     local event_def = {}
     if type(event_spec) == "string" then
-        local event = M.parse(event_spec)
+        local event = parse(event_spec)
         table.insert(event_def, event)
     elseif type(event_spec) == "table" then
         ---@param ev lze.EventSpec[]
         vim.iter(event_spec):each(function(ev)
-            local event = M.parse(ev)
+            local event = parse(ev)
             table.insert(event_def, event)
         end)
     end
     ---@param event lze.Event
     vim.iter(event_def or {}):each(function(event)
-        M.pending[event.id] = M.pending[event.id] or {}
-        M.pending[event.id][plugin.name] = plugin.name
+        pending[event.id] = pending[event.id] or {}
+        pending[event.id][plugin.name] = event.augroup
         add_event(event)
     end)
 end
 
 ---@param name string
 function M.before(name)
-    vim.iter(M.pending):each(function(_, plugins)
+    for _, plugins in pairs(pending) do
         plugins[name] = nil
-    end)
+    end
+end
+
+function M.cleanup()
+    for _, plugins in pairs(pending) do
+        --why does it say p is unused...
+        --I literally use it on the next line...
+        --luacheck: no unused
+        for _, p in pairs(plugins) do
+            if p == augroup then
+                p = nil
+            end
+        end
+    end
+    if augroup then
+        vim.api.nvim_del_augroup_by_id(augroup)
+    end
+    if deferred_enter_event_id then
+        vim.api.nvim_del_autocmd(deferred_enter_event_id)
+    end
 end
 
 return M

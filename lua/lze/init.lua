@@ -52,4 +52,10 @@ lze.load = require("lze.c.loader").define
 ---@type lze.State
 lze.state = require("lze.c.loader").state
 
+---Handlers may expose things by registering them in their lib table
+---require('lze').h.<spec_field>.<key>
+---wont populate unless used, will be removed if handler is removed
+---@type table<string, table>
+lze.h = require("lze.c.handler").libs
+
 return lze

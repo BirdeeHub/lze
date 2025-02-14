@@ -70,6 +70,15 @@ lze.state                                                            *lze.state*
         (lze.State)
 
 
+lze.h                                                                    *lze.h*
+    Handlers may expose things by registering them in their lib table
+    require('lze').h.<spec_field>.<key>
+    wont populate unless used, will be removed if handler is removed
+
+    Type: ~
+        (table<string,table>)
+
+
                                              *lze.types*
 
 >lua
@@ -130,8 +139,8 @@ lze.state                                                            *lze.state*
   ---@field id string
   ---@field name string
   
-  ---@alias lze.Event {id:string, event:string[]|string, pattern?:string[]|string}
-  ---@alias lze.EventSpec string|{event?:string|string[], pattern?:string|string[]}|string[]
+  ---@alias lze.Event {id:string, event:string[]|string, pattern?:string[]|string, augroup:integer}
+  ---@alias lze.EventSpec string|{event?:string|string[], pattern?:string|string[], augroup?:integer}|string[]
   
   ---@class lze.SpecHandlers
   ---
@@ -204,6 +213,14 @@ lze.state                                                            *lze.state*
   ---Default: nil
   ---@field set_lazy? boolean
   ---
+  ---Handlers may export functions and other values via this set,
+  ---which then may be accessed via `require('lze').h[spec_field].your_func()`
+  ---@field lib? table
+  ---Called when the handler is registered
+  ---@field init? fun()
+  ---Allows you to clean up any global modifications your handler makes to the environment.
+  ---@field cleanup? fun()
+  ---
   ---runs at the end of require('lze').load()
   ---for handlers to set up extra triggers such as the
   ---event handler's DeferredUIEnter event
@@ -232,6 +249,12 @@ lze.state                                                            *lze.state*
   ---
   ---If false, lze will print error messages on fewer things.
   ---@field verbose? boolean
+  ---
+  ---Default priority for startup plugins. Defaults to 50 if unset
+  ---@field default_priority? integer
+  ---
+  ---If true, lze will not automatically register the default handlers.
+  ---@field without_default_handlers? boolean
   
   ---@type lze.Config
   vim.g.lze = vim.g.lze

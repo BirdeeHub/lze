@@ -2,12 +2,12 @@
 -- because require('lze') requires this module.
 local loader = require("lze.c.loader")
 
----@class lze.KeysHandler: lze.Handler
+local augroup = nil
 
 ---@param value lze.KeysSpec
 ---@param mode? string
 ---@return lze.Keys
-local function parse(value, mode)
+local function _parse(value, mode)
     local ret = vim.deepcopy(value) --[[@as lze.Keys]]
     ret.lhs = ret[1] or ""
     ret.rhs = ret[2]
@@ -25,30 +25,39 @@ local function parse(value, mode)
     return ret
 end
 
+---@param value string|lze.KeysSpec
+---@return lze.Keys[]
+local function parse(value)
+    value = type(value) == "string" and { value } or value --[[@as lze.KeysSpec]]
+    local modes = type(value.mode) == "string" and { value.mode } or value.mode --[[ @as string[] | nil ]]
+    if not modes then
+        return { _parse(value) }
+    end
+    return vim.iter(modes)
+        :map(function(mode)
+            return _parse(value, mode)
+        end)
+        :totable()
+end
+
 ---@param keys lze.Keys
 local function is_nop(keys)
     return type(keys.rhs) == "string" and (keys.rhs == "" or keys.rhs:lower() == "<nop>")
 end
 
----@type lze.KeysHandler
+local states = {}
+
+---@type lze.Handler
 local M = {
-    pending = {},
     spec_field = "keys",
-    ---@param value string|lze.KeysSpec
-    ---@return lze.Keys[]
-    parse = function(value)
-        value = type(value) == "string" and { value } or value --[[@as lze.KeysSpec]]
-        local modes = type(value.mode) == "string" and { value.mode } or value.mode --[[ @as string[] | nil ]]
-        if not modes then
-            return { parse(value) }
-        end
-        return vim.iter(modes)
-            :map(function(mode)
-                return parse(value, mode)
-            end)
-            :totable()
-    end,
+    lib = {
+        parse = parse,
+    },
 }
+
+function M.init()
+    augroup = vim.api.nvim_create_augroup("lze_handler_keys_ft", { clear = true })
+end
 
 local skip = { mode = true, id = true, ft = true, rhs = true, lhs = true }
 
@@ -76,24 +85,15 @@ local function set(keys, buf)
     end
 end
 
--- Delete a mapping and create the real global
--- mapping when needed
----@param keys lze.Keys
-local function del(keys)
-    pcall(vim.keymap.del, keys.mode, keys.lhs, {
-        -- NOTE: for buffer-local mappings, we only delete the mapping for the current buffer
-        -- So the mapping could still exist in other buffers
-        buffer = keys.ft and true or nil,
-    })
-    -- make sure to create global mappings when needed
-    -- buffer-local mappings are managed by lze
-    if not keys.ft then
-        set(keys)
-    end
-end
-
 ---@param keys lze.Keys
 local function add_keys(keys)
+    local del = function()
+        pcall(vim.keymap.del, keys.mode, keys.lhs, {
+            -- NOTE: for buffer-local mappings, we only delete the mapping for the current buffer
+            -- So the mapping could still exist in other buffers
+            buffer = keys.ft and true or nil,
+        })
+    end
     local lhs = keys.lhs
     local opts = get_opts(keys)
 
@@ -103,12 +103,17 @@ local function add_keys(keys)
             return set(keys, buf)
         end
         vim.keymap.set(keys.mode, lhs, function()
-            local plugins = M.pending[keys.id]
+            local plugins = states[keys.id]
             -- always delete the mapping immediately to prevent recursive mappings
-            del(keys)
-            M.pending[keys.id] = nil
+            del()
+            -- make sure to create global mappings when needed
+            -- buffer-local mappings are managed by lze
+            if not keys.ft then
+                set(keys)
+            end
+            states[keys.id] = nil
             if plugins then
-                loader.load(vim.tbl_values(plugins))
+                loader.load(vim.tbl_keys(plugins))
             end
             -- Create the real buffer-local mapping
             if keys.ft then
@@ -131,10 +136,11 @@ local function add_keys(keys)
     -- buffer-local mappings
     if keys.ft then
         vim.api.nvim_create_autocmd("FileType", {
+            group = augroup,
             pattern = keys.ft,
             nested = true,
             callback = function(event)
-                if M.pending[keys.id] then
+                if states[keys.id] then
                     add(event.buf)
                 else
                     -- Only create the mapping if its managed by lze
@@ -146,6 +152,7 @@ local function add_keys(keys)
     else
         add()
     end
+    return del
 end
 
 ---@param plugin lze.Plugin
@@ -156,28 +163,39 @@ function M.add(plugin)
     end
     local keys_def = {}
     if type(keys_spec) == "string" then
-        local keys = M.parse(keys_spec)
+        local keys = parse(keys_spec)
         vim.list_extend(keys_def, keys)
     elseif type(keys_spec) == "table" then
         ---@param keys_spec_ string | lze.KeysSpec
         vim.iter(keys_spec):each(function(keys_spec_)
-            local keys = M.parse(keys_spec_)
+            local keys = parse(keys_spec_)
             vim.list_extend(keys_def, keys)
         end)
     end
     ---@param key lze.Keys
     vim.iter(keys_def or {}):each(function(key)
-        M.pending[key.id] = M.pending[key.id] or {}
-        M.pending[key.id][plugin.name] = plugin.name
-        add_keys(key)
+        states[key.id] = states[key.id] or {}
+        states[key.id][plugin.name] = add_keys(key)
     end)
 end
 
 ---@param name string
 function M.before(name)
-    vim.iter(M.pending):each(function(_, plugins)
+    vim.iter(states):each(function(_, plugins)
         plugins[name] = nil
     end)
+end
+
+function M.cleanup()
+    if augroup then
+        vim.api.nvim_del_augroup_by_id(augroup)
+    end
+    vim.iter(states):each(function(_, plugins)
+        for _, del in pairs(plugins) do
+            del()
+        end
+    end)
+    states = {}
 end
 
 return M

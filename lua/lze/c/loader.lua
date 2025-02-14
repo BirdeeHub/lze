@@ -1,6 +1,4 @@
--- It turns out that its faster when you copy paste.
--- Would be nice to just define it once, but then you lose 10ms
----@param spec lze.Plugin|lze.HandlerSpec|lze.SpecImport
+---@param spec lze.Plugin
 local function is_enabled(spec)
     local disabled = spec.enabled == false or (type(spec.enabled) == "function" and not spec.enabled())
     return not disabled
@@ -39,33 +37,55 @@ local M = {}
 ---@type table<string, lze.Plugin|false>
 local state = {}
 
+-- NOTE: must be userdata rather than table
+-- otherwise __len never gets called
+-- because tables cache their length
+-- but this only works with luajit
+-- so if you change to non-luajit,
+-- just make it a table and accept that # will always return 0.
+local proxy = newproxy and newproxy(true) or {}
+local proxy_mt = getmetatable(proxy)
+proxy_mt.__index = function(_, k)
+    return vim.deepcopy(state[k])
+end
+proxy_mt.__tostring = function()
+    return vim.inspect(state)
+end
+proxy_mt.__len = function(_)
+    local count = 0
+    for _, v in pairs(state) do
+        if v then
+            count = count + 1
+        end
+    end
+    return count
+end
+---@param name string
+---@return boolean?
+proxy_mt.__call = function(_, name)
+    ---@diagnostic disable-next-line: return-type-mismatch
+    return state[name] and true or state[name]
+end
+proxy_mt.__unm = function(_)
+    return vim.deepcopy(state)
+end
+proxy_mt.__newindex = function(_, k, v)
+    vim.schedule(function()
+        vim.notify(
+            "Arbitrary modification of lze's internal state is not allowed outside of an lze.Handler's modify hook.\n"
+                .. "value: '"
+                .. vim.inspect(v)
+                .. "' NOT added to require('lze').state."
+                .. tostring(k),
+            vim.log.levels.ERROR,
+            { title = "lze.state" }
+        )
+    end)
+end
+
 ---@type lze.State
-M.state = setmetatable({}, {
-    __index = function(_, k)
-        return vim.deepcopy(state[k])
-    end,
-    ---@param name string
-    ---@return boolean?
-    __call = function(_, name)
-        return state[name] and true or state[name]
-    end,
-    __unm = function(_)
-        return vim.deepcopy(state)
-    end,
-    __newindex = function(_, k, v)
-        vim.schedule(function()
-            vim.notify(
-                "Arbitrary modification of lze's internal state is not allowed outside of an lze.Handler's modify hook.\n"
-                    .. "value: '"
-                    .. vim.inspect(v)
-                    .. "' NOT added to require('lze').state."
-                    .. tostring(k),
-                vim.log.levels.ERROR,
-                { title = "lze.state" }
-            )
-        end)
-    end,
-})
+---@diagnostic disable-next-line: assign-type-mismatch
+M.state = proxy
 
 ---@type fun(plugin_names: string[]|string): string[]
 function M.load(plugin_names)
@@ -120,12 +140,13 @@ end
 ---@param verbose boolean
 local function load_startup_plugins(plugins, verbose)
     local startups = {}
+    -- NOTE: default priority is 50
+    local default_priority = vim.tbl_get(vim.g, "lze", "default_priority") or 50
     for _, plugin in ipairs(plugins) do
         if not plugin.lazy then
             table.insert(startups, {
                 name = plugin.name,
-                -- NOTE: default priority is 50
-                priority = plugin.priority or 50,
+                priority = plugin.priority or default_priority,
             })
         end
         hook("beforeAll", plugin)

@@ -2,26 +2,24 @@
 -- because require('lze') requires this module.
 local loader = require("lze.c.loader")
 
----@class lze.ColorschemeHandler: lze.Handler
----@field augroup? integer
+local states = {}
+local augroup = nil
 
----@type lze.ColorschemeHandler
+---@type lze.Handler
 local M = {
-    pending = {},
-    augroup = nil,
     spec_field = "colorscheme",
 }
 
 ---@param name string
 function M.before(name)
-    vim.iter(M.pending):each(function(_, plugins)
+    vim.iter(states):each(function(_, plugins)
         plugins[name] = nil
     end)
 end
 
 ---@param name string
 local function on_colorscheme(name)
-    local pending = M.pending[name] or {}
+    local pending = states[name] or {}
     if vim.tbl_isempty(pending) then
         -- already loaded
         return
@@ -29,17 +27,14 @@ local function on_colorscheme(name)
     loader.load(vim.tbl_values(pending))
 end
 
-local function init()
-    if M.augroup then
-        return
-    end
-    M.augroup = vim.api.nvim_create_augroup("lze_handler_colorscheme", { clear = true })
+function M.init()
+    augroup = vim.api.nvim_create_augroup("lze_handler_colorscheme", { clear = true })
     vim.api.nvim_create_autocmd("ColorSchemePre", {
         callback = function(event)
             on_colorscheme(event.match)
         end,
         nested = true,
-        group = M.augroup,
+        group = augroup,
     })
 end
 
@@ -58,12 +53,18 @@ function M.add(plugin)
             table.insert(colorscheme_def, colorscheme_spec_)
         end)
     end
-    init()
     ---@param colorscheme string
     vim.iter(colorscheme_def):each(function(colorscheme)
-        M.pending[colorscheme] = M.pending[colorscheme] or {}
-        M.pending[colorscheme][plugin.name] = plugin.name
+        states[colorscheme] = states[colorscheme] or {}
+        states[colorscheme][plugin.name] = plugin.name
     end)
+end
+
+function M.cleanup()
+    if augroup then
+        vim.api.nvim_del_augroup_by_id(augroup)
+    end
+    states = {}
 end
 
 return M

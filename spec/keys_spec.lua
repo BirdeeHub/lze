@@ -3,7 +3,6 @@ vim.g.lze = {
     load = function() end,
 }
 local lze = require("lze")
-local keys = require("lze.h.keys")
 local loader = require("lze.c.loader")
 local spy = require("luassert.spy")
 
@@ -16,9 +15,9 @@ describe("handlers.keys", function()
         }
         for _, test in ipairs(tests) do
             if test[3] then
-                assert.same(keys.parse(test[1])[1].id, keys.parse(test[2])[1].id)
+                assert.same(lze.h.keys.parse(test[1])[1].id, lze.h.keys.parse(test[2])[1].id)
             else
-                assert.is_not.same(keys.parse(test[1])[1].id, keys.parse(test[2])[1].id)
+                assert.is_not.same(lze.h.keys.parse(test[1])[1].id, lze.h.keys.parse(test[2])[1].id)
             end
         end
     end)
@@ -43,7 +42,7 @@ describe("handlers.keys", function()
             local timesloaded = 0
             local parsed_keys = {}
             for _, key in ipairs(lzkeys) do
-                table.insert(parsed_keys, keys.parse(key)[1])
+                table.insert(parsed_keys, lze.h.keys.parse(key)[1])
             end
             ---@type lze.Plugin
             local plugin = {

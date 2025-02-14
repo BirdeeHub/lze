@@ -7,6 +7,16 @@ local spy = require("luassert.spy")
 
 describe("lze", function()
     describe("load", function()
+        it("__len works", function()
+            assert.True(#lz.state == 0)
+            lz.load({
+                {
+                    "neorgblahblahblah",
+                    lazy = true,
+                },
+            })
+            assert.True(#lz.state == 1)
+        end)
         it("list of plugin specs", function()
             local spy_load = spy.on(loader, "load")
             lz.load({

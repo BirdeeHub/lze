@@ -14,10 +14,13 @@ describe("nested events", function()
                 after = function()
                     pcall(vim.cmd.colorscheme, "sick_colorscheme_bruh")
                 end,
-                load = function() end,
+                load = function()
+                    vim.g.event_nested_works = true
+                end,
             },
         })
         vim.api.nvim_exec_autocmds("UIEnter", {})
+        assert.True(vim.g.event_nested_works)
         assert.True(vim.g.sweetie_nvim_loaded)
     end)
 end)
