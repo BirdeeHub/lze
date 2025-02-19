@@ -1,13 +1,63 @@
 local M = {}
 
 ---@type lze.Handler[]
-local handlers = require("lze.h")
+local handlers = vim.tbl_get(vim.g, "lze", "without_default_handlers") and {} or require("lze.h")
+for _, handler in ipairs(handlers) do
+    if handler.init then
+        handler.init()
+    end
+end
+
+local lib_meta = {
+    __index = function(t, k)
+        local h_lib
+        for _, handler in ipairs(handlers) do
+            if handler.spec_field == k then
+                h_lib = handler.lib
+                break
+            end
+        end
+        if type(h_lib) ~= "table" then
+            vim.schedule(function()
+                vim.notify(
+                    "handler '" .. k .. "' does not export any lib functions or is not registered",
+                    vim.log.levels.ERROR,
+                    { title = "lze" }
+                )
+            end)
+            return nil
+        end
+        rawset(t, k, h_lib)
+        return h_lib
+    end,
+    __newindex = function(t, k, v)
+        rawset(t, k, v)
+    end,
+}
+
+M.libs = setmetatable({}, lib_meta)
 
 ---Removes and returns all handlers
 ---@return lze.Handler[]
 function M.clear_handlers()
+    if vim.tbl_get(vim.g, "lze", "verbose") ~= false and #require("lze.c.loader").state ~= 0 then
+        vim.schedule(function()
+            vim.notify(
+                "removing handlers while there are pending plugin specs may produce unpredictable behavior\n"
+                    .. "If you know what you are doing, set vim.g.lze.verbose = false",
+                vim.log.levels.ERROR,
+                { title = "lze" }
+            )
+        end)
+    end
+    for _, handler in ipairs(handlers) do
+        if handler.cleanup then
+            handler.cleanup()
+        end
+    end
     local old_handlers = handlers
     handlers = {}
+    M.libs = setmetatable({}, lib_meta)
     return old_handlers
 end
 
@@ -15,6 +65,16 @@ end
 ---@param names string|string[]
 ---@return lze.Handler[]
 function M.remove_handlers(names)
+    if vim.tbl_get(vim.g, "lze", "verbose") ~= false and #require("lze.c.loader").state ~= 0 then
+        vim.schedule(function()
+            vim.notify(
+                "removing handlers while there are pending plugin specs may produce unpredictable behavior\n"
+                    .. "If you know what you are doing, set vim.g.lze.verbose = false",
+                vim.log.levels.ERROR,
+                { title = "lze" }
+            )
+        end)
+    end
     ---@type string[]
     ---@diagnostic disable-next-line: assign-type-mismatch
     local handler_names = type(names) ~= "table" and { names } or names
@@ -22,7 +82,11 @@ function M.remove_handlers(names)
     for _, name in ipairs(handler_names) do
         for i, handler in ipairs(handlers) do
             if handler.spec_field == name then
+                if handler.cleanup then
+                    handler.cleanup()
+                end
                 table.remove(handlers, i)
+                M.libs[name] = nil
                 table.insert(removed_handlers, handler)
                 break
             end
@@ -31,12 +95,9 @@ function M.remove_handlers(names)
     return removed_handlers
 end
 
--- It turns out that its faster when you copy paste.
--- Would be nice to just define it once, but then you lose 10ms
 ---@param spec lze.Plugin|lze.HandlerSpec|lze.SpecImport
-local function is_enabled(spec)
-    local disabled = spec.enabled == false or (type(spec.enabled) == "function" and not spec.enabled())
-    return not disabled
+local function is_disabled(spec)
+    return spec.enabled == false or (type(spec.enabled) == "function" and not spec.enabled())
 end
 
 ---Register new handlers.
@@ -57,12 +118,15 @@ function M.register_handlers(handler_list)
     for _, spec in ipairs(handler_list) do
         local handler = spec.spec_field and spec
             ---@cast spec lze.HandlerSpec
-            or spec.handler and is_enabled(spec) and spec.handler
+            or spec.handler and not is_disabled(spec) and spec.handler
         local spec_field = handler and handler.spec_field or nil
         if spec_field and not existing_handler_fields[spec_field] then
             existing_handler_fields[spec_field] = true
             table.insert(added_names, spec_field)
             table.insert(handlers, handler)
+            if handler.init then
+                handler.init()
+            end
         end
     end
     return added_names
@@ -86,8 +150,6 @@ end
 ---@param plugin lze.Plugin
 ---@return lze.Plugin
 function M.run_modify(plugin)
-    ---@diagnostic disable-next-line: undefined-field
-    local res = plugin
     local if_has_run = function(hndl, p)
         if not hndl.modify then
             return p
@@ -95,8 +157,12 @@ function M.run_modify(plugin)
         if p[hndl.spec_field] == nil then
             return p
         end
+        if is_disabled(p) then
+            return p
+        end
         return hndl.modify(p)
     end
+    local res = plugin
     for _, hndl in ipairs(handlers) do
         res = if_has_run(hndl, res)
     end

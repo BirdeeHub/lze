@@ -23,17 +23,16 @@ In fact, I have even contributed to `lz.n`
 I think having the handlers manage the entire
 state of `lz.n` is an elegant solution.
 
-But it also meant I had to be more careful when writing handlers,
-and `lz.n` to that effect has provided an API to make this easier.
-
-I wanted more things to be **guaranteed**, and I started drafting this.
+But it also meant I had to be more careful with state when writing handlers,
+or else my plugin may not be properly trigger-able.
+`lz.n` to that effect has provided an API to make this easier.
 
 This is my take on `lz.n`.
 
 The core has been entirely rewritten
 and it handles its state entirely differently.
 
-It shares some code where handlers parse their specs,
+It shares some code where some handlers parse their specs,
 otherwise it works entirely differently, but
 with a largely compatible [plugin spec](#plugin-spec)
 
@@ -52,10 +51,6 @@ If your startup plugins have not been given a priority,
 they load in the order passed in.
 
 What order should the directory be imported in? I left it up to you.
-
-Handlers are very different. They have much less
-responsibility to manage state for `lze`.
-But they are not less capable.
 
 > Why does the readme say it is a dead simple library?
 
@@ -175,11 +170,15 @@ vim.g.lze = {
     load = vim.cmd.packadd,
     ---@type boolean
     verbose = true,
+    ---@type integer
+    default_priority = 50,
+    ---@type boolean
+    without_default_handlers = false,
 }
 ```
 
 If `vim.g.lze.verbose` is `false` it will not print a warning
-in cases of duplicate and missing plugins.
+in cases of duplicate and missing plugins, or when passing in an empty list.
 
 ## :books: Usage
 
@@ -217,7 +216,7 @@ require("lze").load(plugins)
 | **beforeAll?** | `fun(lze.Plugin)` | Always executed upon calling `require('lze').load(spec)` before any plugin specs from that call are triggered to be loaded. | `init` |
 | **before?** | `fun(lze.Plugin)` | Executed before a plugin is loaded. | None |
 | **after?** | `fun(lze.Plugin)` | Executed after a plugin is loaded. | `config` |
-| **priority?** | `number` | Only useful for **start** plugins (not lazy-loaded) added within **the same `require('lze').load(spec)` call** to force loading certain plugins first. Default priority is `50`. | `priority` |
+| **priority?** | `number` | Only useful for **start** plugins (not lazy-loaded) added within **the same `require('lze').load(spec)` call** to force loading certain plugins first. Default priority is `50`, or the value of `vim.g.lze.default_priority`. | `priority` |
 | **load?** | `fun(string)` | Can be used to override the `vim.g.lze.load(name)` function for an individual plugin. (default is `vim.cmd.packadd(name)`)[^2] | None. |
 | **allow_again?** | `boolean` or `fun():boolean` | When a plugin has ALREADY BEEN LOADED, true would allow you to add it again. No idea why you would want this outside of testing. | None. |
 | **lazy?** | `boolean` | Using a handler's field sets this automatically, but you can set this manually as well. | `lazy` |
@@ -277,11 +276,11 @@ a PR to fix any of these issues upstream.
 >   for sourcing plugin scripts. For sourcing `after/plugin` directories
 >   manually, you can use [`rtp.nvim`](https://github.com/nvim-neorocks/rtp.nvim).
 >   [Here is an example](https://github.com/nvim-neorocks/lz.n/wiki/lazy%E2%80%90loading-nvim%E2%80%90cmp-and-its-extensions).
-
-> [!TIP]
 >
-> We recommend [care.nvim](https://max397574.github.io/care.nvim/)
-> as a modern alternative to nvim-cmp.
+> - You may also wish to use [`rtp.nvim`](https://github.com/nvim-neorocks/rtp.nvim)
+>   for sourcing `ftdetect` files in plugins without loading them,
+>   for when plugins provide their own filetypes
+>   and you wish to trigger on that filetype.
 
 ### Examples
 
@@ -338,7 +337,7 @@ require("lze").load {
 
   ```lua
   require "paq" {
-      { "nvim-telescope/telescope.nvim", opt = true }
+      { "nvim-telescope/telescope.nvim", opt = true },
       { "NTBBloodBatch/sweetie.nvim", opt = true }
   }
 
@@ -445,22 +444,32 @@ require("lze").load {
   # ... the rest of your nix where you call the builder and export packages
   ```
 
-  - Not on nixkgs-unstable?
+  - Not on nixpkgs-unstable?
 
   If your neovim is not on the `nixpkgs-unstable` channel,
-  `vimPlugins.lze` will not yet be in nixpkgs for you.
+  `vimPlugins.lze` may not yet be in nixpkgs for you.
   You may instead get it from this flake!
   ```nix
   # in your flake inputs:
-  inputs.lze.url = "github:BirdeeHub/lze";
+  inputs = {
+    lze.url = "github:BirdeeHub/lze";
+  };
   ```
   Then, pass your config your inputs from your flake,
-  and retrieve `lze` with `inputs.lze.packages.${pkgs.system}.default`:
+  and retrieve `lze` with:
+  ```nix
+  inputs.lze.packages.${pkgs.system}.default`:
+  ```
 
 </details>
 <!-- markdownlint-restore -->
 
 ### Structuring Your Plugins
+
+Unlike `lazy.nvim`, in `lze` you may call
+`require('lze').load` as many times as you would like.
+
+This means being able to import files via specs is not as useful.
 
 The import spec of `lze` allows for importing a single lua module,
 unlike `lz.n` or `lazy.nvim`, where it imports an entire directory.
@@ -512,11 +521,6 @@ where the imported files would return plugin specs as shown above.
 You may register your own handlers to lazy-load plugins via
 other triggers not already covered by the plugin spec.
 
-> [!WARNING]
-> You must register ALL handlers before calling `require('lze').load`,
-> because they will not be retroactively applied to
-> the `load` calls that occur before they are registered.
-
 ```lua
 ---@param handlers lze.Handler[]|lze.Handler|lze.HandlerSpec[]|lze.HandlerSpec
 ---@return string[] handlers_registered
@@ -548,26 +552,26 @@ there exists a `require('lze').clear_handlers()`
 and a `require('lze').remove_handlers(handler_names: string|string[])`
 function for this purpose. They return the removed handlers.
 
-Here is an example of how you would add a custom handler
-BEFORE the default list of handlers:
-
-<!-- markdownlint-disable MD013 -->
-```lua
-local default_handlers = require('lze').clear_handlers() -- clear_handlers removes ALL handlers
--- and now we can register them in any order we want.
-require("lze").register_handlers(require("my_handlers.b4_defaults"))
-require("lze").register_handlers(default_handlers)
-```
-<!-- markdownlint-enable MD013 -->
-
-Again, this is important:
-
 > [!WARNING]
 > You must register ALL handlers before calling `require('lze').load`,
 > because they will not be retroactively applied to
 > the `load` calls that occur before they are registered.
+>
+> In addition, removing a handler after it already
+> has had plugins added to it is undefined behavior.
+> Existing plugin items will remain in state
+> and trigger-able via `require('lze').trigger_load`
+>
+> While the default handlers clear their state when removed,
+> it is not necessary to be adding and removing handlers often
+> for the purpose of loading plugins or various things in your config.
+>
+> So you should do ALL handler additions AND removals
+> BEFORE calling `require('lze').load`.
 
 #### lze.HandlerSpec
+
+You can also add them as specs instead of just directly as a list.
 
 <!-- markdownlint-disable MD013 -->
 | Property   | Type                         | Description                                               |
@@ -590,6 +594,9 @@ Again, this is important:
 | modify?     | `fun(plugin: lze.Plugin): lze.Plugin` | This function is called before a plugin is added to state. It is your one chance to modify the plugin spec, it is active only if your spec_field was used in that spec, and is called in the order the handlers have been added. |
 | set_lazy?     | `boolean` | Whether using this handler's field should have an effect on the lazy setting. True or nil is true. Default: nil |
 | post_def?        | `fun()`               | For adding custom triggers such as the event handler's `DeferredUIEnter` event, called at the end of `require('lze').load` |
+| lib?        | `table`               | Handlers may export functions and other values via this set, which then may be accessed via `require('lze').h[spec_field].your_func()` |
+| init?        | `fun()`               | Called when the handler is registered. |
+| cleanup?        | `fun()`               | Called when the handler is removed. |
 <!-- markdownlint-enable MD013 -->
 
 Your handler first has a chance to modify the
@@ -640,7 +647,7 @@ ever NEED to get a copy. But it is nice for troubleshooting.
 > so that you don't have to carry around
 > unnecessary state and increase your chance of error and your memory usage.
 > However, not doing so would not cause any bugs in `lze`.
-> It just might let you call `trigger_load` multiple times unnecessarily
+> It just might let you call `trigger_load` multiple times to no effect.
 
 ## :green_heart: Contributing
 

@@ -2,17 +2,16 @@
 -- because require('lze') requires this module.
 local loader = require("lze.c.loader")
 
----@class lze.CmdHandler: lze.Handler
+local states = {}
 
----@type lze.CmdHandler
+---@type lze.Handler
 local M = {
-    pending = {},
     spec_field = "cmd",
 }
 
 ---@param cmd string
 local function load(cmd)
-    loader.load(vim.tbl_values(M.pending[cmd]))
+    loader.load(vim.tbl_values(states[cmd]))
 end
 
 ---@param cmd string
@@ -43,7 +42,7 @@ local function add_cmd(cmd)
         if not info then
             vim.schedule(function()
                 ---@type string
-                local plugins = "`" .. table.concat(vim.tbl_values(M.pending[cmd]), ", ") .. "`"
+                local plugins = "`" .. table.concat(vim.tbl_values(states[cmd]), ", ") .. "`"
                 vim.notify("Command `" .. cmd .. "` not found after loading " .. plugins, vim.log.levels.ERROR)
             end)
             return
@@ -69,7 +68,7 @@ end
 
 ---@param name string
 function M.before(name)
-    for cmd, plugins in pairs(M.pending) do
+    for cmd, plugins in pairs(states) do
         if plugins[name] then
             pcall(vim.api.nvim_del_user_command, cmd)
         end
@@ -94,10 +93,17 @@ function M.add(plugin)
     end
     ---@param cmd string
     vim.iter(cmd_def):each(function(cmd)
-        M.pending[cmd] = M.pending[cmd] or {}
-        M.pending[cmd][plugin.name] = plugin.name
+        states[cmd] = states[cmd] or {}
+        states[cmd][plugin.name] = plugin.name
         add_cmd(cmd)
     end)
+end
+
+function M.cleanup()
+    for cmd, _ in pairs(states) do
+        pcall(vim.api.nvim_del_user_command, cmd)
+    end
+    states = {}
 end
 
 return M

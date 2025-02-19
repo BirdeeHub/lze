@@ -3,53 +3,51 @@ vim.g.lze = {
     load = function() end,
 }
 local lze = require("lze")
-local event = require("lze.h.event")
 local loader = require("lze.c.loader")
 local spy = require("luassert.spy")
 
 describe("handlers.event", function()
     it("can parse from string", function()
-        assert.same({
+        local f = function(inspec, evstr)
+            local res = lze.h.event.parse(evstr)
+            assert.Same(inspec.event, res.event)
+            assert.Same(inspec.pattern, res.pattern)
+            assert.Same(inspec.id, res.id)
+        end
+        f({
             event = "VimEnter",
             id = "VimEnter",
-        }, event.parse("VimEnter"))
+        }, "VimEnter")
     end)
     it("can parse from table", function()
-        assert.same(
-            {
-                event = "VimEnter",
-                id = "VimEnter",
-            },
-            event.parse({
-                event = "VimEnter",
+        local f = function(inspec)
+            local res = lze.h.event.parse({
+                event = inspec.event,
+                pattern = inspec.pattern,
             })
-        )
-        assert.same(
-            {
-                event = { "VimEnter", "BufEnter" },
-                id = "VimEnter|BufEnter",
-            },
-            event.parse({
-                event = { "VimEnter", "BufEnter" },
-            })
-        )
-        assert.same(
-            {
-                event = "BufEnter",
-                id = "BufEnter *.lua",
-                pattern = "*.lua",
-            },
-            event.parse({
-                event = "BufEnter",
-                pattern = "*.lua",
-            })
-        )
+            assert.Same(inspec.event, res.event)
+            assert.Same(inspec.pattern, res.pattern)
+            assert.Same(inspec.id, res.id)
+        end
+        f({
+            event = "VimEnter",
+            id = "VimEnter",
+        })
+        f({
+            event = { "VimEnter", "BufEnter" },
+            id = "VimEnter|BufEnter",
+        })
+        f({
+            event = "BufEnter",
+            id = "BufEnter *.lua",
+            pattern = "*.lua",
+        })
     end)
     it("Event only loads plugin once", function()
         ---@type lze.Plugin
         local plugin = {
             name = "foo",
-            event = { event.parse("BufEnter") },
+            event = { lze.h.event.parse("BufEnter") },
         }
         local spy_load = spy.on(loader, "load")
         lze.load(plugin)
@@ -83,15 +81,15 @@ describe("handlers.event", function()
             assert.Equal(1, called_number[plugin.name])
             assert.False(lze.state(plugin.name))
         end
-        itt({ event.parse("BufEnter"), event.parse("WinEnter") }, "foo2")
-        itt({ event.parse("WinEnter"), event.parse("BufEnter") }, "foo3")
+        itt({ lze.h.event.parse("BufEnter"), lze.h.event.parse("WinEnter") }, "foo2")
+        itt({ lze.h.event.parse("WinEnter"), lze.h.event.parse("BufEnter") }, "foo3")
     end)
     it("Plugins' event handlers are triggered", function()
         local triggered = false
         ---@type lze.Plugin
         local plugin = {
             name = "foo6",
-            event = { event.parse("BufEnter") },
+            event = { lze.h.event.parse("BufEnter") },
             after = function()
                 triggered = true
             end,
@@ -106,7 +104,7 @@ describe("handlers.event", function()
         ---@type lze.Plugin
         local plugin = {
             name = "bla",
-            event = { event.parse("DeferredUIEnter") },
+            event = { lze.h.event.parse("DeferredUIEnter") },
         }
         local spy_load = spy.on(loader, "load")
         lze.load(plugin)

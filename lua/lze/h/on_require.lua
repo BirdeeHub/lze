@@ -9,7 +9,7 @@ local states = {}
 -- replacing the global require function
 
 local old_require = require
-require("_G").require = function(mod_path)
+local new_require = function(mod_path)
     local ok, value = pcall(old_require, mod_path)
     if ok then
         return value
@@ -33,13 +33,18 @@ end
 ---@field on_require? string[]|string
 
 ---@type lze.Handler
----@diagnostic disable-next-line: missing-fields
 local M = {
-    old_require = old_require,
     spec_field = "on_require",
     ---@param name string
     before = function(name)
         states[name] = nil
+    end,
+    init = function()
+        _G.require = new_require
+    end,
+    cleanup = function()
+        _G.require = old_require
+        states = {}
     end,
 }
 

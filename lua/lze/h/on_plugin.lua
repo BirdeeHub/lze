@@ -6,7 +6,6 @@ local trigger_load = require("lze.c.loader").load
 local states = {}
 
 ---@type lze.Handler
----@diagnostic disable-next-line: missing-fields
 local M = {
     spec_field = "on_plugin",
 }
@@ -49,6 +48,10 @@ function M.after(name)
         trigger_load(states[name])
         states[name] = nil
     end
+end
+
+function M.cleanup()
+    states = {}
 end
 
 return M

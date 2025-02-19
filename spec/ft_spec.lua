@@ -3,17 +3,22 @@ vim.g.lze = {
     load = function() end,
 }
 local lze = require("lze")
-local ft = require("lze.h.ft")
 local loader = require("lze.c.loader")
 local spy = require("luassert.spy")
 
 describe("handlers.ft", function()
     it("can parse from string", function()
-        assert.same({
+        local f = function(inspec, ft)
+            local res = lze.h.ft.parse(ft)
+            assert.Same(inspec.event, res.event)
+            assert.Same(inspec.pattern, res.pattern)
+            assert.Same(inspec.id, res.id)
+        end
+        f({
             event = "FileType",
             id = "rust",
             pattern = "rust",
-        }, ft.parse("rust"))
+        }, "rust")
     end)
     it("filetype event loads plugins", function()
         ---@type lze.Plugin
