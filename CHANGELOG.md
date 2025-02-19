@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/BirdeeHub/lze/compare/v0.7.11...v0.8.0) (2025-02-19)
+
+
+### Features
+
+* **lze.h:** lze.h[spec_field].handler_exported_function() ([67220ae](https://github.com/BirdeeHub/lze/commit/67220aeb7dc079d4b45d875e0dbdab842718e956))
+
 ## [0.7.11](https://github.com/BirdeeHub/lze/compare/v0.7.10...v0.7.11) (2025-02-13)
 
 
