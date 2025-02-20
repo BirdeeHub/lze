@@ -253,6 +253,11 @@ require("lze").load(plugins)
   Can be used as an `event` to lazy-load plugins that are not immediately needed
   for the initial UI[^4].
 
+But users may define more aliased events if they wish.
+The event handler exports a function you may call to set them.
+
+`require('lze').h.event.set_event_alias(name: string, spec: lze.EventSpec?)`
+
 [^4]: This is equivalent to `lazy.nvim`'s `VeryLazy` event.
 
 ### Plugins with after directories
