@@ -204,89 +204,6 @@ require("lze").load(plugins)
 > plugin specs is not supported. It will prevent you from doing so,
 > and return the list of duplicate names
 
-### Plugin spec
-
-#### Loading hooks
-
-<!-- markdownlint-disable MD013 -->
-| Property         | Type | Description | `lazy.nvim` equivalent |
-|------------------|------|-------------|-----------------------|
-| **[1]** | `string` | REQUIRED. The plugin's name (not the module name). This is the directory name of the plugin in the packpath and is usually the same as the repo name of the repo it was cloned from. | `name`[^1] |
-| **enabled?** | `boolean` or `fun():boolean` | When `false`, or if the `function` returns `nil` or `false`, then this plugin will not be included in the spec. | `enabled` |
-| **beforeAll?** | `fun(lze.Plugin)` | Always executed upon calling `require('lze').load(spec)` before any plugin specs from that call are triggered to be loaded. | `init` |
-| **before?** | `fun(lze.Plugin)` | Executed before a plugin is loaded. | None |
-| **after?** | `fun(lze.Plugin)` | Executed after a plugin is loaded. | `config` |
-| **priority?** | `number` | Only useful for **start** plugins (not lazy-loaded) added within **the same `require('lze').load(spec)` call** to force loading certain plugins first. Default priority is `50`, or the value of `vim.g.lze.default_priority`. | `priority` |
-| **load?** | `fun(string)` | Can be used to override the `vim.g.lze.load(name)` function for an individual plugin. (default is `vim.cmd.packadd(name)`)[^2] | None. |
-| **allow_again?** | `boolean` or `fun():boolean` | When a plugin has ALREADY BEEN LOADED, true would allow you to add it again. No idea why you would want this outside of testing. | None. |
-| **lazy?** | `boolean` | Using a handler's field sets this automatically, but you can set this manually as well. | `lazy` |
-<!-- markdownlint-enable MD013 -->
-
-#### Lazy-loading triggers provided by the default handlers
-
-<!-- markdownlint-disable MD013 -->
-| Property | Type | Description | `lazy.nvim` equivalent |
-|----------|------|-------------|----------------------|
-| **event?** | `string` or `{event?:string\|string[], pattern?:string\|string[]}\` or `string[]` | Lazy-load on event. Events can be specified as `BufEnter` or with a pattern like `BufEnter *.lua`. | `event` |
-| **cmd?** | `string` or `string[]` | Lazy-load on command. | `cmd` |
-| **ft?** | `string` or `string[]` | Lazy-load on filetype. | `ft` |
-| **keys?** | `string` or `string[]` or `lze.KeysSpec[]` | Lazy-load on key mapping. | `keys` |
-| **colorscheme?** | `string` or `string[]` | Lazy-load on colorscheme. | None. `lazy.nvim` lazy-loads colorschemes automatically[^3]. |
-| **dep_of?** | `string` or `string[]` | Lazy-load before another plugin but after its `before` hook. Accepts a plugin name or a list of plugin names. |  None but is sorta the reverse of the dependencies key of the `lazy.nvim` plugin spec |
-| **on_plugin?** | `string` or `string[]` | Lazy-load after another plugin but before its `after` hook. Accepts a plugin name or a list of plugin names. | None. |
-| **on_require?** | `string` or `string[]` | Accepts a top-level **lua module** name or a list of top-level **lua module** names. Will load when any submodule of those listed is `require`d | None. `lazy.nvim` does this automatically. |
-<!-- markdownlint-enable MD013 -->
-
-[^1]: In contrast to `lazy.nvim`'s `name` field, a `lze.PluginSpec`'s `name` *is not optional*.
-      This is because `lze` is not a plugin manager and needs to be told which
-      plugins to load.
-[^2]: for example, lazy-loading cmp sources will
-      require you to source its `after/plugin` file,
-      as packadd does not do this automatically for you.
-[^3]: The reason this library doesn't lazy-load colorschemes automatically is that
-      it would have to know where the plugin is installed in order to determine
-      which plugin to load.
-
-### User events
-
-- `DeferredUIEnter`: Triggered when `require('lze').load()` is done and after `UIEnter`.
-  Can be used as an `event` to lazy-load plugins that are not immediately needed
-  for the initial UI[^4].
-
-But users may define more aliased events if they wish.
-The event handler exports a function you may call to set them.
-
-`require('lze').h.event.set_event_alias(name: string, spec: lze.EventSpec?)`
-
-[^4]: This is equivalent to `lazy.nvim`'s `VeryLazy` event.
-
-### Plugins with after directories
-
-Relying on another plugin's `plugin` or `after/plugin` scripts is considered a bug,
-as Neovim's built-in loading mechanism does not guarantee initialisation order.
-Requiring users to manually call a `setup` function [is an anti pattern](https://github.com/nvim-neorocks/nvim-best-practices?tab=readme-ov-file#zap-initialization).
-Forcing users to think about the order in which they load plugins that
-extend or depend on each other is not great either and we
-suggest opening an issue or submitting
-a PR to fix any of these issues upstream.
-
-> [!NOTE]
->
-> - This does not work with plugins that rely on `after/plugin`, such as many
->   nvim-cmp sources, because Neovim's `:h packadd` does not source
->   `after/plugin` scripts after startup has completed.
->   We recommend bundling such plugins with their extensions, or sourcing
->   the `after` scripts manually.
->   In the spirit of the UNIX philosophy, `lze` does not provide any functions
->   for sourcing plugin scripts. For sourcing `after/plugin` directories
->   manually, you can use [`rtp.nvim`](https://github.com/nvim-neorocks/rtp.nvim).
->   [Here is an example](https://github.com/nvim-neorocks/lz.n/wiki/lazy%E2%80%90loading-nvim%E2%80%90cmp-and-its-extensions).
->
-> - You may also wish to use [`rtp.nvim`](https://github.com/nvim-neorocks/rtp.nvim)
->   for sourcing `ftdetect` files in plugins without loading them,
->   for when plugins provide their own filetypes
->   and you wish to trigger on that filetype.
-
 ### Examples
 
 ```lua
@@ -468,6 +385,89 @@ require("lze").load {
 
 </details>
 <!-- markdownlint-restore -->
+
+### Plugin spec
+
+#### Loading hooks
+
+<!-- markdownlint-disable MD013 -->
+| Property         | Type | Description | `lazy.nvim` equivalent |
+|------------------|------|-------------|-----------------------|
+| **[1]** | `string` | REQUIRED. The plugin's name (not the module name). This is the directory name of the plugin in the packpath and is usually the same as the repo name of the repo it was cloned from. | `name`[^1] |
+| **enabled?** | `boolean` or `fun():boolean` | When `false`, or if the `function` returns `nil` or `false`, then this plugin will not be included in the spec. | `enabled` |
+| **beforeAll?** | `fun(lze.Plugin)` | Always executed upon calling `require('lze').load(spec)` before any plugin specs from that call are triggered to be loaded. | `init` |
+| **before?** | `fun(lze.Plugin)` | Executed before a plugin is loaded. | None |
+| **after?** | `fun(lze.Plugin)` | Executed after a plugin is loaded. | `config` |
+| **priority?** | `number` | Only useful for **start** plugins (not lazy-loaded) added within **the same `require('lze').load(spec)` call** to force loading certain plugins first. Default priority is `50`, or the value of `vim.g.lze.default_priority`. | `priority` |
+| **load?** | `fun(string)` | Can be used to override the `vim.g.lze.load(name)` function for an individual plugin. (default is `vim.cmd.packadd(name)`)[^2] | None. |
+| **allow_again?** | `boolean` or `fun():boolean` | When a plugin has ALREADY BEEN LOADED, true would allow you to add it again. No idea why you would want this outside of testing. | None. |
+| **lazy?** | `boolean` | Using a handler's field sets this automatically, but you can set this manually as well. | `lazy` |
+<!-- markdownlint-enable MD013 -->
+
+#### Lazy-loading triggers provided by the default handlers
+
+<!-- markdownlint-disable MD013 -->
+| Property | Type | Description | `lazy.nvim` equivalent |
+|----------|------|-------------|----------------------|
+| **event?** | `string` or `{event?:string\|string[], pattern?:string\|string[]}\` or `string[]` | Lazy-load on event. Events can be specified as `BufEnter` or with a pattern like `BufEnter *.lua`. | `event` |
+| **cmd?** | `string` or `string[]` | Lazy-load on command. | `cmd` |
+| **ft?** | `string` or `string[]` | Lazy-load on filetype. | `ft` |
+| **keys?** | `string` or `string[]` or `lze.KeysSpec[]` | Lazy-load on key mapping. | `keys` |
+| **colorscheme?** | `string` or `string[]` | Lazy-load on colorscheme. | None. `lazy.nvim` lazy-loads colorschemes automatically[^3]. |
+| **dep_of?** | `string` or `string[]` | Lazy-load before another plugin but after its `before` hook. Accepts a plugin name or a list of plugin names. |  None but is sorta the reverse of the dependencies key of the `lazy.nvim` plugin spec |
+| **on_plugin?** | `string` or `string[]` | Lazy-load after another plugin but before its `after` hook. Accepts a plugin name or a list of plugin names. | None. |
+| **on_require?** | `string` or `string[]` | Accepts a top-level **lua module** name or a list of top-level **lua module** names. Will load when any submodule of those listed is `require`d | None. `lazy.nvim` does this automatically. |
+<!-- markdownlint-enable MD013 -->
+
+[^1]: In contrast to `lazy.nvim`'s `name` field, a `lze.PluginSpec`'s `name` *is not optional*.
+      This is because `lze` is not a plugin manager and needs to be told which
+      plugins to load.
+[^2]: for example, lazy-loading cmp sources will
+      require you to source its `after/plugin` file,
+      as packadd does not do this automatically for you.
+[^3]: The reason this library doesn't lazy-load colorschemes automatically is that
+      it would have to know where the plugin is installed in order to determine
+      which plugin to load.
+
+### User events
+
+- `DeferredUIEnter`: Triggered when `require('lze').load()` is done and after `UIEnter`.
+  Can be used as an `event` to lazy-load plugins that are not immediately needed
+  for the initial UI[^4].
+
+But users may define more aliased events if they wish.
+The event handler exports a function you may call to set them.
+
+`require('lze').h.event.set_event_alias(name: string, spec: lze.EventSpec?)`
+
+[^4]: This is equivalent to `lazy.nvim`'s `VeryLazy` event.
+
+### Plugins with after directories
+
+Relying on another plugin's `plugin` or `after/plugin` scripts is considered a bug,
+as Neovim's built-in loading mechanism does not guarantee initialisation order.
+Requiring users to manually call a `setup` function [is an anti pattern](https://github.com/nvim-neorocks/nvim-best-practices?tab=readme-ov-file#zap-initialization).
+Forcing users to think about the order in which they load plugins that
+extend or depend on each other is not great either and we
+suggest opening an issue or submitting
+a PR to fix any of these issues upstream.
+
+> [!NOTE]
+>
+> - This does not work with plugins that rely on `after/plugin`, such as many
+>   nvim-cmp sources, because Neovim's `:h packadd` does not source
+>   `after/plugin` scripts after startup has completed.
+>   We recommend bundling such plugins with their extensions, or sourcing
+>   the `after` scripts manually.
+>   In the spirit of the UNIX philosophy, `lze` does not provide any functions
+>   for sourcing plugin scripts. For sourcing `after/plugin` directories
+>   manually, you can use [`rtp.nvim`](https://github.com/nvim-neorocks/rtp.nvim).
+>   [Here is an example](https://github.com/nvim-neorocks/lz.n/wiki/lazy%E2%80%90loading-nvim%E2%80%90cmp-and-its-extensions).
+>
+> - You may also wish to use [`rtp.nvim`](https://github.com/nvim-neorocks/rtp.nvim)
+>   for sourcing `ftdetect` files in plugins without loading them,
+>   for when plugins provide their own filetypes
+>   and you wish to trigger on that filetype.
 
 ### Structuring Your Plugins
 
