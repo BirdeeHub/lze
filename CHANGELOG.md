@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.1](https://github.com/BirdeeHub/lze/compare/v0.8.0...v0.8.1) (2025-03-07)
+
+
+### Bug Fixes
+
+* **event:** ft loop ([308290b](https://github.com/BirdeeHub/lze/commit/308290b31b77c9f24eb63abbd07394f1d1797ae2))
+* **event:** ft loop ([5ba6ccf](https://github.com/BirdeeHub/lze/commit/5ba6ccfc854c876902a1a29bfd39cfb3b141370b))
+
 ## [0.8.0](https://github.com/BirdeeHub/lze/compare/v0.7.11...v0.8.0) (2025-02-19)
 
 
