@@ -103,31 +103,19 @@ local function get_augroups(event)
         :totable()
 end
 
-local event_triggers = {
-    FileType = "BufReadPost",
-    BufReadPost = "BufReadPre",
-}
 -- Get the current state of the event and all the events that will be fired
 ---@param event string
 ---@param buf integer
 ---@param data unknown
----@return lze.EventOpts[]
+---@return lze.EventOpts
 local function get_state(event, buf, data)
-    ---@type lze.EventOpts[]
-    local state = {}
-    while event do
-        ---@type lze.EventOpts
-        local event_opts = {
-            event = event,
-            exclude = event ~= "FileType" and get_augroups(event) or nil,
-            buffer = buf,
-            data = data,
-        }
-        table.insert(state, 1, event_opts)
-        data = nil -- only pass the data to the first event
-        event = event_triggers[event]
-    end
-    return state
+    ---@type lze.EventOpts
+    return {
+        event = event,
+        exclude = get_augroups(event),
+        buffer = buf,
+        data = data,
+    }
 end
 
 -- Trigger an event
@@ -187,10 +175,7 @@ local function add_event(event)
             -- load the plugins
             loader.load(vim.tbl_keys(pending[event.id]))
             -- check if any plugin created an event handler for this event and fire the group
-            ---@param s lze.EventOpts
-            vim.iter(state):each(function(s)
-                trigger(s)
-            end)
+            trigger(state)
         end,
     })
 end
