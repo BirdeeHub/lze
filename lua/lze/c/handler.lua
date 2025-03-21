@@ -75,11 +75,10 @@ function M.remove_handlers(names)
             )
         end)
     end
-    ---@type string[]
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    local handler_names = type(names) ~= "table" and { names } or names
+    names = type(names) ~= "table" and { names } or names
+    ---@cast names string[]
     local removed_handlers = {}
-    for _, name in ipairs(handler_names) do
+    for _, name in ipairs(names) do
         for i, handler in ipairs(handlers) do
             if handler.spec_field == name then
                 if handler.cleanup then
@@ -95,7 +94,7 @@ function M.remove_handlers(names)
     return removed_handlers
 end
 
----@param spec lze.Plugin|lze.HandlerSpec|lze.SpecImport
+---@param spec lze.Plugin|lze.HandlerSpec
 local function is_disabled(spec)
     return spec.enabled == false or (type(spec.enabled) == "function" and not spec.enabled())
 end
@@ -133,7 +132,7 @@ function M.register_handlers(handler_list)
 end
 
 ---gets value for plugin.lazy by checking handler field useage
----@param spec lze.PluginSpec
+---@param spec lze.Plugin
 ---@return boolean
 function M.is_lazy(spec)
     for _, hndl in ipairs(handlers) do
@@ -148,9 +147,13 @@ end
 ---and then spec_field for that handler on the plugin
 ---is not nil
 ---@param plugin lze.Plugin
+---@param delay fun(f: fun())
 ---@return lze.Plugin
-function M.run_modify(plugin)
-    local if_has_run = function(hndl, p)
+function M.run_modify(plugin, delay)
+    ---@param hndl lze.Handler
+    ---@param p lze.Plugin
+    ---@return any
+    local function if_has_run(hndl, p)
         if not hndl.modify then
             return p
         end
@@ -160,7 +163,11 @@ function M.run_modify(plugin)
         if is_disabled(p) then
             return p
         end
-        return hndl.modify(p)
+        local ret, delayed = hndl.modify(p)
+        if delayed then
+            delay(delayed)
+        end
+        return ret
     end
     local res = plugin
     for _, hndl in ipairs(handlers) do
@@ -201,22 +208,21 @@ function M.run_before(name)
     end
 end
 
----@param plugin lze.Plugin
-local function enable(plugin)
-    for _, handler in ipairs(handlers) do
-        if handler.add then
-            handler.add(vim.deepcopy(plugin))
-        end
-    end
-end
-
 -- calls add for all the handlers, each handler gets a copy, so that they
 -- cannot change the plugin object recieved by the other handlers
 -- outside of the modify step
 ---@param plugins lze.Plugin[]
-function M.init(plugins)
+---@param delay fun(f: fun())
+function M.init(plugins, delay)
     for _, plugin in ipairs(plugins) do
-        enable(plugin)
+        for _, handler in ipairs(handlers) do
+            if handler.add then
+                local delayed = handler.add(vim.deepcopy(plugin))
+                if delayed then
+                    delay(delayed)
+                end
+            end
+        end
     end
 end
 

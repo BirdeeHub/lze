@@ -119,10 +119,10 @@ error("Cannot import a meta module")
 ---
 ---Your handler's 1 chance to modify plugins before they are entered into state!
 ---Called only if your field was present.
----@field modify? fun(plugin: lze.Plugin): lze.Plugin
+---@field modify? fun(plugin: lze.Plugin): lze.Plugin, fun()?
 ---
 ---Called after being entered into state but before any loading has occurred
----@field add? fun(plugin: lze.Plugin)
+---@field add? fun(plugin: lze.Plugin): fun()?
 ---
 ---Whether using this handler's field should have an effect on the lazy setting
 ---True or nil is true

@@ -136,11 +136,78 @@ function M.load(plugin_names)
     return skipped
 end
 
+local delayed = {}
+---@param f fun()
+local function delay(f)
+    table.insert(delayed, f)
+end
+local function run_delayed()
+    local torun = delayed
+    delayed = {}
+    for _, f in ipairs(torun) do
+        local ok, err = pcall(f)
+        if not ok then
+            vim.schedule(function()
+                vim.notify(
+                    "Error occurred in deferred function returned by handler modify or add hook \nError text: " .. err,
+                    vim.log.levels.ERROR,
+                    { title = "lze.handler_deferred_fn" }
+                )
+            end)
+        end
+    end
+end
+
+---@param plugins lze.Plugin[]
+---@param verbose boolean
+---@return lze.Plugin[] final
+---@return lze.Plugin[] disabled
+local function add(plugins, verbose)
+    local final = {}
+    local duplicates = {}
+    for _, v in ipairs(plugins) do
+        local plugin = require("lze.c.handler").run_modify(v, delay)
+        assert(
+            type(plugin) == "table" and type(plugin.name) == "string",
+            "handler modify hook must return a valid plugin"
+        )
+        if plugin.lazy == nil then
+            plugin.lazy = require("lze.c.handler").is_lazy(plugin)
+        end
+        local p = vim.deepcopy(plugin)
+        if is_enabled(plugin) then
+            -- deepcopy after all handlers use modify
+            -- now we have a copy the handlers can't change
+            local name = plugin.name
+            if state[name] == nil then
+                state[name] = p
+                table.insert(final, p)
+            elseif v.allow_again and not state[name] then
+                state[name] = p
+                table.insert(final, p)
+            else
+                table.insert(duplicates, p)
+                if verbose then
+                    vim.schedule(function()
+                        vim.notify(
+                            "attempted to add " .. plugin.name .. " twice",
+                            vim.log.levels.ERROR,
+                            { title = "lze" }
+                        )
+                    end)
+                end
+            end
+        end
+    end
+    -- Return copy of result, and names of duplicates
+    -- This prevents handlers from changing state after the handler's modify hooks
+    return vim.deepcopy(final), duplicates
+end
+
 ---@param plugins lze.Plugin[]
 ---@param verbose boolean
 local function load_startup_plugins(plugins, verbose)
     local startups = {}
-    -- NOTE: default priority is 50
     local default_priority = vim.tbl_get(vim.g, "lze", "default_priority") or 50
     for _, plugin in ipairs(plugins) do
         if not plugin.lazy then
@@ -168,53 +235,32 @@ local function load_startup_plugins(plugins, verbose)
     end
 end
 
----@param plugins lze.Plugin[]
----@return lze.Plugin[] final
----@return lze.Plugin[] disabled
-local function add(plugins)
-    local final = {}
-    local duplicates = {}
-    -- deepcopy after all handlers use modify
-    -- now we have a copy the handlers can't change
-    for _, v in ipairs(vim.deepcopy(plugins)) do
-        local name = v.name
-        if state[name] == nil then
-            state[name] = v
-            table.insert(final, v)
-        elseif v.allow_again and not state[name] then
-            state[name] = v
-            table.insert(final, v)
-        else
-            table.insert(duplicates, v)
-        end
-    end
-    -- Return copy of result, and names of duplicates
-    -- This prevents handlers from changing state after the handler's modify hooks
-    return vim.deepcopy(final), duplicates
-end
-
 ---@type fun(spec: string|lze.Spec): lze.Plugin[]
 function M.define(spec)
     local verbose = vim.tbl_get(vim.g, "lze", "verbose") ~= false
-    if spec == nil or spec == {} then
+    if type(spec) == "string" then
+        spec = { import = spec }
+    elseif spec == nil or type(spec) ~= "table" then
         if verbose then
             vim.schedule(function()
-                vim.notify("load has been called, but no spec was provided", vim.log.levels.ERROR, { title = "lze" })
+                vim.notify(
+                    "load was called with no arguments or invalid spec. Called with: " .. vim.inspect(spec),
+                    vim.log.levels.ERROR,
+                    { title = "lze" }
+                )
             end)
         end
         return {}
     end
-    if type(spec) == "string" then
-        spec = { import = spec }
-    end
     -- plugins that are parsed as disabled in this stage will not be included
     -- plugins that are parsed as enabled in this stage will remain in the queue
     -- until trigger_load is called AND the plugin is parsed as enabled at that time.
-    local plugins = require("lze.c.parse")(spec, require("lze.c.handler").is_lazy, require("lze.c.handler").run_modify)
+    local plugins = require("lze.c.parse")(spec)
     -- add non-duplicates to state.
-    local final_plugins, duplicates = add(plugins)
+    local final_plugins, duplicates = add(plugins, verbose)
     -- calls handler adds with copies to prevent handlers messing with each other
-    require("lze.c.handler").init(final_plugins)
+    require("lze.c.handler").init(final_plugins, delay)
+    run_delayed()
     -- will call beforeAll of all plugin specs in the order passed in.
     -- will then call trigger_load on the non-lazy plugins
     -- in order of priority and the order passed in.
@@ -222,13 +268,6 @@ function M.define(spec)
     -- handlers can set up any of their own triggers for themselves here
     -- such as things like the event handler's DeferredUIEnter event
     require("lze.c.handler").run_post_def()
-    if verbose then
-        for _, v in ipairs(duplicates) do
-            vim.schedule(function()
-                vim.notify("attempted to add " .. v.name .. " twice", vim.log.levels.ERROR, { title = "lze" })
-            end)
-        end
-    end
     return duplicates
 end
 

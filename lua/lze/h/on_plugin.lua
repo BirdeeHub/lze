@@ -30,8 +30,9 @@ function M.add(plugin)
     end
     for _, name in ipairs(loaded_on) do
         if require("lze").state(name) == false then
-            trigger_load(plugin.name)
-            return
+            return function()
+                trigger_load(plugin.name)
+            end
         end
     end
     for _, name in ipairs(loaded_on) do

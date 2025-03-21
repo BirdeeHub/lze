@@ -593,10 +593,10 @@ You can also add them as specs instead of just directly as a list.
 | Property   | Type                              | Description                                               |
 | ---        | ---                               | ---                                                       |
 | spec_field | `string`                          | the `lze.PluginSpec` field used to configure the handler |
-| add?        | `fun(plugin: lze.Plugin)`        | called once for each handler before any plugin has been loaded. Tells your handler about each plugin so you can set up a trigger for it if your handler was used. |
+| add?        | `fun(plugin: lze.Plugin): fun()?`        | called once for each handler before any plugin has been loaded. Tells your handler about each plugin so you can set up a trigger for it if your handler was used. |
 | before?        | `fun(name: string)`               | called after each plugin spec's before `hook`, and before its `load` hook |
 | after?        | `fun(name: string)`               | called after each plugin spec's `load` hook and before its `after` hook |
-| modify?     | `fun(plugin: lze.Plugin): lze.Plugin` | This function is called before a plugin is added to state. It is your one chance to modify the plugin spec, it is active only if your spec_field was used in that spec, and is called in the order the handlers have been added. |
+| modify?     | `fun(plugin: lze.Plugin): lze.Plugin, fun()?` | This function is called before a plugin is added to state. It is your one chance to modify the plugin spec, it is active only if your spec_field was used in that spec, and is called in the order the handlers have been added. |
 | set_lazy?     | `boolean` | Whether using this handler's field should have an effect on the lazy setting. True or nil is true. Default: nil |
 | post_def?        | `fun()`               | For adding custom triggers such as the event handler's `DeferredUIEnter` event, called at the end of `require('lze').load` |
 | lib?        | `table`               | Handlers may export functions and other values via this set, which then may be accessed via `require('lze').h[spec_field].your_func()` |
@@ -604,26 +604,39 @@ You can also add them as specs instead of just directly as a list.
 | cleanup?        | `fun()`               | Called when the handler is removed. |
 <!-- markdownlint-enable MD013 -->
 
+All handler hooks will be called in the order in which your handlers are registered.
+
 Your handler first has a chance to modify the
 parsed plugin spec before it is loaded into the state of `lze`.
+None of the builtin handlers have this hook.
 
-The modify field of a handler will only be called if that handler's
+The `modify` field of a handler will only be called if that handler's
 `spec_field` was used in that [plugin spec](#plugin-spec) (meaning, it is not nil).
 
-They will be called in the order in which your handlers are registered,
-and none of the builtin handlers use it.
+It is called before the plugin is added to state,
+and thus you will not be able to call `trigger_load` on it yet.
+To get around this, you may return a function
+as an optional second return value, which will
+be called after `add` and before any functions deferred by `add`.
 
-Then, your handler will have a chance to add plugins to its list to trigger,
-via its `add` function, which is called before any plugins have been loaded
+Then, your handler will have a chance to add plugins to its list to trigger
+via its `add` hook. The `add` hook is called
+before any plugins have been loaded
 in that `require('lze').load` call.
+
+You should also avoid calling `trigger_load` in the `add` hook,
+as it may not have been added to all handlers yet.
+You may optionally return a function in order to defer code
+until after all `add` hooks and all functions
+deferred by `modify` have been called.
 
 Your handler will then decide when to load
 a plugin and run its associated hooks
 using the `trigger_load` function.
 
 ```lua
-  ---@overload fun(plugin_name: string | string[]): string[]
-  require('lze').trigger_load
+---@overload fun(plugin_name: string | string[]): string[]
+require('lze').trigger_load
 ```
 
 `trigger_load` will resist being called multiple times on the same plugin name.
