@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/BirdeeHub/lze/compare/v0.9.0...v0.9.1) (2025-03-21)
+
+
+### Bug Fixes
+
+* **beforeAll:** once again beforeAll ([da9a0c8](https://github.com/BirdeeHub/lze/commit/da9a0c8e44162fecd1b03c41dbb55e133f8bc65f))
+
 ## [0.9.0](https://github.com/BirdeeHub/lze/compare/v0.8.1...v0.9.0) (2025-03-21)
 
 
