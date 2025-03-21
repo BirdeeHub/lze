@@ -178,7 +178,7 @@ local function add(plugins, verbose)
         if is_enabled(plugin) then
             -- deepcopy after all handlers use modify
             -- now we have a copy the handlers can't change
-            local name = plugin.name
+            local name = p.name
             if state[name] == nil then
                 state[name] = p
                 table.insert(final, p)
