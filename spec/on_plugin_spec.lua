@@ -97,4 +97,20 @@ describe("handlers.on_plugin", function()
         assert.True(vim.tbl_contains(plugin_state[tpl_2.name].loaded_after_before, "test_plugin"))
         assert.True(vim.tbl_contains(plugin_state[tpl_2.name].loaded_after_before, "test_plugin_2"))
     end)
+    it("dep_of loads if other was loaded already", function()
+        local testval = false
+        local defertest = {
+            "defer_test_plugin",
+        }
+        local defertest2 = {
+            "defer_test_plugin_2",
+            on_plugin = { "defer_test_plugin" },
+            load = function(_)
+                testval = true
+            end,
+        }
+        lze.load(defertest)
+        lze.load(defertest2)
+        assert.True(testval)
+    end)
 end)
