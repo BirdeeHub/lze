@@ -218,6 +218,7 @@ local function load_startup_plugins(plugins, verbose)
         end
         hook("beforeAll", plugin)
     end
+    run_delayed()
     table.sort(startups, function(a, b)
         return a.priority > b.priority
     end)
@@ -260,7 +261,6 @@ function M.define(spec)
     local final_plugins, duplicates = add(plugins, verbose)
     -- calls handler adds with copies to prevent handlers messing with each other
     require("lze.c.handler").init(final_plugins, delay)
-    run_delayed()
     -- will call beforeAll of all plugin specs in the order passed in.
     -- will then call trigger_load on the non-lazy plugins
     -- in order of priority and the order passed in.
