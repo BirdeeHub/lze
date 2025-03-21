@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/BirdeeHub/lze/compare/v0.8.1...v0.9.0) (2025-03-21)
+
+
+### Features
+
+* **handler:** add and modify hooks can return a function to be deferred ([a43c98e](https://github.com/BirdeeHub/lze/commit/a43c98e67e357b9c6af1fc0592fc3b8533d1af8b))
+
 ## [0.8.1](https://github.com/BirdeeHub/lze/compare/v0.8.0...v0.8.1) (2025-03-07)
 
 
