@@ -28,7 +28,6 @@ jobs:
           LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
         with:
           version: ${{ env.LUAROCKS_VERSION }}
-          test_interpreters: ""
           license: GPL-2+
           detailed_description: |
             It is intended to be used
