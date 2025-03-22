@@ -189,11 +189,7 @@ local function add(plugins, verbose)
                 table.insert(duplicates, p)
                 if verbose then
                     vim.schedule(function()
-                        vim.notify(
-                            "attempted to add " .. plugin.name .. " twice",
-                            vim.log.levels.ERROR,
-                            { title = "lze" }
-                        )
+                        vim.notify("attempted to add " .. p.name .. " twice", vim.log.levels.ERROR, { title = "lze" })
                     end)
                 end
             end
