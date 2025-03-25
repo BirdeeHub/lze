@@ -12,12 +12,21 @@ It is intended to be used
 - by users of plugin managers that don't provide a convenient API for lazy-loading.
 - by plugin managers, to provide a convenient API for lazy-loading.
 
+> What problem does it solve?
+If I am downloading a plugin as optional,
+can't I call `vim.cmd.packadd` from an autocommand myself to load it?
+
+Yes you can. However, you may wish to trigger a plugin on one of *many* triggers,
+rather than just one triggering condition.
+
+You will find that either gets very verbose very quickly,
+or results in something like this plugin.
+
+`lze` solves this problem in a simple, performant, and extensible way.
+
 ## :question: Is this [`lz.n`](https://github.com/nvim-neorocks/lz.n)?
 
 Nope. I quite like `lz.n`. I have contributed to `lz.n` many times.
-
-In fact, I have even contributed to `lz.n`
-*after* this plugin has been created.
 
 `lz.n` is a great plugin.
 I think having the handlers manage the entire
@@ -35,11 +44,6 @@ and it handles its state entirely differently.
 It shares some code where some handlers parse their specs,
 otherwise it works entirely differently, but
 with a largely compatible [plugin spec](#plugin-spec)
-
-Which one is better? Hard to say.
-
-The plugin specs are basically the same,
-with 3 more fields thrown in.
 
 However, import specs can only import a
 single module rather than a whole directory.
@@ -157,7 +161,7 @@ the same mechanism through which the builtin handlers are created.
 
 ## :pencil: Requirements
 
-- `Neovim >= 0.10.0`
+- `Neovim >= 0.7.0`
 
 ## :wrench: Configuration
 
