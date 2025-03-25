@@ -87,16 +87,16 @@ function M.add(plugin)
         table.insert(cmd_def, cmd_spec)
     elseif type(cmd_spec) == "table" then
         ---@param cmd_spec_ string
-        vim.iter(cmd_spec):each(function(cmd_spec_)
+        for _, cmd_spec_ in ipairs(cmd_spec) do
             table.insert(cmd_def, cmd_spec_)
-        end)
+        end
     end
     ---@param cmd string
-    vim.iter(cmd_def):each(function(cmd)
+    for _, cmd in ipairs(cmd_def) do
         states[cmd] = states[cmd] or {}
         states[cmd][plugin.name] = plugin.name
         add_cmd(cmd)
-    end)
+    end
 end
 
 function M.cleanup()

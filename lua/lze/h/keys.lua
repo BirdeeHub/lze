@@ -33,11 +33,11 @@ local function parse(value)
     if not modes then
         return { _parse(value) }
     end
-    return vim.iter(modes)
-        :map(function(mode)
-            return _parse(value, mode)
-        end)
-        :totable()
+    local ret = {}
+    for _, mode in ipairs(modes) do
+        table.insert(ret, _parse(value, mode))
+    end
+    return ret
 end
 
 ---@param keys lze.Keys
@@ -65,12 +65,13 @@ local skip = { mode = true, id = true, ft = true, rhs = true, lhs = true }
 ---@return lze.KeysBase
 local function get_opts(keys)
     ---@type lze.KeysBase
-    return vim.iter(keys):fold({}, function(acc, k, v)
+    local ret = {}
+    for k, v in pairs(keys) do
         if type(k) ~= "number" and not skip[k] then
-            acc[k] = v
+            ret[k] = v
         end
-        return acc
-    end)
+    end
+    return ret
 end
 
 -- Create a mapping if it is managed by lze
@@ -167,34 +168,34 @@ function M.add(plugin)
         vim.list_extend(keys_def, keys)
     elseif type(keys_spec) == "table" then
         ---@param keys_spec_ string | lze.KeysSpec
-        vim.iter(keys_spec):each(function(keys_spec_)
+        for _, keys_spec_ in ipairs(keys_spec) do
             local keys = parse(keys_spec_)
             vim.list_extend(keys_def, keys)
-        end)
+        end
     end
     ---@param key lze.Keys
-    vim.iter(keys_def or {}):each(function(key)
+    for _, key in ipairs(keys_def or {}) do
         states[key.id] = states[key.id] or {}
         states[key.id][plugin.name] = add_keys(key)
-    end)
+    end
 end
 
 ---@param name string
 function M.before(name)
-    vim.iter(states):each(function(_, plugins)
+    for _, plugins in pairs(states) do
         plugins[name] = nil
-    end)
+    end
 end
 
 function M.cleanup()
     if augroup then
         vim.api.nvim_del_augroup_by_id(augroup)
     end
-    vim.iter(states):each(function(_, plugins)
+    for _, plugins in pairs(states) do
         for _, del in pairs(plugins) do
             del()
         end
-    end)
+    end
     states = {}
 end
 

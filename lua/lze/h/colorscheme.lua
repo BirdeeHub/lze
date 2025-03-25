@@ -12,9 +12,9 @@ local M = {
 
 ---@param name string
 function M.before(name)
-    vim.iter(states):each(function(_, plugins)
+    for _, plugins in pairs(states) do
         plugins[name] = nil
-    end)
+    end
 end
 
 ---@param name string
@@ -49,15 +49,15 @@ function M.add(plugin)
         table.insert(colorscheme_def, colorscheme_spec)
     elseif type(colorscheme_spec) == "table" then
         ---@param colorscheme_spec_ string
-        vim.iter(colorscheme_spec):each(function(colorscheme_spec_)
+        for _, colorscheme_spec_ in ipairs(colorscheme_spec) do
             table.insert(colorscheme_def, colorscheme_spec_)
-        end)
+        end
     end
     ---@param colorscheme string
-    vim.iter(colorscheme_def):each(function(colorscheme)
+    for _, colorscheme in ipairs(colorscheme_def) do
         states[colorscheme] = states[colorscheme] or {}
         states[colorscheme][plugin.name] = plugin.name
-    end)
+    end
 end
 
 function M.cleanup()

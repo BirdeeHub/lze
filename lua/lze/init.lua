@@ -2,10 +2,6 @@
 
 local lze = {}
 
-if vim.fn.has("nvim-0.10.0") ~= 1 then
-    error("lze requires Neovim >= 0.10.0")
-end
-
 ---registers a handler with lze to add new spec fields
 ---Returns the list of spec_field values added.
 ---THIS SHOULD BE CALLED BEFORE ANY CALLS TO lze.load ARE MADE

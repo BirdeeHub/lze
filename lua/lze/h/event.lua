@@ -93,14 +93,13 @@ end
 ---@param event string
 ---@return string[]
 local function get_augroups(event)
-    return vim.iter(vim.api.nvim_get_autocmds({ event = event }))
-        :filter(function(autocmd)
-            return autocmd.group_name ~= nil
-        end)
-        :map(function(autocmd)
-            return autocmd.group_name
-        end)
-        :totable()
+    local ret = {}
+    for _, autocmd in ipairs(vim.api.nvim_get_autocmds({ event = event })) do
+        if autocmd.group_name ~= nil then
+            table.insert(ret, autocmd.group_name)
+        end
+    end
+    return ret
 end
 
 -- Get the current state of the event and all the events that will be fired
@@ -145,7 +144,7 @@ local function trigger(opts)
     end
     ---@type table<string,true>
     local done = {}
-    vim.iter(vim.api.nvim_get_autocmds({ event = opts.event })):each(function(autocmd)
+    for _, autocmd in ipairs(vim.api.nvim_get_autocmds({ event = opts.event })) do
         local id = autocmd.event .. ":" .. (autocmd.group or "") ---@type string
         local skip = done[id] or (opts.exclude and vim.tbl_contains(opts.exclude, autocmd.group_name))
         done[id] = true
@@ -154,7 +153,7 @@ local function trigger(opts)
             opts.group = autocmd.group_name
             _trigger(opts)
         end
-    end)
+    end
 end
 
 ---@param event lze.Event
@@ -192,17 +191,17 @@ function M.add(plugin)
         table.insert(event_def, event)
     elseif type(event_spec) == "table" then
         ---@param ev lze.EventSpec[]
-        vim.iter(event_spec):each(function(ev)
+        for _, ev in ipairs(event_spec) do
             local event = parse(ev)
             table.insert(event_def, event)
-        end)
+        end
     end
     ---@param event lze.Event
-    vim.iter(event_def or {}):each(function(event)
+    for _, event in ipairs(event_def or {}) do
         pending[event.id] = pending[event.id] or {}
         pending[event.id][plugin.name] = event.augroup
         add_event(event)
-    end)
+    end
 end
 
 ---@param name string
@@ -214,12 +213,9 @@ end
 
 function M.cleanup()
     for _, plugins in pairs(pending) do
-        --why does it say p is unused...
-        --I literally use it on the next line...
-        --luacheck: no unused
-        for _, p in pairs(plugins) do
+        for k, p in pairs(plugins) do
             if p == augroup then
-                p = nil
+                plugins[k] = nil
             end
         end
     end

@@ -13,15 +13,13 @@ describe("handlers.on_plugin", function()
     local plugin_state = {}
 
     local filter_states = function(plugin, filter)
-        return vim.iter(plugin_state)
-            :filter(function(name, _)
-                return name ~= plugin.name
-            end)
-            :filter(filter)
-            :map(function(n, _)
-                return n
-            end)
-            :totable()
+        local result = {}
+        for name, state in pairs(plugin_state) do
+            if name ~= plugin.name and filter(name, state) then
+                table.insert(result, name)
+            end
+        end
+        return result
     end
 
     local test_load_fun = function(plugin)

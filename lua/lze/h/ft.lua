@@ -38,12 +38,11 @@ function M.add(plugin)
         ---@diagnostic disable-next-line: param-type-mismatch
         table.insert(plugin.event, ft)
     elseif type(ft_spec) == "table" then
-        ---@param ft_spec_ string
-        vim.iter(ft_spec):each(function(ft_spec_)
+        for _, ft_spec_ in ipairs(ft_spec) do
             local ft = parse(ft_spec_)
             ---@diagnostic disable-next-line: param-type-mismatch
             table.insert(plugin.event, ft)
-        end)
+        end
     end
     states[plugin.name] = true
     event.add(plugin)
