@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/BirdeeHub/lze/compare/v0.9.1...v0.10.0) (2025-03-25)
+
+
+### Features
+
+* **version:** remove vim.iter to support older nvim versions ([4efeb2f](https://github.com/BirdeeHub/lze/commit/4efeb2f33ab12f6f500d9392ab80be9b19026b0c))
+
 ## [0.9.1](https://github.com/BirdeeHub/lze/compare/v0.9.0...v0.9.1) (2025-03-21)
 
 
