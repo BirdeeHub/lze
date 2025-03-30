@@ -163,27 +163,6 @@ the same mechanism through which the builtin handlers are created.
 
 - `Neovim >= 0.7.0`
 
-## :wrench: Configuration
-
-You can override the function used to load plugins.
-`lze` has the following defaults:
-
-```lua
-vim.g.lze = {
-    ---@type fun(name: string)
-    load = vim.cmd.packadd,
-    ---@type boolean
-    verbose = true,
-    ---@type integer
-    default_priority = 50,
-    ---@type boolean
-    without_default_handlers = false,
-}
-```
-
-If `vim.g.lze.verbose` is `false` it will not print a warning
-in cases of duplicate and missing plugins, or when passing in an empty list.
-
 ## :books: Usage
 
 ```lua
@@ -389,6 +368,36 @@ require("lze").load {
 
 </details>
 <!-- markdownlint-restore -->
+## :wrench: Configuration
+
+You can override the function used to load plugins.
+`lze` has the following defaults:
+
+```lua
+vim.g.lze = {
+    injects = {},
+    ---@type fun(name: string)
+    load = vim.cmd.packadd,
+    ---@type boolean
+    verbose = true,
+    ---@type integer
+    default_priority = 50,
+    ---@type boolean
+    without_default_handlers = false,
+}
+```
+
+`vim.g.lze.without_default_handlers` must be set before you require `lze`
+or it will have no effect.
+
+If `vim.g.lze.verbose` is `false` it will not print a warning
+in cases of duplicate and missing plugins, or when passing in an empty list.
+
+`vim.g.lze.load` defines the fallback function used for the load hook for plugins.
+This value is not present in the plugin spec when handlers receive the plugin spec.
+
+In contrast, `vim.g.lze.injects` injects default values
+for ANY field BEFORE any handlers receive the plugin spec.
 
 ### Plugin spec
 
@@ -397,7 +406,7 @@ require("lze").load {
 <!-- markdownlint-disable MD013 -->
 | Property         | Type | Description | `lazy.nvim` equivalent |
 |------------------|------|-------------|-----------------------|
-| **[1]** | `string` | REQUIRED. The plugin's name (not the module name). This is the directory name of the plugin in the packpath and is usually the same as the repo name of the repo it was cloned from. | `name`[^1] |
+| **[1]** | `string` | REQUIRED. The plugin's name (not the module name, and not the url). This is the directory name of the plugin in the packpath and is usually the same as the repo name of the repo it was cloned from. | `name`[^1] |
 | **enabled?** | `boolean` or `fun():boolean` | When `false`, or if the `function` returns `nil` or `false`, then this plugin will not be included in the spec. | `enabled` |
 | **beforeAll?** | `fun(lze.Plugin)` | Always executed upon calling `require('lze').load(spec)` before any plugin specs from that call are triggered to be loaded. | `init` |
 | **before?** | `fun(lze.Plugin)` | Executed before a plugin is loaded. | None |
@@ -458,15 +467,33 @@ a PR to fix any of these issues upstream.
 
 > [!NOTE]
 >
-> - This does not work with plugins that rely on `after/plugin`, such as many
->   nvim-cmp sources, because Neovim's `:h packadd` does not source
->   `after/plugin` scripts after startup has completed.
->   We recommend bundling such plugins with their extensions, or sourcing
->   the `after` scripts manually.
->   In the spirit of the UNIX philosophy, `lze` does not provide any functions
->   for sourcing plugin scripts. For sourcing `after/plugin` directories
->   manually, you can use [`rtp.nvim`](https://github.com/nvim-neorocks/rtp.nvim).
->   [Here is an example](https://github.com/nvim-neorocks/lz.n/wiki/lazy%E2%80%90loading-nvim%E2%80%90cmp-and-its-extensions).
+> - `vim.cmd.packadd` does not work with plugins that rely
+>   on `after` directories of plugins, such as many
+>   nvim-cmp sources.
+>   To source `after` directories of a plugin,
+>   you should replace the load function for the plugin with:
+
+```lua
+local function load_with_after(name)
+    vim.cmd.packadd(name)
+    vim.cmd.packadd(name .. "/after")
+end
+```
+
+For example:
+
+```lua
+require("lze").load {
+  "cmp-cmdline",
+  on_plugin = { "nvim-cmp" },
+  load = load_with_after,
+}
+```
+
+[lzextras](https://github.com/BirdeeHub/lzextras?tab=readme-ov-file#loaders)
+provides this function and a few others as well!
+
+> [!NOTE]
 >
 > - You may also wish to use [`rtp.nvim`](https://github.com/nvim-neorocks/rtp.nvim)
 >   for sourcing `ftdetect` files in plugins without loading them,

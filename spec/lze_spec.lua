@@ -1,6 +1,8 @@
 local lz = require("lze")
 vim.g.lze = {
-    load = function() end,
+    injects = {
+        load = function() end,
+    },
 }
 local loader = require("lze.c.loader")
 local spy = require("luassert.spy")

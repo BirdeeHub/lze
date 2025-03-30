@@ -4,29 +4,23 @@ local function is_enabled(spec)
     return not disabled
 end
 
----@alias hook_key "before" | "after" | "beforeAll"
-
----@param hook_key hook_key | "load"
----@param pname string
----@param err any
-local function mk_hook_err(hook_key, pname, err)
-    vim.notify(
-        "Failed to run '" .. hook_key .. "' hook for " .. pname .. ": " .. tostring(err or ""),
-        vim.log.levels.ERROR,
-        { title = "lze.spec." .. hook_key }
-    )
-end
-
----@param hook_key hook_key
+---@param hook_key "before" | "after" | "beforeAll" | "load"
 ---@param plugin lze.Plugin
-local function hook(hook_key, plugin)
+---@param arg? any
+local function hook(hook_key, plugin, arg)
     if plugin[hook_key] then
         xpcall(
             plugin[hook_key],
             vim.schedule_wrap(function(err)
-                mk_hook_err(hook_key, plugin.name, err)
+                if hook_key ~= "load" or vim.tbl_get(vim.g, "lze", "verbose") ~= false then
+                    vim.notify(
+                        "Failed to run '" .. hook_key .. "' hook for " .. plugin.name .. ": " .. tostring(err or ""),
+                        vim.log.levels.ERROR,
+                        { title = "lze.spec." .. hook_key }
+                    )
+                end
             end),
-            plugin
+            arg or plugin
         )
     end
 end
@@ -97,19 +91,13 @@ function M.load(plugin_names)
         local plugin = state[pname]
         if plugin and is_enabled(plugin) then
             state[pname] = false
+            local load_impl = plugin.load or vim.tbl_get(vim.g, "lze", "load") or vim.cmd.packadd
             -- technically plugin spec before hooks can modify
             -- the plugin item provided to their own after hook
             -- This is not worth a deepcopy and should be considered a feature
-            ---@type fun(name: string)
-            local load_impl = plugin.load or vim.tbl_get(vim.g, "lze", "load") or vim.cmd.packadd
             hook("before", plugin)
             require("lze.c.handler").run_before(pname)
-            local ok, err = pcall(load_impl, pname)
-            if not ok and vim.tbl_get(vim.g, "lze", "verbose") ~= false then
-                vim.schedule(function()
-                    mk_hook_err("load", pname, err)
-                end)
-            end
+            hook("load", { name = pname, load = load_impl }, pname)
             require("lze.c.handler").run_after(pname)
             hook("after", plugin)
         else
@@ -165,8 +153,9 @@ end
 local function add(plugins, verbose)
     local final = {}
     local duplicates = {}
+    local injects = vim.tbl_get(vim.g, "lze", "injects") or {}
     for _, v in ipairs(plugins) do
-        local plugin = require("lze.c.handler").run_modify(v, delay)
+        local plugin = require("lze.c.handler").run_modify(vim.tbl_extend("keep", v, injects), delay)
         assert(
             type(plugin) == "table" and type(plugin.name) == "string",
             "handler modify hook must return a valid plugin"

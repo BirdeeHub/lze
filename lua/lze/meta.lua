@@ -159,9 +159,15 @@ error("Cannot import a meta module")
 
 ---@class lze.Config
 ---
----Callback to load a plugin.
+---Default callback used to load a plugin.
 ---Takes the plugin name (not the module name). Defaults to |packadd| if not set.
+---Not provided to handler hooks
 ---@field load? fun(name: string)
+---
+---Allows you to inject a default value
+---for any non-nil plugin spec field
+---which will be visible to all handler hooks.
+---@field injects? table
 ---
 ---If false, lze will print error messages on fewer things.
 ---@field verbose? boolean

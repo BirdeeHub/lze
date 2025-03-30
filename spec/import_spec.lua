@@ -1,6 +1,8 @@
 local lz = require("lze")
 vim.g.lze = {
-    load = function() end,
+    injects = {
+        load = function() end,
+    },
 }
 local tempdir = vim.fn.tempname()
 vim.system({ "rm", "-r", tempdir }):wait()

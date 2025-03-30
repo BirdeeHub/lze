@@ -1,6 +1,8 @@
 ---@diagnostic disable: invisible
 vim.g.lze = {
-    load = function() end,
+    injects = {
+        load = function() end,
+    },
 }
 local lze = require("lze")
 local loader = require("lze.c.loader")
