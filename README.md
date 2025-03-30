@@ -368,7 +368,8 @@ require("lze").load {
 
 </details>
 <!-- markdownlint-restore -->
-## :wrench: Configuration
+
+### :wrench: Configuration
 
 You can override the function used to load plugins.
 `lze` has the following defaults:
