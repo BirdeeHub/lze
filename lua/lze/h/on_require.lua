@@ -20,7 +20,7 @@ local new_require = function(mod_path)
             table.insert(plugins, name)
         end
     end
-    if plugins ~= {} then
+    if next(plugins) ~= nil then
         trigger_load(plugins)
         return old_require(mod_path)
     end
