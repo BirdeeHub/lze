@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/BirdeeHub/lze/compare/v0.11.0...v0.11.1) (2025-04-08)
+
+
+### Bug Fixes
+
+* **on_require:** now properly propagates error messages ([efbd778](https://github.com/BirdeeHub/lze/commit/efbd778e1b5e9d98ecc31298256e3ff5bcfed0d4))
+
 ## [0.11.0](https://github.com/BirdeeHub/lze/compare/v0.10.0...v0.11.0) (2025-03-30)
 
 
