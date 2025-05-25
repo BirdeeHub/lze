@@ -5,15 +5,7 @@ local trigger_load = require("lze.c.loader").load
 ---@type table<string, function>
 local states = {}
 
--- NOTE: the thing that calls the load...
--- replacing the global require function
-
-local old_require = require
-local new_require = function(mod_path)
-    local ok, value = pcall(old_require, mod_path)
-    if ok then
-        return value
-    end
+local new_loader = function(mod_path)
     local plugins = {}
     for name, has in pairs(states) do
         if has(mod_path) then
@@ -21,16 +13,14 @@ local new_require = function(mod_path)
         end
     end
     if next(plugins) ~= nil then
-        trigger_load(plugins)
-        return old_require(mod_path)
+        return function()
+            package.loaded[mod_path] = nil
+            trigger_load(plugins)
+            return require(mod_path)
+        end
     end
-    error(value)
+    return "lze.on_require: no plugin registered to load on require of " .. tostring(mod_path)
 end
-
--- NOTE: the handler for lze
-
----@class lze_plugin: lze.Plugin
----@field on_require? string[]|string
 
 ---@type lze.Handler
 local M = {
@@ -40,16 +30,20 @@ local M = {
         states[name] = nil
     end,
     init = function()
-        _G.require = new_require
+        table.insert(package.loaders or package.searchers, new_loader)
     end,
     cleanup = function()
-        _G.require = old_require
+        for i, v in ipairs(package.loaders or package.searchers) do
+            if v == new_loader then
+                table.remove(package.loaders or package.searchers, i)
+            end
+        end
         states = {}
     end,
 }
 
 ---Adds a plugin to be lazy loaded upon requiring any submodule of provided mod paths
----@param plugin lze_plugin
+---@param plugin lze.Plugin
 function M.add(plugin)
     local on_req = plugin.on_require
 
@@ -72,7 +66,7 @@ function M.add(plugin)
     ---@return boolean
     states[plugin.name] = function(mod_path)
         for _, v in ipairs(mod_paths) do
-            if vim.startswith(mod_path, v) then
+            if mod_path and mod_path:sub(1, #v) == v then
                 return true
             end
         end
