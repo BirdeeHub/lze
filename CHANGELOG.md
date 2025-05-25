@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.3](https://github.com/BirdeeHub/lze/compare/v0.11.2...v0.11.3) (2025-05-25)
+
+
+### Bug Fixes
+
+* **on_require:** improved formatting of error message ([6551328](https://github.com/BirdeeHub/lze/commit/6551328084a7ff79f61665d4e389524b2b058e56))
+
 ## [0.11.2](https://github.com/BirdeeHub/lze/compare/v0.11.1...v0.11.2) (2025-05-25)
 
 
