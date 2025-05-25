@@ -19,7 +19,7 @@ local new_loader = function(mod_path)
             return require(mod_path)
         end
     end
-    return "lze.on_require: no plugin registered to load on require of " .. tostring(mod_path)
+    return "\n\tlze.on_require: no plugin registered to load on require of '" .. tostring(mod_path) .. "'"
 end
 
 ---@type lze.Handler
