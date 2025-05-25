@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.2](https://github.com/BirdeeHub/lze/compare/v0.11.1...v0.11.2) (2025-05-25)
+
+
+### Bug Fixes
+
+* **feature:** improved how on_require handler works internally ([b1ca05e](https://github.com/BirdeeHub/lze/commit/b1ca05e428276901fbd0ccce6ae3da39a5422032))
+
 ## [0.11.1](https://github.com/BirdeeHub/lze/compare/v0.11.0...v0.11.1) (2025-04-08)
 
 
