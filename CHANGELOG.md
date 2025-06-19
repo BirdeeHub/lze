@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.4](https://github.com/BirdeeHub/lze/compare/v0.11.3...v0.11.4) (2025-06-19)
+
+
+### Bug Fixes
+
+* **deprecate:** removed lze.x, which has done nothing but warn for 5 months ([a68ab6b](https://github.com/BirdeeHub/lze/commit/a68ab6b52756b0d1650ae79eb6442dd278cff435))
+
 ## [0.11.3](https://github.com/BirdeeHub/lze/compare/v0.11.2...v0.11.3) (2025-05-25)
 
 
