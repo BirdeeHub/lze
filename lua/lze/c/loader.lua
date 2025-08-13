@@ -37,6 +37,9 @@ local state = {}
 -- but this only works with luajit
 -- so if you change to non-luajit,
 -- just make it a table and accept that # will always return 0.
+
+-- also tell lua_ls to be quiet about that on 5.4 so the test suite doesnt complain
+---@diagnostic disable-next-line: deprecated
 local proxy = newproxy and newproxy(true) or {}
 local proxy_mt = getmetatable(proxy)
 proxy_mt.__index = function(_, k)
