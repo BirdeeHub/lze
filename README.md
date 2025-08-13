@@ -237,7 +237,46 @@ require("lze").load {
 <!-- markdownlint-disable -->
 <details>
   <summary>
-    <b><a href="https://github.com/savq/paq-nvim">paq-nvim</a> example</b>
+    <b><a href="https://neovim.io/doc/user/pack.html#vim.pack.add()">vim.pack.add example</a></b>
+  </summary>
+
+  ```lua
+  vim.pack.add({
+      "https://github.com/Wansmer/treesj",
+      { src = "https://github.com/nvim-telescope/telescope.nvim" },
+      { src = "https://github.com/NTBBloodBatch/sweetie.nvim", name = "sweetie" }
+  }, {
+    -- prevent packadd! or packadd like this to allow on_require handler to load plugin spec
+    load = function() end,
+    -- choose your preference for install confirmation
+    confirm = true,
+  })
+
+  require("lze").load {
+      {
+          "telescope.nvim",
+          cmd = "Telescope",
+      },
+      {
+          "sweetie", -- note the name change above
+          colorscheme = "sweetie",
+      },
+      {
+          "treesj",
+          cmd = { "TSJToggle" },
+          keys = { { "<leader>Tt", ":TSJToggle<CR>", mode = { "n" }, desc = "treesj split/join" }, },
+          after = function(_)
+              require('treesj').setup({})
+          end,
+      }
+  }
+  ```
+
+</details>
+
+<details>
+  <summary>
+    <b><a href="https://github.com/savq/paq-nvim">paq-nvim example</a></b>
   </summary>
 
   ```lua
