@@ -242,6 +242,7 @@ require("lze").load {
 
   ```lua
   vim.pack.add({
+      "https://github.com/BirdeeHub/lze",
       "https://github.com/Wansmer/treesj",
       { src = "https://github.com/nvim-telescope/telescope.nvim" },
       { src = "https://github.com/NTBBloodBatch/sweetie.nvim", name = "sweetie" }
@@ -251,6 +252,7 @@ require("lze").load {
     -- choose your preference for install confirmation
     confirm = true,
   })
+  vim.cmd.packadd("lze")
 
   require("lze").load {
       {
@@ -281,6 +283,7 @@ require("lze").load {
 
   ```lua
   require "paq" {
+      "BirdeeHub/lze",
       { "nvim-telescope/telescope.nvim", opt = true },
       { "NTBBloodBatch/sweetie.nvim", opt = true }
   }
