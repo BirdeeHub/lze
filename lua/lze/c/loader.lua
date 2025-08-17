@@ -20,6 +20,8 @@ local function hook(hook_key, plugin, arg)
                     )
                 end
             end),
+            -- NOTE: Why do I need to tell lua_ls that xpcall takes varargs to pass my tests????
+            ---@diagnostic disable-next-line: redundant-parameter
             arg or plugin
         )
     end
