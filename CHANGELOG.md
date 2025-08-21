@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.5](https://github.com/BirdeeHub/lze/compare/v0.11.4...v0.11.5) (2025-08-21)
+
+
+### Bug Fixes
+
+* **types:** simplified type annotation oh plugin specs ([e5e2292](https://github.com/BirdeeHub/lze/commit/e5e2292695f0226f35b05c9adda58ce422d558e5))
+* **types:** simplified type definition of plugin specs ([ebc2543](https://github.com/BirdeeHub/lze/commit/ebc25432b58078d0a1e6932048412ac8a223ec49))
+
 ## [0.11.4](https://github.com/BirdeeHub/lze/compare/v0.11.3...v0.11.4) (2025-06-19)
 
 
