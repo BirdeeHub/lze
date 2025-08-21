@@ -240,6 +240,8 @@ require("lze").load {
     <b><a href="https://neovim.io/doc/user/pack.html#vim.pack.add()">vim.pack.add example</a></b>
   </summary>
 
+  There are several ways to use `lze` with `vim.pack.add`. Some of them are listed here.
+
   ```lua
   vim.pack.add({
       "https://github.com/BirdeeHub/lze",
@@ -273,6 +275,82 @@ require("lze").load {
       }
   }
   ```
+
+  OR
+
+  ```lua
+  vim.pack.add({
+      "https://github.com/BirdeeHub/lze",
+      { src = "https://github.com/Wansmer/treesj", data = { opt = true, } },
+      { src = "https://github.com/nvim-telescope/telescope.nvim", data = { opt = true, } },
+      { src = "https://github.com/NTBBloodBatch/sweetie.nvim", name = "sweetie", data = { opt = true, } }
+  }, {
+    load = function(p)
+      if not (p.spec.data or {}).opt then
+        vim.cmd.packadd(p.spec.name)
+      end
+    end,
+    -- choose your preference for install confirmation
+    confirm = true,
+  })
+
+  require("lze").load {
+      {
+          "telescope.nvim",
+          cmd = "Telescope",
+      },
+      {
+          "sweetie", -- note the name change above
+          colorscheme = "sweetie",
+      },
+      {
+          "treesj",
+          cmd = { "TSJToggle" },
+          keys = { { "<leader>Tt", ":TSJToggle<CR>", mode = { "n" }, desc = "treesj split/join" }, },
+          after = function(_)
+              require('treesj').setup({})
+          end,
+      }
+  }
+  ```
+
+  OR
+
+  ```lua
+  vim.pack.add({ "https://github.com/BirdeeHub/lze", }, { confirm = false --[[or true, up to you]], })
+  vim.pack.add({
+      {
+        src = "https://github.com/Wansmer/treesj",
+        data = {
+          cmd = "Telescope",
+        }
+      }
+      {
+        src = "https://github.com/nvim-telescope/telescope.nvim",
+        data = {
+          colorscheme = "sweetie",
+        }
+      },
+      {
+        src = "https://github.com/NTBBloodBatch/sweetie.nvim",
+        data = {
+          cmd = { "TSJToggle" },
+          keys = { { "<leader>Tt", ":TSJToggle<CR>", mode = { "n" }, desc = "treesj split/join" }, },
+          after = function(_)
+              require('treesj').setup({})
+          end,
+        }
+      }
+  }, {
+    load = function(p)
+      local spec = p.spec.data or {}
+      spec.name = p.spec.name
+      require('lze').load(spec)
+    end,
+    -- choose your preference for install confirmation
+    confirm = true,
+  })
+```
 
 </details>
 
