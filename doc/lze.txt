@@ -100,8 +100,6 @@ lze.h                                                                    *lze.h*
   ---
   ---True will allow a plugin to be added to the queue again after it has already been triggered.
   ---@field allow_again? boolean
-  
-  ---@class lze.PluginHooks
   ---
   ---Will be run before loading any plugins in that require('lze').load() call
   ---@field beforeAll? fun(self:lze.Plugin)
@@ -178,12 +176,12 @@ lze.h                                                                    *lze.h*
   
   ---Internal lze.Plugin type, after being parsed.
   ---Is the type passed to handlers in modify and add hooks.
-  ---@class lze.Plugin: lze.PluginBase,lze.PluginHooks,lze.SpecHandlers
+  ---@class lze.Plugin: lze.PluginBase,lze.SpecHandlers
   ---The plugin name (not its main module), e.g. "sweetie.nvim"
   ---@field name string
   
   ---The lze.PluginSpec type, passed to require('lze').load() as entries in lze.Spec
-  ---@class lze.PluginSpec: lze.PluginBase,lze.PluginHooks,lze.SpecHandlers
+  ---@class lze.PluginSpec: lze.PluginBase,lze.SpecHandlers
   ---The plugin name (not its main module), e.g. "sweetie.nvim"
   ---@field [1] string
   
@@ -192,7 +190,7 @@ lze.h                                                                    *lze.h*
   ---@field enabled? boolean|(fun():boolean)
   
   ---List of lze.PluginSpec and/or lze.SpecImport
-  ---@alias lze.Spec lze.PluginSpec | lze.SpecImport | lze.Spec[]
+  ---@alias lze.Spec lze.PluginSpec | lze.Plugin | lze.SpecImport | lze.Spec[]
   
   -- NOTE:
   -- lze.Handler type definition
