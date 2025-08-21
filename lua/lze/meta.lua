@@ -77,8 +77,6 @@ error("Cannot import a meta module")
 ---
 ---Load a plugin before load of one or more other plugins.
 ---@field dep_of? string[]|string
-
----@class lze.ExtraSpecHandlers
 ---
 ---Load a plugin after load of one or more other plugins.
 ---@field on_plugin? string[]|string
@@ -87,6 +85,8 @@ error("Cannot import a meta module")
 ---list of top-level lua module names.
 ---Will load when any submodule of those listed is `require`d
 ---@field on_require? string[]|string
+---
+---@field [string] any? Fields for any extra handlers you might add
 
 -- NOTE:
 -- Defintion of lze.Plugin and lze.PluginSpec
@@ -94,12 +94,12 @@ error("Cannot import a meta module")
 
 ---Internal lze.Plugin type, after being parsed.
 ---Is the type passed to handlers in modify and add hooks.
----@class lze.Plugin: lze.PluginBase,lze.PluginHooks,lze.SpecHandlers, lze.ExtraSpecHandlers
+---@class lze.Plugin: lze.PluginBase,lze.PluginHooks,lze.SpecHandlers
 ---The plugin name (not its main module), e.g. "sweetie.nvim"
 ---@field name string
 
 ---The lze.PluginSpec type, passed to require('lze').load() as entries in lze.Spec
----@class lze.PluginSpec: lze.PluginBase,lze.PluginHooks,lze.SpecHandlers, lze.ExtraSpecHandlers
+---@class lze.PluginSpec: lze.PluginBase,lze.PluginHooks,lze.SpecHandlers
 ---The plugin name (not its main module), e.g. "sweetie.nvim"
 ---@field [1] string
 
