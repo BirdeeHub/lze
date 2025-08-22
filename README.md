@@ -246,7 +246,6 @@ require("lze").load {
   vim.pack.add({
       "https://github.com/BirdeeHub/lze",
       "https://github.com/Wansmer/treesj",
-      { src = "https://github.com/nvim-telescope/telescope.nvim" },
       { src = "https://github.com/NTBBloodBatch/sweetie.nvim", name = "sweetie" }
   }, {
     -- prevent packadd! or packadd like this to allow on_require handler to load plugin spec
@@ -257,10 +256,6 @@ require("lze").load {
   vim.cmd.packadd("lze")
 
   require("lze").load {
-      {
-          "telescope.nvim",
-          cmd = "Telescope",
-      },
       {
           "sweetie", -- note the name change above
           colorscheme = "sweetie",
@@ -282,7 +277,6 @@ require("lze").load {
   vim.pack.add({
       "https://github.com/BirdeeHub/lze",
       { src = "https://github.com/Wansmer/treesj", data = { opt = true, } },
-      { src = "https://github.com/nvim-telescope/telescope.nvim", data = { opt = true, } },
       { src = "https://github.com/NTBBloodBatch/sweetie.nvim", name = "sweetie", data = { opt = true, } }
   }, {
     load = function(p)
@@ -295,10 +289,6 @@ require("lze").load {
   })
 
   require("lze").load {
-      {
-          "telescope.nvim",
-          cmd = "Telescope",
-      },
       {
           "sweetie", -- note the name change above
           colorscheme = "sweetie",
@@ -320,19 +310,13 @@ require("lze").load {
   vim.pack.add({ "https://github.com/BirdeeHub/lze", }, { confirm = false --[[or true, up to you]], })
   vim.pack.add({
       {
-        src = "https://github.com/Wansmer/treesj",
-        data = {
-          cmd = "Telescope",
-        }
-      }
-      {
-        src = "https://github.com/nvim-telescope/telescope.nvim",
+        src = "https://github.com/NTBBloodBatch/sweetie.nvim",
         data = {
           colorscheme = "sweetie",
         }
       },
       {
-        src = "https://github.com/NTBBloodBatch/sweetie.nvim",
+        src = "https://github.com/Wansmer/treesj",
         data = {
           cmd = { "TSJToggle" },
           keys = { { "<leader>Tt", ":TSJToggle<CR>", mode = { "n" }, desc = "treesj split/join" }, },
