@@ -2,14 +2,17 @@
 -- because require('lze') requires this module.
 local trigger_load = require("lze.c.loader").load
 
----@type table<string, function>
+---@type table<string, string[]>
 local states = {}
 
 local new_loader = function(mod_path)
     local plugins = {}
-    for name, has in pairs(states) do
-        if has(mod_path) then
-            table.insert(plugins, name)
+    for name, mod_paths in pairs(states) do
+        for _, v in ipairs(mod_paths) do
+            if mod_path and mod_path:sub(1, #v) == v then
+                table.insert(plugins, name)
+                break
+            end
         end
     end
     if next(plugins) ~= nil then
@@ -47,9 +50,8 @@ local M = {
 function M.add(plugin)
     local on_req = plugin.on_require
 
-    -- I dont know why I need to tell luacheck
-    -- that I actually stick it in a function where I
-    -- loop over it later in like 10 lines from now
+    -- I don't know why I need to tell luacheck
+    -- that I actually do use it by putting it into the state table?
     ---@type string[]
     --luacheck: no unused
     local mod_paths = {}
@@ -62,16 +64,8 @@ function M.add(plugin)
     else
         return
     end
-    ---@param mod_path string
-    ---@return boolean
-    states[plugin.name] = function(mod_path)
-        for _, v in ipairs(mod_paths) do
-            if mod_path and mod_path:sub(1, #v) == v then
-                return true
-            end
-        end
-        return false
-    end
+
+    states[plugin.name] = mod_paths
 end
 
 return M
