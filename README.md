@@ -319,7 +319,9 @@ require("lze").load {
         src = "https://github.com/Wansmer/treesj",
         data = {
           cmd = { "TSJToggle" },
-          keys = { { "<leader>Tt", ":TSJToggle<CR>", mode = { "n" }, desc = "treesj split/join" }, },
+          -- spec.data rejects mixed tables, so for keys, use lhs and rhs instead of [1] and [2]
+          -- see: https://github.com/neovim/neovim/issues/35550
+          keys = { { lhs = "<leader>Tt", rhs = ":TSJToggle<CR>", mode = { "n" }, desc = "treesj split/join" }, },
           after = function(_)
               require('treesj').setup({})
           end,
