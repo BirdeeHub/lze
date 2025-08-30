@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.6](https://github.com/BirdeeHub/lze/compare/v0.11.5...v0.11.6) (2025-08-30)
+
+
+### Bug Fixes
+
+* **add_workaround:** vim.pack specs data field does not currently allow mixed tables ([a77bb9a](https://github.com/BirdeeHub/lze/commit/a77bb9acf342495ce298fb01e964d57eb974e108))
+
 ## [0.11.5](https://github.com/BirdeeHub/lze/compare/v0.11.4...v0.11.5) (2025-08-21)
 
 
