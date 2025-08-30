@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.7](https://github.com/BirdeeHub/lze/compare/v0.11.6...v0.11.7) (2025-08-30)
+
+
+### Bug Fixes
+
+* **5_second_rule:** change precedence on new options before anyone notices they exist ([5328b7d](https://github.com/BirdeeHub/lze/commit/5328b7d7a16362e24eefd29afba5cb9d17774623))
+
 ## [0.11.6](https://github.com/BirdeeHub/lze/compare/v0.11.5...v0.11.6) (2025-08-30)
 
 
