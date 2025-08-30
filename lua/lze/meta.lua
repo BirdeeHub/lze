@@ -42,10 +42,10 @@ error("Cannot import a meta module")
 ---@field ft? string|string[]
 
 ---@class lze.KeysSpec: lze.KeysBase
----@field [1]? string [1] or lhs required, lhs wins
----@field [2]? string|fun()|false rhs will override this if set
----@field lhs? string [1] or lhs required, lhs wins
----@field rhs? string|fun()|false rhs will override [2]
+---@field [1]? string [1] or lhs required, [1] wins
+---@field [2]? string|fun()|false will override rhs
+---@field lhs? string [1] or lhs required, [1] wins
+---@field rhs? string|fun()|false [2] will override rhs if set
 ---@field mode? string|string[]
 
 ---@class lze.Keys: lze.KeysBase

@@ -9,8 +9,8 @@ local augroup = nil
 ---@return lze.Keys
 local function _parse(value, mode)
     local ret = vim.deepcopy(value) --[[@as lze.Keys]]
-    ret.lhs = ret.lhs or ret[1] or ""
-    ret.rhs = ret.rhs or ret[2]
+    ret.lhs = ret[1] or ret.lhs or ""
+    ret.rhs = ret[2] or ret.rhs
     ret[1] = nil
     ret[2] = nil
     ret.mode = mode or "n"
