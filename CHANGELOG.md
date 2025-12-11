@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.12.0](https://github.com/BirdeeHub/lze/compare/v0.11.7...v0.12.0) (2025-12-11)
+
+
+### Features
+
+* **import:** import spec now accepts more specs ([bad1300](https://github.com/BirdeeHub/lze/commit/bad1300cc6ab7e0fe356906effff77086b49c482))
+* **import:** import spec now accepts more specs ([4b3189b](https://github.com/BirdeeHub/lze/commit/4b3189bce92a05b4d86975c7738813cae841100e))
+
 ## [0.11.7](https://github.com/BirdeeHub/lze/compare/v0.11.6...v0.11.7) (2025-08-30)
 
 
