@@ -104,7 +104,7 @@ error("Cannot import a meta module")
 ---@field [1] string
 
 ---@class lze.SpecImport
----@field import string spec module to import
+---@field import string|lze.Spec spec module to import
 ---@field enabled? boolean|(fun():boolean)
 
 ---List of lze.PluginSpec and/or lze.SpecImport

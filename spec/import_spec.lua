@@ -13,6 +13,21 @@ local spy = require("luassert.spy")
 
 describe("lze", function()
     describe("load", function()
+        it("import from spec", function()
+            lz.load({
+                {
+                    import = {
+                        {
+                            "TESTPLUGIN_IMPORT_FROM_SPEC",
+                            lazy = true,
+                        },
+                    },
+                },
+            })
+            assert.True(lz.state("TESTPLUGIN_IMPORT_FROM_SPEC"))
+            lz.trigger_load("TESTPLUGIN_IMPORT_FROM_SPEC")
+            assert.False(lz.state("TESTPLUGIN_IMPORT_FROM_SPEC"))
+        end)
         it("import", function()
             local plugin_config_content = [[
         return {

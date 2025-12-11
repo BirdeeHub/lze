@@ -614,8 +614,11 @@ Unlike `lazy.nvim`, in `lze` you may call
 
 This means being able to import files via specs is not as useful.
 
-The import spec of `lze` allows for importing a single lua module,
+The `import` spec of `lze` allows for importing a single lua module,
 unlike `lz.n` or `lazy.nvim`, where it imports an entire directory.
+
+The `import` spec of `lze` also accepts another `lze.Spec` type.
+This may prove useful when generating definitions from another templating tool.
 
 That module may return a list of specs,
 which means it can also return a list of import specs.
