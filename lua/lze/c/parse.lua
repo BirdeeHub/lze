@@ -9,18 +9,23 @@ end
 ---@param spec lze.SpecImport
 ---@param result lze.Plugin[]
 local function import_spec(spec, result)
+    if is_disabled(spec) then
+        return
+    end
+    if type(spec.import) == "table" then
+        ---@diagnostic disable-next-line: param-type-mismatch
+        lib.normalize(spec.import, result)
+        return
+    end
     if type(spec.import) ~= "string" then
         vim.schedule(function()
             vim.notify(
-                "Invalid import spec. The 'import' field should be a module name, but was instead: "
+                "Invalid import spec. The 'import' field should be a module name (or more specs), but was instead: "
                     .. vim.inspect(spec),
                 vim.log.levels.ERROR,
                 { title = "lze" }
             )
         end)
-        return
-    end
-    if is_disabled(spec) then
         return
     end
     local modname = spec.import
