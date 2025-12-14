@@ -1,4 +1,5 @@
 <!-- markdownlint-disable MD028 -->
+<!-- markdownlint-disable MD060 -->
 # :sloth: lze
 
 [![Neovim][neovim-shield]][neovim-url]
