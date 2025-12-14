@@ -1,5 +1,5 @@
 <!-- markdownlint-disable MD028 -->
-<!-- markdownlint-disable MD060 -->
+<!-- markdownlint-disable-file MD060 -->
 # :sloth: lze
 
 [![Neovim][neovim-shield]][neovim-url]
@@ -829,4 +829,3 @@ or (at your option) any later version.
 https://img.shields.io/luarocks/v/BirdeeHub/lze?logo=lua&color=purple&style=for-the-badge
 [luarocks-url]: https://luarocks.org/modules/BirdeeHub/lze
 <!-- markdownlint-enable MD013 -->
-<!-- markdownlint-enable MD060 -->
