@@ -829,3 +829,4 @@ or (at your option) any later version.
 https://img.shields.io/luarocks/v/BirdeeHub/lze?logo=lua&color=purple&style=for-the-badge
 [luarocks-url]: https://luarocks.org/modules/BirdeeHub/lze
 <!-- markdownlint-enable MD013 -->
+<!-- markdownlint-enable MD060 -->
