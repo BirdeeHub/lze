@@ -1,5 +1,3 @@
-<!-- markdownlint-disable MD028 -->
-<!-- markdownlint-disable-file MD060 -->
 # :sloth: lze
 
 [![Neovim][neovim-shield]][neovim-url]
