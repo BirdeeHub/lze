@@ -1,5 +1,6 @@
 ---@mod lze
 
+---@class lze
 local lze = {}
 
 ---registers a handler with lze to add new spec fields
@@ -37,6 +38,7 @@ lze.load = require("lze.c.loader").define
 
 --- `false` for already loaded (or being loaded currently),
 --- `nil` for never added. READ ONLY TABLE
+--- Either a function which takes a name, or a table.
 --- Function access only checks; table access returns a COPY.
 --- unary minus is defined as vim.deepcopy of the actual state table
 --- local snapshot = -require('lze').state
