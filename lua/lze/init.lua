@@ -1,5 +1,3 @@
----@mod lze
-
 ---@class lze
 local lze = {}
 
