@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/BirdeeHub/lze/compare/v0.12.0...v0.12.1) (2026-01-21)
+
+
+### Bug Fixes
+
+* **type_annotations:** make lze type ([7743d64](https://github.com/BirdeeHub/lze/commit/7743d649587d8965be767545f2bc229b9cb54684))
+
 ## [0.12.0](https://github.com/BirdeeHub/lze/compare/v0.11.7...v0.12.0) (2025-12-11)
 
 
