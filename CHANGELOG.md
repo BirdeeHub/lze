@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.2](https://github.com/BirdeeHub/lze/compare/v0.12.1...v0.12.2) (2026-01-21)
+
+
+### Bug Fixes
+
+* **docgenhook:** duplicate docs heading ([7942030](https://github.com/BirdeeHub/lze/commit/7942030e34bce9a1ebb38483a2443d36b5c9e0b6))
+
 ## [0.12.1](https://github.com/BirdeeHub/lze/compare/v0.12.0...v0.12.1) (2026-01-21)
 
 
