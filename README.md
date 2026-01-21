@@ -233,6 +233,9 @@ require("lze").load {
 }
 ```
 
+This plugin is lua only!
+
+Any way you can add it to the runtimepath will allow you to use it!
 <!-- markdownlint-disable -->
 <details>
   <summary>
@@ -244,6 +247,7 @@ require("lze").load {
   ```lua
   vim.pack.add({
       "https://github.com/BirdeeHub/lze",
+      "https://github.com/BirdeeHub/lzextras",
       "https://github.com/Wansmer/treesj",
       { src = "https://github.com/NTBBloodBatch/sweetie.nvim", name = "sweetie" }
   }, {
@@ -336,140 +340,6 @@ require("lze").load {
     confirm = true,
   })
 ```
-
-</details>
-
-<details>
-  <summary>
-    <b><a href="https://github.com/savq/paq-nvim">paq-nvim example</a></b>
-  </summary>
-
-  ```lua
-  require "paq" {
-      "BirdeeHub/lze",
-      { "nvim-telescope/telescope.nvim", opt = true },
-      { "NTBBloodBatch/sweetie.nvim", opt = true }
-  }
-
-  require("lze").load {
-      {
-          "telescope.nvim",
-          cmd = "Telescope",
-      },
-      {
-          "sweetie.nvim",
-          colorscheme = "sweetie",
-      },
-  }
-  ```
-
-</details>
-
-<details>
-  <summary>
-    <b><a href="https://wiki.nixos.org/wiki/Neovim">Nix examples</a></b>
-  </summary>
-
-  - Home Manager:
-
-  ```nix
-  programs.neovim = {
-    enable = true;
-    plugins = with pkgs.vimPlugins [
-      {
-        plugin = lze;
-        # config = ''
-        #   -- optional, add extra handlers
-        #   -- require("lze").register_handlers(some_custom_handler_here)
-        # '';
-        # type = "lua";
-      }
-      {
-        plugin = telescope-nvim;
-        config = ''
-          require("lze").load {
-            "telescope.nvim",
-            cmd = "Telescope",
-          }
-        '';
-        type = "lua";
-        optional = true;
-      }
-      {
-        plugin = sweetie-nvim;
-        config = ''
-          require("lze").load {
-            "sweetie.nvim",
-            colorscheme = "sweetie",
-          }
-        '';
-        type = "lua";
-        optional = true;
-      }
-    ];
-  };
-  ```
-
-  - [nixCats](https://github.com/BirdeeHub/nixCats-nvim)
-
-  While the home manager syntax is also accepted by `nixCats` anywhere we can add plugins,
-  `nixCats` allows you to configure it in your normal lua files.
-
-  Add it to your `startupPlugins` set as shown below,
-  put the desired plugins in `optionalPlugins` so they don't auto-load,
-  then configure as in [the regular examples](#examples)
-  wherever you want in your config.
-
-  ```nix
-  # in your categoryDefinitions
-  categoryDefinitions = { pkgs, settings, categories, name, ... }: {
-  # :help nixCats.flake.outputs.categories
-    startupPlugins = with pkgs.vimPlugins; {
-      someName = [
-        # in startupPlugins so that it is available
-        lze
-      ];
-    };
-    optionalPlugins = with pkgs.vimPlugins; {
-      someName = [
-        # the plugins you wish to load via lze
-      ];
-      # you can name the categories whatever you want,
-      # the important thing is,
-      # optionalPlugins is for lazy loading via packadd
-    };
-  };
-  # see :help nixCats.flake.outputs.packageDefinitions
-  packageDefinitions = {
-    nvim = {pkgs , ... }: {
-      # see :help nixCats.flake.outputs.settings
-      settings = {/* your settings */ };
-      categories = {
-        # don't forget to enable it for the desired package!
-        someName = true;
-        # ... your other categories here
-      };
-    };
-  };
-  # ... the rest of your nix where you call the builder and export packages
-  ```
-
-  - Not on nixpkgs-unstable?
-
-  If your neovim is not on the `nixpkgs-unstable` channel,
-  `vimPlugins.lze` may not yet be in nixpkgs for you.
-  You may instead get it from this flake!
-  ```nix
-  # in your flake inputs:
-  inputs = {
-    lze.url = "github:BirdeeHub/lze";
-  };
-  ```
-  Then, pass your config your inputs from your flake,
-  and retrieve `lze` with:
-  ```nix
-  inputs.lze.packages.${pkgs.system}.default`:
-  ```
 
 </details>
 <!-- markdownlint-restore -->
