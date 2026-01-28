@@ -496,11 +496,13 @@ and prone to platform specific issues.
 In addition, it gives you no control over the original order of those specs.
 
 Only allowing it to `require` a single module
-means it *actually* does nothing other than `require` it.
+means it actually does *nothing* other than `require` it.
 
 Instead of a directory,
 you may choose between providing a module name,
-or passing more specs directly to an `import` spec.
+or passing more specs directly to an `import` spec,
+or passing a function which returns more specs
+in order to delay this until after the `enabled` check.
 
 You may use this feature to add that capacity back to `lze`,
 should you find you miss it.

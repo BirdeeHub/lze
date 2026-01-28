@@ -12,15 +12,21 @@ local function import_spec(spec, result)
     if is_disabled(spec) then
         return
     end
-    if type(spec.import) == "table" then
+    local import_type = type(spec.import)
+    if import_type == "table" then
         ---@diagnostic disable-next-line: param-type-mismatch
         lib.normalize(spec.import, result)
         return
-    end
-    if type(spec.import) ~= "string" then
+    elseif import_type == "function" then
+        ---@diagnostic disable-next-line: param-type-mismatch
+        lib.normalize(spec.import(), result)
+        return
+    elseif import_type ~= "string" then
         vim.schedule(function()
             vim.notify(
-                "Invalid import spec. The 'import' field should be a module name (or more specs), but was instead: "
+                "Invalid import spec. The 'import' field should be a module name (or more specs, or a function that returns specs), but was instead of type `"
+                    .. import_type
+                    .. "`: "
                     .. vim.inspect(spec),
                 vim.log.levels.ERROR,
                 { title = "lze" }
@@ -28,19 +34,22 @@ local function import_spec(spec, result)
         end)
         return
     end
-    local modname = spec.import
-    local ok, mod = pcall(require, modname)
+    local ok, mod = pcall(require, spec.import)
     if not ok then
         vim.schedule(function()
             local err = type(mod) == "string" and "': " .. mod or ""
-            vim.notify("Failed to load module '" .. modname .. err, vim.log.levels.ERROR, { title = "lze" })
+            vim.notify(
+                "Failed to load module '" .. tostring(spec.import) .. err,
+                vim.log.levels.ERROR,
+                { title = "lze" }
+            )
         end)
         return
     end
     if type(mod) ~= "table" then
         vim.schedule(function()
             vim.notify(
-                "Invalid plugin spec module '" .. modname .. "' of type '" .. type(mod) .. "'",
+                "Invalid plugin spec module '" .. tostring(spec.import) .. "' of type '" .. type(mod) .. "'",
                 vim.log.levels.ERROR,
                 { title = "lze" }
             )
