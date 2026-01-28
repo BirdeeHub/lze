@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.0](https://github.com/BirdeeHub/lze/compare/v0.12.2...v0.13.0) (2026-01-28)
+
+
+### Features
+
+* **import_specs:** allow functions that return specs ([84e7e09](https://github.com/BirdeeHub/lze/commit/84e7e09b935971d3e4e8e8de66f7e4b4838be15f))
+* **import_specs:** allow functions that return specs ([70f75ba](https://github.com/BirdeeHub/lze/commit/70f75ba99904b5e5a6f3db565ec9a8d35b3ab9b4))
+
 ## [0.12.2](https://github.com/BirdeeHub/lze/compare/v0.12.1...v0.12.2) (2026-01-21)
 
 
