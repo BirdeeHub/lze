@@ -486,14 +486,34 @@ This means being able to import files via specs is not as useful.
 The `import` spec of `lze` allows for importing a single lua module,
 unlike `lz.n` or `lazy.nvim`, where it imports an entire directory.
 
-The `import` spec of `lze` also accepts another `lze.Spec` type.
-This may prove useful when generating definitions from another templating tool.
+That module indicated is to return more specs for `lze` to load.
 
-That module may return a list of specs,
-which means it can also return a list of import specs.
+Why does it not have the ability to load a directory?
 
-This way, you get to choose the order, and can
-have files in that directory that are not imported if you wish.
+Searching for the directory is expensive,
+and prone to platform specific issues.
+
+In addition, it gives you no control over the original order of those specs.
+
+Only allowing it to `require` a single module
+means it *actually* does nothing other than `require` it.
+
+Instead of a directory,
+you may choose between providing a module name,
+or passing more specs directly to an `import` spec.
+
+You may use this feature to add that capacity back to `lze`,
+should you find you miss it.
+
+[lzextras](https://github.com/BirdeeHub/lzextras/tree/master?tab=readme-ov-file#mod_dir_to_spec)
+is a collection of functions and handlers which you may find useful.
+
+It has a function for this purpose,
+which is just as fast as it would be if it were built-in.
+
+You may not find all of its items useful,
+but you will not load what you do not use,
+and you are free to take inspiration from any of the items you like.
 
 ```lua
 require("lze").load("plugins")
