@@ -188,6 +188,7 @@ require("lze").load(plugins)
 
 ### Examples
 
+<!-- markdownlint-disable MD013 -->
 ```lua
 require("lze").load {
     {
@@ -232,6 +233,7 @@ require("lze").load {
     },
 }
 ```
+<!-- markdownlint-enable MD013 -->
 
 This plugin is lua only!
 
