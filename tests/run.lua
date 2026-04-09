@@ -1,5 +1,7 @@
 #!/usr/bin/env lua
 
+-- https://zserge.com/posts/minimal-testing/
+
 local passmark = "[32m✔[0m"
 local failmark = "[31m✘[0m"
 local exceptmark = "[35m‼[0m"
