@@ -200,7 +200,9 @@ package.preload.gambiarra = function()
                     eq = env.eq,
                 }
 
+                local was_restored = false
                 local restore = function()
+                    was_restored = true
                     env.ok = prev.ok
                     env.spy = prev.spy
                     env.eq = prev.eq
@@ -243,9 +245,17 @@ package.preload.gambiarra = function()
                 end
 
                 handler(self, "begin", name)
-                local ok, err = pcall(f, restore)
+                local ok, err
+                if async then
+                    ok, err = pcall(f, restore)
+                else
+                    ok, err = pcall(f)
+                end
                 if not ok then
                     handler(self, "except", name, err)
+                    if async and not was_restored then
+                        restore()
+                    end
                 end
 
                 if not async then
