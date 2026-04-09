@@ -58,7 +58,7 @@ just run `direnv allow` and you will be dropped in this devShell.
 Have `nvim` command installed to your `PATH`
 (must be usable via the interpreter line `#!/usr/bin/env -S nvim -l`)
 
-Navigate to the root of the repository and run `./test`
+Navigate to the root of the repository and run `./test.nvim.lua`
 
 They will also ran as part of the pre-commit checks.
 
