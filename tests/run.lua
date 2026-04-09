@@ -136,29 +136,34 @@ package.preload.gambiarra = function()
     })
 
     local pendingtests = {}
+    local await_callbacks = {}
     ---@type TestEnv|any
     local env = _G
 
     local function runpending()
         if pendingtests[1] ~= nil then
             pendingtests[1](runpending)
+        else
+            for _, f in ipairs(await_callbacks) do
+                f()
+            end
+            await_callbacks = {}
         end
     end
 
     return setmetatable({
         tests_passed = 0,
         tests_failed = 0,
-        gambiarrahandler = function(self, e, desc, msg, err)
-            local suffix = tostring(msg) .. (err and "\n   (with error: " .. err .. ")" or "")
+        gambiarrahandler = function(_, e, async, desc, msg, err)
+            local suffix = (async and (desc .. " ") or "")
+                .. tostring(msg)
+                .. (err and "\n   (with error: " .. err .. ")" or "")
             if e == "pass" then
                 io.stdout:write("   " .. passmark .. " " .. suffix .. "\n")
-                self.tests_passed = self.tests_passed + 1
             elseif e == "fail" then
                 io.stdout:write("   " .. failmark .. " " .. suffix .. "\n")
-                self.tests_failed = self.tests_failed + 1
             elseif e == "except" then
                 io.stdout:write(" " .. exceptmark .. " " .. suffix .. "\n")
-                self.tests_failed = self.tests_failed + 1
             elseif e == "begin" then
                 io.stdout:write(" " .. sectionmark .. " " .. desc .. " " .. sectionmark .. "\n")
                 -- elseif e == "end" then
@@ -180,12 +185,18 @@ package.preload.gambiarra = function()
                     io.stdout:write("Tests passed: " .. tostring(self.tests_passed) .. "\n")
                     io.stdout:write("Tests failed: " .. tostring(self.tests_failed) .. "\n")
                 end
-            elseif key == "assert_passing" then
-                return function()
-                    if (self.tests_failed or 0) > 0 then
-                        os.exit(1)
+            elseif key == "await" then
+                return function(f)
+                    if #pendingtests == 0 then
+                        f(self)
+                    else
+                        table.insert(await_callbacks, function()
+                            f(self)
+                        end)
                     end
                 end
+            elseif key == "pending" then
+                return #pendingtests
             end
         end,
         __call = function(self, name, f, async)
@@ -202,20 +213,31 @@ package.preload.gambiarra = function()
                     eq = env.eq,
                 }
 
+                local handler = function(...)
+                    local e = ({ ... })[2]
+                    if e == "pass" then
+                        self.tests_passed = self.tests_passed + 1
+                    elseif e == "end" then
+                        self.tests_passed = self.tests_passed + 1
+                    elseif e == "fail" then
+                        self.tests_failed = self.tests_failed + 1
+                    elseif e == "except" then
+                        self.tests_failed = self.tests_failed + 1
+                    end
+                    self.gambiarrahandler(...)
+                end
                 local was_restored = false
                 local restore = function()
                     was_restored = true
                     env.ok = prev.ok
                     env.spy = prev.spy
                     env.eq = prev.eq
-                    self.gambiarrahandler(self, "end", name)
+                    handler(self, "end", async, name)
                     table.remove(pendingtests, 1)
                     if next then
                         next()
                     end
                 end
-
-                local handler = self.gambiarrahandler
 
                 env.eq = function(a, b)
                     return deepeq(a, b)
@@ -228,11 +250,12 @@ package.preload.gambiarra = function()
                     if type(cond) == "function" then
                         local ok, value = pcall(cond)
                         if should_fail and not ok or not should_fail and ok then
-                            handler(self, "pass", name, msg)
+                            handler(self, "pass", async, name, msg)
                         else
                             handler(
                                 self,
                                 "fail",
+                                async,
                                 name,
                                 msg,
                                 not should_fail and tostring(value)
@@ -240,13 +263,13 @@ package.preload.gambiarra = function()
                             )
                         end
                     elseif should_fail and not cond or not should_fail and cond then
-                        handler(self, "pass", name, msg)
+                        handler(self, "pass", async, name, msg)
                     else
-                        handler(self, "fail", name, msg)
+                        handler(self, "fail", async, name, msg)
                     end
                 end
 
-                handler(self, "begin", name)
+                handler(self, "begin", async, name)
                 local ok, err
                 if async then
                     ok, err = pcall(f, restore)
@@ -254,14 +277,14 @@ package.preload.gambiarra = function()
                     ok, err = pcall(f)
                 end
                 if not ok then
-                    handler(self, "except", name, err)
+                    handler(self, "except", async, name, err)
                     if async and not was_restored then
                         restore()
                     end
                 end
 
                 if not async then
-                    handler(self, "end", name)
+                    handler(self, "end", async, name)
                     env.ok = prev.ok
                     env.spy = prev.spy
                     env.eq = prev.eq
@@ -390,6 +413,11 @@ for _, file in ipairs(files) do
     )
 end
 
-test.report()
-test.assert_passing()
-os.exit(0)
+test.await(function(self)
+    self.report()
+    if (self.tests_failed or 0) > 0 then
+        os.exit(1)
+    else
+        os.exit(0)
+    end
+end)
