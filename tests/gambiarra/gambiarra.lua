@@ -142,6 +142,7 @@ local function runpending()
     end
 end
 
+-- Returned dir always has trailing slash
 local function cwd()
     local sep = package.config:sub(1, 1)
     local info = debug.getinfo(1, "S")
@@ -162,6 +163,7 @@ local function cwd()
     return "." .. sep, nil
 end
 
+-- Requires dir to have trailing slash
 local function read_dir(dir, filter)
     local uv = (vim or {}).uv or (vim or {}).loop
     if not uv then
