@@ -1,0 +1,15 @@
+#!/usr/bin/env -S nvim -l
+local function cwd()
+    local sep = package.config:sub(1, 1)
+    local info = debug.getinfo(1, "S")
+    local source = info.source
+    if source:sub(1, 1) == "@" then
+        local path = source:sub(2)
+        local dir, file = path:match("^(.*[" .. sep .. "])([^" .. sep .. "]+)$")
+        return dir or ("." .. sep), file
+    end
+    return "." .. sep, nil
+end
+local here = cwd()
+vim.opt.runtimepath:prepend(here)
+dofile(here .. "/spec/run.lua")

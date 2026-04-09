@@ -4,79 +4,79 @@ vim.g.lze = {
 }
 local lze = require("lze")
 local loader = require("lze.c.loader")
-local spy = require("luassert.spy")
+local test = require("gambiarra")
 
-describe("handlers.cmd", function()
-    it("Command only loads plugin once and executes plugin command", function()
-        local counter = 0
+test("Command only loads plugin once and executes plugin command", function()
+    local counter = 0
+    ---@type lze.Plugin
+    local plugin = {
+        name = "foos",
+        cmd = { "Foos" },
+        after = function()
+            vim.api.nvim_create_user_command("Foos", function()
+                counter = counter + 1
+            end, {})
+        end,
+    }
+    local spy_load = spy.on(loader, "load")
+    lze.load({ plugin })
+    ok(vim.cmd.Foos ~= nil, "Foos command created")
+    vim.cmd.Foos()
+    vim.cmd.Foos()
+    ok(#spy_load.called == 1, "plugin loaded once")
+    ok(2 == counter, "command executed twice")
+    spy_load.off()
+end)
+test("Multiple commands only load plugin once", function()
+    ---@param commands string[]
+    local function itt(commands, name)
         ---@type lze.Plugin
         local plugin = {
-            name = "foos",
-            cmd = { "Foos" },
+            name = name,
+            cmd = commands,
             after = function()
-                vim.api.nvim_create_user_command("Foos", function()
-                    counter = counter + 1
-                end, {})
+                vim.api.nvim_create_user_command(commands[1], function() end, {})
+                vim.api.nvim_create_user_command(commands[2], function() end, {})
             end,
         }
         local spy_load = spy.on(loader, "load")
         lze.load({ plugin })
-        assert.is_not_nil(vim.cmd.Foos)
-        vim.cmd.Foos()
-        vim.cmd.Foos()
-        assert.spy(spy_load).called(1)
-        assert.same(2, counter)
-    end)
-    it("Multiple commands only load plugin once", function()
-        ---@param commands string[]
-        local function itt(commands, name)
-            ---@type lze.Plugin
-            local plugin = {
-                name = name,
-                cmd = commands,
-                after = function()
-                    vim.api.nvim_create_user_command(commands[1], function() end, {})
-                    vim.api.nvim_create_user_command(commands[2], function() end, {})
-                end,
-            }
-            local spy_load = spy.on(loader, "load")
-            lze.load({ plugin })
-            vim.cmd[commands[1]]()
-            vim.cmd[commands[2]]()
-            assert.spy(spy_load).called(1)
-        end
-        itt({ "Foo", "Bar" }, "foo5")
-        itt({ "Bar", "Foo" }, "foo4")
-    end)
-    it("Deletes command before loading the plugin when other specs load it", function()
-        local should_be_inc = 0
-        local plugin = {
-            name = "my_other_plus_cmd",
-            cmd = "MyTestCMD",
-            load = function(_)
-                if vim.fn.exists(":MyTestCMD") == 0 then
-                    vim.api.nvim_create_user_command("MyTestCMD", function(_)
-                        should_be_inc = should_be_inc + 1
-                    end, {})
-                end
-            end,
-        }
-        lze.load(plugin)
-        lze.trigger_load(plugin.name)
-        vim.cmd[plugin.cmd]()
-        assert.equal(1, should_be_inc)
-    end)
-    it("Doesn't error when deleting command if the command doesn't exist", function()
-        local plugin = {
-            name = "my_test_cmd",
-            cmd = "TestCMD",
-        }
-        local plugin2 = {
-            name = "my_other_cmd_dep",
-            dep_of = { "my_test_cmd" },
-            cmd = "TestCMD",
-        }
-        lze.load({ plugin, plugin2 })
-        lze.trigger_load(plugin.name)
-    end)
+        vim.cmd[commands[1]]()
+        vim.cmd[commands[2]]()
+        ok(#spy_load.called == 1, "plugin loaded once")
+        spy_load.off()
+    end
+    itt({ "Foo", "Bar" }, "foo5")
+    itt({ "Bar", "Foo" }, "foo4")
+end)
+test("Deletes command before loading the plugin when other specs load it", function()
+    local should_be_inc = 0
+    local plugin = {
+        name = "my_other_plus_cmd",
+        cmd = "MyTestCMD",
+        load = function(_)
+            if vim.fn.exists(":MyTestCMD") == 0 then
+                vim.api.nvim_create_user_command("MyTestCMD", function(_)
+                    should_be_inc = should_be_inc + 1
+                end, {})
+            end
+        end,
+    }
+    lze.load(plugin)
+    lze.trigger_load(plugin.name)
+    vim.cmd[plugin.cmd]()
+    ok(1 == should_be_inc, "test value was incremented")
+end)
+test("Doesn't error when deleting command if the command doesn't exist", function()
+    local plugin = {
+        name = "my_test_cmd",
+        cmd = "TestCMD",
+    }
+    local plugin2 = {
+        name = "my_other_cmd_dep",
+        dep_of = { "my_test_cmd" },
+        cmd = "TestCMD",
+    }
+    lze.load({ plugin, plugin2 })
+    lze.trigger_load(plugin.name)
 end)
