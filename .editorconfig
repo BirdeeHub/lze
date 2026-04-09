@@ -65,6 +65,6 @@ indent_size = unset
 indent_size = unset
 indent_style = unset
 
-[spec/**/*.lua]
+[tests/**/*.lua]
 indent_size = unset
 indent_style = unset
