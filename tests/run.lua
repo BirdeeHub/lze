@@ -30,31 +30,34 @@ _G.ok = nil
 _G.eq = nil
 
 package.preload.gambiarra = function()
-    local function deepeq(a, b)
-        -- Different types: false
+    local function deepeq(a, b, visited)
+        visited = visited or {}
+        -- cycle detection
+        if type(a) == "table" and type(b) == "table" then
+            if visited[a] and visited[a] == b then
+                return true
+            end
+            visited[a] = b
+        end
         if type(a) ~= type(b) then
             return false
         end
-        -- Functions
         if type(a) == "function" then
             return string.dump(a) == string.dump(b)
         end
-        -- Primitives and equal pointers
         if a == b then
             return true
         end
-        -- Only equal tables could have passed previous tests
         if type(a) ~= "table" then
             return false
         end
-        -- Compare tables field by field
         for k, v in pairs(a) do
-            if b[k] == nil or not deepeq(v, b[k]) then
+            if b[k] == nil or not deepeq(v, b[k], visited) then
                 return false
             end
         end
-        for k, v in pairs(b) do
-            if a[k] == nil or not deepeq(v, a[k]) then
+        for k in pairs(b) do
+            if a[k] == nil then
                 return false
             end
         end
@@ -205,7 +208,9 @@ package.preload.gambiarra = function()
 
                 local handler = self.gambiarrahandler
 
-                env.eq = deepeq
+                env.eq = function(a, b)
+                    return deepeq(a, b)
+                end
                 env.spy = spy
                 env.ok = function(cond, msg, should_fail)
                     if not msg then
