@@ -366,7 +366,13 @@ return setmetatable({
             if not ok then
                 handler(self, "except", async, name, err)
                 if async and not was_restored then
-                    restore()
+                    env.ok = prev.ok
+                    env.spy = prev.spy
+                    env.eq = prev.eq
+                    table.remove(pendingtests, 1)
+                    if next then
+                        next()
+                    end
                 end
             elseif not async then
                 handler(self, "end", async, name)
