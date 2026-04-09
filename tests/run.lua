@@ -357,7 +357,7 @@ for _, file in ipairs(files) do
         success, msg = pcall(msg, test)
     end
     local icon = (success and passmark or failmark)
-    io.write(icon .. " " .. file .. " " .. icon .. (msg and " : " .. tostring(msg) or "") .. "\n")
+    io.write(" " .. icon .. " " .. file .. " " .. icon .. (msg and " : " .. tostring(msg) or "") .. "\n")
 end
 
 test.report()
