@@ -142,85 +142,89 @@ local function runpending()
     end
 end
 
-return setmetatable({
-    cwd = function()
-        local sep = package.config:sub(1, 1)
-        local info = debug.getinfo(1, "S")
-        local source = info.source
-        if source:sub(1, 1) == "@" then
-            local realpath = ((vim or {}).uv or (vim or {}).loop or {}).fs_realpath
-            if not realpath then
-                local ok, luv = pcall(require, "luv")
-                if ok then
-                    realpath = luv.fs_realpath
-                end
-            end
-            local path = source:sub(2)
-            path = realpath and realpath(path) or path
-            local dir, file = path:match("^(.*[" .. sep .. "])([^" .. sep .. "]+)$")
-            return dir or ("." .. sep), file
-        end
-        return "." .. sep, nil
-    end,
-    read_dir = function(dir, filter)
-        local uv = (vim or {}).uv or (vim or {}).loop
-        if not uv then
+local function cwd()
+    local sep = package.config:sub(1, 1)
+    local info = debug.getinfo(1, "S")
+    local source = info.source
+    if source:sub(1, 1) == "@" then
+        local realpath = ((vim or {}).uv or (vim or {}).loop or {}).fs_realpath
+        if not realpath then
             local ok, luv = pcall(require, "luv")
             if ok then
-                uv = luv
+                realpath = luv.fs_realpath
             end
         end
-        if uv then
-            local files = {}
-            local handle = uv.fs_scandir(dir)
-            while handle do
-                local name, ty = uv.fs_scandir_next(handle)
-                if not name then
-                    break
+        local path = source:sub(2)
+        path = realpath and realpath(path) or path
+        local dir, file = path:match("^(.*[" .. sep .. "])([^" .. sep .. "]+)$")
+        return dir or ("." .. sep), file
+    end
+    return "." .. sep, nil
+end
+
+local function read_dir(dir, filter)
+    local uv = (vim or {}).uv or (vim or {}).loop
+    if not uv then
+        local ok, luv = pcall(require, "luv")
+        if ok then
+            uv = luv
+        end
+    end
+    if uv then
+        local files = {}
+        local handle = uv.fs_scandir(dir)
+        while handle do
+            local name, ty = uv.fs_scandir_next(handle)
+            if not name then
+                break
+            end
+            local path = dir .. name
+            ty = ty or (uv.fs_stat(path) or {}).type
+            if ty == "file" or ty == "link" then
+                if not filter or filter(name) then
+                    table.insert(files, name)
                 end
+            end
+        end
+        return files
+    end
+
+    local ok, lfs = pcall(require, "lfs")
+    if ok then
+        local files = {}
+        for name in lfs.dir(dir) do
+            if name ~= "." and name ~= ".." then
                 local path = dir .. name
-                ty = ty or (uv.fs_stat(path) or {}).type
-                if ty == "file" or ty == "link" then
+                local attr = lfs.attributes(path)
+
+                if attr and (attr.mode == "file" or attr.mode == "link") then
                     if not filter or filter(name) then
                         table.insert(files, name)
                     end
                 end
             end
-            return files
         end
-
-        local ok, lfs = pcall(require, "lfs")
-        if ok then
-            local files = {}
-            for name in lfs.dir(dir) do
-                if name ~= "." and name ~= ".." then
-                    local path = dir .. name
-                    local attr = lfs.attributes(path)
-
-                    if attr and (attr.mode == "file" or attr.mode == "link") then
-                        if not filter or filter(name) then
-                            table.insert(files, name)
-                        end
-                    end
-                end
-            end
-            return files
-        end
-
-        local command = package.config:sub(1, 1) == "\\" and ('dir "' .. dir .. '" /b') or ('ls -1 "' .. dir .. '"')
-        local handle = io.popen(command)
-        local files = {}
-        if not handle then
-            return files
-        end
-        for filename in handle:lines() do
-            if not filter or filter(filename) then
-                table.insert(files, filename)
-            end
-        end
-        handle:close()
         return files
-    end,
+    end
+
+    local command = package.config:sub(1, 1) == "\\" and ('dir "' .. dir .. '" /b') or ('ls -1 "' .. dir .. '"')
+    local handle = io.popen(command)
+    local files = {}
+    if not handle then
+        return files
+    end
+    for filename in handle:lines() do
+        if not filter or filter(filename) then
+            table.insert(files, filename)
+        end
+    end
+    handle:close()
+    return files
+end
+
+return setmetatable({
+    read_dir = read_dir,
+    cwd = cwd,
     icons = {
         pass = "[32m✔[0m",
         fail = "[31m✘[0m",
@@ -263,7 +267,9 @@ return setmetatable({
                         .. "\n"
                 )
                 io.stdout:write(" " .. self.icons.pass .. " Tests passed: " .. tostring(self.tests_passed) .. "\n")
-                io.stdout:write(" " .. self.icons.fail .. " Tests failed: " .. tostring(self.tests_failed) .. "\n")
+                if (self.tests_failed or 0) > 0 then
+                    io.stdout:write(" " .. self.icons.fail .. " Tests failed: " .. tostring(self.tests_failed) .. "\n")
+                end
             end
         elseif key == "await" then
             return function(f)
@@ -296,13 +302,13 @@ return setmetatable({
             local handler = function(...)
                 local e = ({ ... })[2]
                 if e == "pass" then
-                    self.tests_passed = self.tests_passed + 1
+                    self.tests_passed = (self.tests_passed or 0) + 1
                 elseif e == "end" then
-                    self.tests_passed = self.tests_passed + 1
+                    self.tests_passed = (self.tests_passed or 0) + 1
                 elseif e == "fail" then
-                    self.tests_failed = self.tests_failed + 1
+                    self.tests_failed = (self.tests_failed or 0) + 1
                 elseif e == "except" then
-                    self.tests_failed = self.tests_failed + 1
+                    self.tests_failed = (self.tests_failed or 0) + 1
                 end
                 self.gambiarrahandler(...)
             end
