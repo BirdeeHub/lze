@@ -39,15 +39,19 @@ package.preload.gambiarra = function()
             end
             visited[a] = b
         end
+        -- Different types: false
         if type(a) ~= type(b) then
             return false
         end
+        -- Functions
         if type(a) == "function" then
             return string.dump(a) == string.dump(b)
         end
+        -- Primitives and equal pointers
         if a == b then
             return true
         end
+        -- Only both as tables could have passed previous tests
         if type(a) ~= "table" then
             return false
         end
@@ -56,6 +60,7 @@ package.preload.gambiarra = function()
                 return false
             end
         end
+        -- ones in b not in a
         for k in pairs(b) do
             if a[k] == nil then
                 return false
