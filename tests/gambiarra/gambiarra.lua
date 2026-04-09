@@ -208,25 +208,13 @@ local function read_dir(dir, filter)
     return files
 end
 
-local pendingtests = {}
-local await_callbacks = {}
----@type GambiarraTestEnv|any
-local env = _G
-
-local function runpending()
-    if pendingtests[1] ~= nil then
-        pendingtests[1](runpending)
-    else
-        for _, f in ipairs(await_callbacks) do
-            f()
-        end
-        await_callbacks = {}
-    end
-end
-
 return setmetatable({
     read_dir = read_dir,
     cwd = cwd,
+    spy = spy,
+    eq = function(a, b)
+        return deepeq(a, b)
+    end,
     icons = {
         pass = "[32m✔[0m",
         fail = "[31m✘[0m",
@@ -236,6 +224,10 @@ return setmetatable({
     },
     tests_passed = 0,
     tests_failed = 0,
+    pendingtests = {},
+    await_callbacks = {},
+    ---@type GambiarraTestEnv|any
+    env = _G,
     gambiarrahandler = function(self, e, async, desc, msg, err)
         local suffix = (async and (desc .. " ") or "")
             .. tostring(msg)
@@ -275,30 +267,41 @@ return setmetatable({
             end
         elseif key == "await" then
             return function(f)
-                if #pendingtests == 0 then
+                if #self.pendingtests == 0 then
                     f(self)
                 else
-                    table.insert(await_callbacks, function()
+                    table.insert(self.await_callbacks, function()
                         f(self)
                     end)
                 end
             end
         elseif key == "pending" then
-            return #pendingtests
+            return #self.pendingtests
+        elseif key == "runpending" then
+            return function()
+                if self.pendingtests[1] ~= nil then
+                    self.pendingtests[1](self.runpending)
+                else
+                    for _, f in ipairs(self.await_callbacks) do
+                        f()
+                    end
+                    self.await_callbacks = {}
+                end
+            end
         end
     end,
     __call = function(self, name, f, async)
         if type(name) == "function" then
             self.gambiarrahandler = name
-            env = f or _G
+            self.env = f or _G
             return
         end
 
         local testfn = function(next)
             local prev = {
-                ok = env.ok,
-                spy = env.spy,
-                eq = env.eq,
+                ok = self.env.ok,
+                spy = self.env.spy,
+                eq = self.env.eq,
             }
 
             local handler = function(...)
@@ -317,10 +320,10 @@ return setmetatable({
             local was_restored = false
             local function restore()
                 was_restored = true
-                env.ok = prev.ok
-                env.spy = prev.spy
-                env.eq = prev.eq
-                table.remove(pendingtests, 1)
+                self.env.ok = prev.ok
+                self.env.spy = prev.spy
+                self.env.eq = prev.eq
+                table.remove(self.pendingtests, 1)
                 if next then
                     next()
                 end
@@ -339,11 +342,11 @@ return setmetatable({
                 restore()
             end
 
-            env.eq = function(a, b)
+            self.env.eq = function(a, b)
                 return deepeq(a, b)
             end
-            env.spy = spy
-            env.ok = function(cond, msg, should_fail)
+            self.env.spy = spy
+            self.env.ok = function(cond, msg, should_fail)
                 if not msg then
                     msg = debug.getinfo(2, "S").short_src .. ":" .. debug.getinfo(2, "l").currentline
                 end
@@ -386,16 +389,16 @@ return setmetatable({
             end
 
             if not async then
-                env.ok = prev.ok
-                env.spy = prev.spy
-                env.eq = prev.eq
+                self.env.ok = prev.ok
+                self.env.spy = prev.spy
+                self.env.eq = prev.eq
             end
         end
 
         if async then
-            table.insert(pendingtests, testfn)
-            if #pendingtests == 1 then
-                runpending()
+            table.insert(self.pendingtests, testfn)
+            if #self.pendingtests == 1 then
+                self.runpending()
             end
         else
             testfn()
