@@ -11,11 +11,8 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-
     pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
-
     gen-luarc.url = "github:mrcjkb/nix-gen-luarc-json";
-
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
   };
 
@@ -162,7 +159,7 @@
         luarc = pkgs.mk-luarc {};
       in rec {
         default = pkgs.mkShell {
-          name = "lze devShell";
+          name = "${name} devShell";
           DEVSHELL = 0;
           shellHook = ''
             ${(pre-commit-check pkgs luarc).shellHook}
@@ -183,10 +180,10 @@
         pkgs = nixpkgs.legacyPackages.${system}.appendOverlays [
           self.overlays.default
         ];
-      in rec {
-        default = lze-vimPlugin;
-        lze-luaPackage = pkgs.lua51Packages.${name};
-        lze-vimPlugin = pkgs.vimPlugins.${name};
+      in {
+        default = self.packages.${system}."${name}-vimPlugin";
+        "${name}-luaPackage" = pkgs.lua51Packages.${name};
+        "${name}-vimPlugin" = pkgs.vimPlugins.${name};
       }
     );
 
