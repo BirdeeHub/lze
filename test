@@ -14,7 +14,7 @@ local function cwd()
 end
 local here = cwd()
 vim.opt.runtimepath:prepend(here)
-local testdir = here .. "/tests/"
+local testdir = here .. "tests/"
 loadfile(testdir .. "run.lua")(testdir, function(filename)
     return filename:match("_test%.lua$")
 end)
