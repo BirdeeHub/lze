@@ -14,49 +14,64 @@
 ---@class GambiarraTestEnv
 ---@field ok fun(cond: boolean, msg?: string, should_fail?: boolean)
 ---@field spy GambiarraSpyType
----@field eq fun(a: any, b: any): boolean
+---@field eq fun(a: any, b: any): boolean, string?
 
 ---@type GambiarraSpyType
 _G.spy = nil
 ---@type fun(cond: boolean, msg?: string, should_fail?: boolean)
 _G.ok = nil
----@type fun(a: any, b: any): boolean
+---@type fun(a: any, b: any): boolean, string?
 _G.eq = nil
 
-local function deepeq(a, b, visited)
-    visited = visited or {}
-    -- cycle detection
-    if type(a) == "table" and type(b) == "table" then
-        if visited[a] and visited[a] == b then
-            return true
-        end
-        visited[a] = b
-    end
-    -- Different types: false
-    if type(a) ~= type(b) then
+local function printable(typename)
+    if typename == "nil" or typename == "boolean" or typename == "number" or typename == "string" then
+        return true
+    else
         return false
     end
-    -- Functions
-    if type(a) == "function" then
-        return string.dump(a) == string.dump(b)
-    end
-    -- Primitives and equal pointers
-    if a == b then
+end
+
+-- https://github.com/luvit/luvit/blob/master/tests/libs/deep-equal.lua
+local function deepeq(expected, actual, path)
+    if expected == actual then
         return true
     end
-    -- Only both as tables could have passed previous tests
-    if type(a) ~= "table" then
-        return false
+    local prefix = path and (path .. ": ") or ""
+    local expectedType = type(expected)
+    local actualType = type(actual)
+    if expectedType ~= actualType then
+        return false,
+            prefix
+                .. "Expected type "
+                .. expectedType
+                .. " but found "
+                .. actualType
+                .. ", expected value "
+                .. (printable(expectedType) and tostring(expected))
+                .. ", but found value "
+                .. (printable(actualType) and tostring(actual))
     end
-    for k, v in pairs(a) do
-        if b[k] == nil or not deepeq(v, b[k], visited) then
-            return false
+    if expectedType ~= "table" then
+        return false, prefix .. "Expected " .. tostring(expected) .. " but found " .. tostring(actual)
+    end
+    local expectedLength = #expected
+    local actualLength = #actual
+    for key in pairs(expected) do
+        if actual[key] == nil then
+            return false, prefix .. "Missing table key " .. key
+        end
+        local newPath = path and (path .. "." .. key) or key
+        local same, message = deepeq(expected[key], actual[key], newPath)
+        if not same then
+            return same, message
         end
     end
-    -- ones in b not in a
-    for k in pairs(b) do
-        if a[k] == nil then
-            return false
+    if expectedLength ~= actualLength then
+        return false, prefix .. "Expected table length " .. expectedLength .. " but found " .. actualLength
+    end
+    for key in pairs(actual) do
+        if expected[key] == nil then
+            return false, prefix .. "Unexpected table key " .. key
         end
     end
     return true
