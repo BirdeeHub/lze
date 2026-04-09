@@ -123,5 +123,10 @@ return {
     package.loaded["import_test_plugins_dir.telescope"] = nil
     spy_load.off()
 end)
-
-vim.system({ "rm", "-r", tempdir }):wait()
+test("import_test cleanup", function(next)
+    vim.system({ "rm", "-r", tempdir }):wait()
+    -- this seemed also like a good place to make the tests wait until everything is done printing
+    vim.schedule(function()
+        vim.schedule(next)
+    end)
+end, true)
