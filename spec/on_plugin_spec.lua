@@ -1,15 +1,14 @@
+---@diagnostic disable: invisible
+vim.g.lze = {
+    injects = {
+        load = function() end,
+    },
+}
 local lze = require("lze")
+local test = require("gambiarra")
 
-describe("handlers.on_plugin", function()
-    ---@class state_entry_after
-    ---@field load_called? boolean
-    ---@field after_called? boolean
-    ---@field before_called? boolean
-    ---@field loaded_after? string[]
-    ---@field loaded_after_before? string[]
-    ---@field loaded_after_after? string[]
-
-    ---@type table<string, state_entry_after>
+test("handlers.on_plugin dep_of loads after before and before load", function()
+    ---@type table<string, table>
     local plugin_state = {}
 
     local filter_states = function(plugin, filter)
@@ -75,40 +74,38 @@ describe("handlers.on_plugin", function()
     tpl_2.name = tpl_2[1]
     tpl_2[1] = nil
 
-    it("dep_of loads after before and before load", function()
-        lze.load(test_plugin)
-        lze.load(test_plugin_2)
-        lze.trigger_load(tpl.name)
+    lze.load(test_plugin)
+    lze.load(test_plugin_2)
+    lze.trigger_load(tpl.name)
 
-        assert.same(true, plugin_state[tpl.name].load_called)
-        assert.same(true, plugin_state[tpl.name].before_called)
-        assert.same(true, plugin_state[tpl.name].after_called)
-        assert.same({}, plugin_state[tpl.name].loaded_after)
-        assert.same({}, plugin_state[tpl.name].loaded_after_after)
-        assert.same({ "test_plugin" }, plugin_state[tpl.name].loaded_after_before)
+    ok(eq(true, plugin_state[tpl.name].load_called), "tpl load_called")
+    ok(eq(true, plugin_state[tpl.name].before_called), "tpl before_called")
+    ok(eq(true, plugin_state[tpl.name].after_called), "tpl after_called")
+    ok(eq({}, plugin_state[tpl.name].loaded_after), "tpl loaded_after")
+    ok(eq({}, plugin_state[tpl.name].loaded_after_after), "tpl loaded_after_after")
+    ok(eq({ "test_plugin" }, plugin_state[tpl.name].loaded_after_before), "tpl loaded_after_before")
 
-        assert.same(true, plugin_state[tpl_2.name].load_called)
-        assert.same(true, plugin_state[tpl_2.name].before_called)
-        assert.same(true, plugin_state[tpl_2.name].after_called)
-        assert.same({}, plugin_state[tpl_2.name].loaded_after_after)
-        assert.same({ "test_plugin" }, plugin_state[tpl_2.name].loaded_after)
-        assert.True(vim.tbl_contains(plugin_state[tpl_2.name].loaded_after_before, "test_plugin"))
-        assert.True(vim.tbl_contains(plugin_state[tpl_2.name].loaded_after_before, "test_plugin_2"))
-    end)
-    it("dep_of loads if other was loaded already", function()
-        local testval = false
-        local defertest = {
-            "defer_test_plugin",
-        }
-        local defertest2 = {
-            "defer_test_plugin_2",
-            on_plugin = { "defer_test_plugin" },
-            load = function(_)
-                testval = true
-            end,
-        }
-        lze.load(defertest)
-        lze.load(defertest2)
-        assert.True(testval)
-    end)
+    ok(eq(true, plugin_state[tpl_2.name].load_called), "tpl_2 load_called")
+    ok(eq(true, plugin_state[tpl_2.name].before_called), "tpl_2 before_called")
+    ok(eq(true, plugin_state[tpl_2.name].after_called), "tpl_2 after_called")
+    ok(eq({}, plugin_state[tpl_2.name].loaded_after_after), "tpl_2 loaded_after_after")
+    ok(eq({ "test_plugin" }, plugin_state[tpl_2.name].loaded_after), "tpl_2 loaded_after")
+    ok(vim.tbl_contains(plugin_state[tpl_2.name].loaded_after_before, "test_plugin"), "tpl_2 contains test_plugin")
+    ok(vim.tbl_contains(plugin_state[tpl_2.name].loaded_after_before, "test_plugin_2"), "tpl_2 contains test_plugin_2")
+end)
+test("handlers.on_plugin dep_of loads if other was loaded already", function()
+    local testval = false
+    local defertest = {
+        "defer_test_plugin",
+    }
+    local defertest2 = {
+        "defer_test_plugin_2",
+        on_plugin = { "defer_test_plugin" },
+        load = function(_)
+            testval = true
+        end,
+    }
+    lze.load(defertest)
+    lze.load(defertest2)
+    ok(testval == true, "testval is true")
 end)

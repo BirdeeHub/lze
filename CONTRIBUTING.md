@@ -55,23 +55,12 @@ just run `direnv allow` and you will be dropped in this devShell.
 
 ### Running tests
 
-I use [`busted`](https://lunarmodules.github.io/busted/) for testing,
-but with Neovim as the Lua interpreter.
+Have `nvim` command installed to your `PATH`
+(must be usable via the interpreter line `#!/usr/bin/env -S nvim -l`)
 
-The easiest way to run tests is with Nix (see below).
+Navigate to the root of the repository and run `./test`
 
-If you do not use Nix, you can also run the test suite using `luarocks test`.
-For more information on how to set up Neovim as a Lua interpreter, see
-
-- The [neorocks tutorial](https://github.com/nvim-neorocks/neorocks#without-neolua).
-
-Or
-
-- [`nlua`](https://github.com/mfussenegger/nlua).
-
-> [!NOTE]
->
-> The Nix devShell sets up `luarocks test` and `busted` to use Neovim as the interpreter.
+They will also ran as part of the pre-commit checks.
 
 ### Running tests and checks with Nix
 

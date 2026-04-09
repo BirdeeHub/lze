@@ -1,6 +1,7 @@
 local lze = require("lze")
+local test = require("gambiarra")
 
-describe("handlers.dep_of", function()
+test("dep_of loads after before and before load", function()
     ---@class state_entry_deps
     ---@field load_called? boolean
     ---@field after_called? boolean
@@ -12,7 +13,16 @@ describe("handlers.dep_of", function()
     ---@type table<string, state_entry_deps>
     local plugin_state = {}
 
-    local filter_states = function(plugin, filter)
+    local function contains(tbl, val)
+        for _, v in ipairs(tbl) do
+            if v == val then
+                return true
+            end
+        end
+        return false
+    end
+
+    local function filter_states(plugin, filter)
         local result = {}
         for name, state in pairs(plugin_state) do
             if name ~= plugin.name and filter(name, state) then
@@ -68,25 +78,35 @@ describe("handlers.dep_of", function()
         after = test_after_fun,
     }
 
-    it("dep_of loads after before and before load", function()
-        lze.load(tpl_2)
-        lze.load(tpl)
-        lze.trigger_load(tpl.name)
+    lze.load(tpl_2)
+    lze.load(tpl)
+    lze.trigger_load(tpl.name)
 
-        assert.same(true, plugin_state[tpl.name].load_called)
-        assert.same(true, plugin_state[tpl.name].before_called)
-        assert.same(true, plugin_state[tpl.name].after_called)
-        assert.same({ "test_plugin_4" }, plugin_state[tpl.name].loaded_after)
-        assert.same({ "test_plugin_4" }, plugin_state[tpl.name].loaded_after_after)
-        assert.True(vim.tbl_contains(plugin_state[tpl.name].loaded_after_before, "test_plugin_3"))
-        assert.True(vim.tbl_contains(plugin_state[tpl.name].loaded_after_before, "test_plugin_4"))
+    ok(plugin_state[tpl.name].load_called == true, "tpl load_called")
+    ok(plugin_state[tpl.name].before_called == true, "tpl before_called")
+    ok(plugin_state[tpl.name].after_called == true, "tpl after_called")
+    ok(eq({ "test_plugin_4" }, plugin_state[tpl.name].loaded_after), "tpl loaded_after")
+    ok(eq({ "test_plugin_4" }, plugin_state[tpl.name].loaded_after_after), "tpl loaded_after_after")
+    ok(
+        contains(plugin_state[tpl.name].loaded_after_before, "test_plugin_3"),
+        "tpl loaded_after_before contains test_plugin_3"
+    )
+    ok(
+        contains(plugin_state[tpl.name].loaded_after_before, "test_plugin_4"),
+        "tpl loaded_after_before contains test_plugin_4"
+    )
 
-        assert.same(true, plugin_state[tpl_2.name].load_called)
-        assert.same(true, plugin_state[tpl_2.name].before_called)
-        assert.same(true, plugin_state[tpl_2.name].after_called)
-        assert.same({}, plugin_state[tpl_2.name].loaded_after)
-        assert.same({}, plugin_state[tpl_2.name].loaded_after_after)
-        assert.True(vim.tbl_contains(plugin_state[tpl_2.name].loaded_after_before, "test_plugin_3"))
-        assert.True(vim.tbl_contains(plugin_state[tpl_2.name].loaded_after_before, "test_plugin_4"))
-    end)
+    ok(plugin_state[tpl_2.name].load_called == true, "tpl_2 load_called")
+    ok(plugin_state[tpl_2.name].before_called == true, "tpl_2 before_called")
+    ok(plugin_state[tpl_2.name].after_called == true, "tpl_2 after_called")
+    ok(eq({}, plugin_state[tpl_2.name].loaded_after), "tpl_2 loaded_after")
+    ok(eq({}, plugin_state[tpl_2.name].loaded_after_after), "tpl_2 loaded_after_after")
+    ok(
+        contains(plugin_state[tpl_2.name].loaded_after_before, "test_plugin_3"),
+        "tpl_2 loaded_after_before contains test_plugin_3"
+    )
+    ok(
+        contains(plugin_state[tpl_2.name].loaded_after_before, "test_plugin_4"),
+        "tpl_2 loaded_after_before contains test_plugin_4"
+    )
 end)
