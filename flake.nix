@@ -155,13 +155,10 @@
 
     devShells = perSystem (
       system: let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [
-            gen-luarc.overlays.default
-            self.overlays.default
-          ];
-        };
+        pkgs = nixpkgs.legacyPackages.${system}.appendOverlays [
+          gen-luarc.overlays.default
+          self.overlays.default
+        ];
         luarc = pkgs.mk-luarc {};
       in rec {
         default = pkgs.mkShell {
@@ -183,10 +180,9 @@
 
     packages = perSystem (
       system: let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [self.overlays.default];
-        };
+        pkgs = nixpkgs.legacyPackages.${system}.appendOverlays [
+          self.overlays.default
+        ];
       in rec {
         default = lze-vimPlugin;
         lze-luaPackage = pkgs.lua51Packages.${name};
@@ -196,13 +192,10 @@
 
     checks = perSystem (
       system: let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [
-            gen-luarc.overlays.default
-            self.overlays.default
-          ];
-        };
+        pkgs = nixpkgs.legacyPackages.${system}.appendOverlays [
+          gen-luarc.overlays.default
+          self.overlays.default
+        ];
         nightlypkgs = pkgs.appendOverlays [inputs.neovim-nightly-overlay.overlays.default];
       in {
         pre-commit-check = pre-commit-check pkgs (pkgs.mk-luarc {});
