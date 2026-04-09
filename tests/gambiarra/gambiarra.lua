@@ -221,11 +221,13 @@ return setmetatable({
         handle:close()
         return files
     end,
-    passmark = "[32m✔[0m",
-    failmark = "[31m✘[0m",
-    exceptmark = "[35m‼[0m",
-    sectionmark = "[36m▶[0m",
-    endsectionmark = "[36m◀[0m",
+    icons = {
+        pass = "[32m✔[0m",
+        fail = "[31m✘[0m",
+        except = "[35m‼[0m",
+        begin = "[36m▶[0m",
+        _end = "[36m◀[0m",
+    },
     tests_passed = 0,
     tests_failed = 0,
     gambiarrahandler = function(self, e, async, desc, msg, err)
@@ -233,15 +235,15 @@ return setmetatable({
             .. tostring(msg)
             .. (err and "\n   (with error: " .. err .. ")" or "")
         if e == "pass" then
-            io.stdout:write("\n   " .. self.passmark .. " " .. suffix)
+            io.stdout:write("\n   " .. self.icons.pass .. " " .. suffix)
         elseif e == "fail" then
-            io.stdout:write("\n   " .. self.failmark .. " " .. suffix)
+            io.stdout:write("\n   " .. self.icons.fail .. " " .. suffix)
         elseif e == "except" then
-            io.stdout:write("\n " .. self.exceptmark .. " " .. suffix)
+            io.stdout:write("\n " .. self.icons.except .. " " .. suffix)
         elseif e == "begin" then
-            io.stdout:write("\n " .. self.sectionmark .. " " .. desc .. " " .. self.sectionmark)
+            io.stdout:write("\n " .. self.icons.begin .. " " .. desc .. " " .. self.icons.begin)
             -- elseif e == "end" then
-            --     io.stdout:write("\n " .. self.endsectionmark .. " " .. desc .. " " .. self.endsectionmark)
+            --     io.stdout:write("\n " .. self.icons._end .. " " .. desc .. " " .. self.icons._end)
         end
     end,
 }, {
@@ -255,13 +257,13 @@ return setmetatable({
             return function()
                 io.stdout:write(
                     "\n "
-                        .. self.sectionmark
+                        .. self.icons.begin
                         .. " Tests ran: "
                         .. tostring((self.tests_failed or 0) + (self.tests_passed or 0))
                         .. "\n"
                 )
-                io.stdout:write(" " .. self.passmark .. " Tests passed: " .. tostring(self.tests_passed) .. "\n")
-                io.stdout:write(" " .. self.failmark .. " Tests failed: " .. tostring(self.tests_failed) .. "\n")
+                io.stdout:write(" " .. self.icons.pass .. " Tests passed: " .. tostring(self.tests_passed) .. "\n")
+                io.stdout:write(" " .. self.icons.fail .. " Tests failed: " .. tostring(self.tests_failed) .. "\n")
             end
         elseif key == "await" then
             return function(f)

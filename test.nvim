@@ -30,11 +30,11 @@ for _, file in ipairs(files) do
     end
     io.write(
         "\n "
-            .. test.endsectionmark
+            .. test.icons._end
             .. " "
             .. file
             .. " "
-            .. (success and test.passmark or test.failmark)
+            .. (success and test.icons.pass or test.icons.fail)
             .. (msg and " : " .. tostring(msg) or "")
             .. "\n"
     )
