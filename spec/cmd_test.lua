@@ -4,7 +4,7 @@ vim.g.lze = {
 }
 local lze = require("lze")
 local loader = require("lze.c.loader")
-local test = require("gambiarra")
+local test = ...
 
 test("Command only loads plugin once and executes plugin command", function()
     local counter = 0

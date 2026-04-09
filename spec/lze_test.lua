@@ -5,7 +5,7 @@ vim.g.lze = {
 }
 local lz = require("lze")
 local loader = require("lze.c.loader")
-local test = require("gambiarra")
+local test = ...
 
 test("lze load __len works", function()
     ok(0 == #lz.state, "initial state length is 0")

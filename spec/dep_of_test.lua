@@ -1,5 +1,5 @@
 local lze = require("lze")
-local test = require("gambiarra")
+local test = ...
 
 test("dep_of loads after before and before load", function()
     ---@class state_entry_deps

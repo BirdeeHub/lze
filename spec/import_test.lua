@@ -5,7 +5,7 @@ vim.g.lze = {
 }
 local lz = require("lze")
 local tempdir = vim.fn.tempname()
-local test = require("gambiarra")
+local test = ...
 vim.system({ "mkdir", "-p", tempdir .. "/lua/plugins" }):wait()
 
 local loader = require("lze.c.loader")

@@ -6,7 +6,7 @@ vim.g.lze = {
 }
 local lze = require("lze")
 local loader = require("lze.c.loader")
-local test = require("gambiarra")
+local test = ...
 
 test("handlers.ft can parse from string", function()
     local f = function(inspec, ft)

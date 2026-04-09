@@ -12,4 +12,6 @@ local function cwd()
 end
 local here = cwd()
 vim.opt.runtimepath:prepend(here)
-dofile(here .. "/spec/run.lua")
+loadfile(here .. "/spec/run.lua")(here .. "/spec/", function(filename)
+    return filename:match("_test%.lua$")
+end)

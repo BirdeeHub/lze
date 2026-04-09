@@ -1,4 +1,4 @@
-local test = require("gambiarra")
+local test = ...
 test("nested events lazy-loaded colorscheme triggered by UIEnter event", function()
     require("lze").load({
         {
