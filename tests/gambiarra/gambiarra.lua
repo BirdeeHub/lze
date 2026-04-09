@@ -126,22 +126,6 @@ local spy = setmetatable({}, {
     end,
 })
 
-local pendingtests = {}
-local await_callbacks = {}
----@type GambiarraTestEnv|any
-local env = _G
-
-local function runpending()
-    if pendingtests[1] ~= nil then
-        pendingtests[1](runpending)
-    else
-        for _, f in ipairs(await_callbacks) do
-            f()
-        end
-        await_callbacks = {}
-    end
-end
-
 -- Returned dir always has trailing slash
 local function cwd()
     local sep = package.config:sub(1, 1)
@@ -222,6 +206,22 @@ local function read_dir(dir, filter)
     end
     handle:close()
     return files
+end
+
+local pendingtests = {}
+local await_callbacks = {}
+---@type GambiarraTestEnv|any
+local env = _G
+
+local function runpending()
+    if pendingtests[1] ~= nil then
+        pendingtests[1](runpending)
+    else
+        for _, f in ipairs(await_callbacks) do
+            f()
+        end
+        await_callbacks = {}
+    end
 end
 
 return setmetatable({
