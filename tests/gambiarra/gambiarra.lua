@@ -233,15 +233,15 @@ return setmetatable({
             .. tostring(msg)
             .. (err and "\n   (with error: " .. err .. ")" or "")
         if e == "pass" then
-            io.stdout:write("   " .. self.passmark .. " " .. suffix .. "\n")
+            io.stdout:write("\n   " .. self.passmark .. " " .. suffix)
         elseif e == "fail" then
-            io.stdout:write("   " .. self.failmark .. " " .. suffix .. "\n")
+            io.stdout:write("\n   " .. self.failmark .. " " .. suffix)
         elseif e == "except" then
-            io.stdout:write(" " .. self.exceptmark .. " " .. suffix .. "\n")
+            io.stdout:write("\n " .. self.exceptmark .. " " .. suffix)
         elseif e == "begin" then
-            io.stdout:write(" " .. self.sectionmark .. " " .. desc .. " " .. self.sectionmark .. "\n")
+            io.stdout:write("\n " .. self.sectionmark .. " " .. desc .. " " .. self.sectionmark)
             -- elseif e == "end" then
-            --     io.stdout:write(" " .. self.endsectionmark .. " " .. desc .. " " .. self.endsectionmark ..  "\n")
+            --     io.stdout:write("\n " .. self.endsectionmark .. " " .. desc .. " " .. self.endsectionmark)
         end
     end,
 }, {
@@ -254,7 +254,7 @@ return setmetatable({
         elseif key == "report" then
             return function()
                 io.stdout:write(
-                    " "
+                    "\n "
                         .. self.sectionmark
                         .. " Tests ran: "
                         .. tostring((self.tests_failed or 0) + (self.tests_passed or 0))
@@ -305,7 +305,15 @@ return setmetatable({
                 self.gambiarrahandler(...)
             end
             local was_restored = false
-            local restore = function()
+            local restore = function(fn, ...)
+                if fn then
+                    local res = args(pcall(fn, ...))
+                    if res[1] then
+                        return (unpack or table.unpack)(res, 2, res.n)
+                    else
+                        handler(self, "except", async, name, res[2])
+                    end
+                end
                 was_restored = true
                 env.ok = prev.ok
                 env.spy = prev.spy
