@@ -5,7 +5,7 @@ vim.g.lze = {
     },
 }
 local lze = require("lze")
-local test = require("gambiarra")
+local test = ...
 
 test("handlers.on_plugin dep_of loads after before and before load", function()
     ---@type table<string, table>

@@ -1,5 +1,5 @@
 local lze = require("lze")
-local test = require("gambiarra")
+local test = ...
 
 ---@class state_entry
 ---@field load_called boolean

@@ -240,22 +240,7 @@ local function read_dir(dir, filter)
             uv = luv
         end
     end
-    if not uv then
-        local command = package.config:sub(1, 1) == "\\" and ('dir "' .. dir .. '" /b') or ('ls -1 "' .. dir .. '"')
-
-        local handle = io.popen(command)
-        local files = {}
-        if not handle then
-            return files
-        end
-        for filename in handle:lines() do
-            if not filter or filter(filename) then
-                table.insert(files, filename)
-            end
-        end
-        handle:close()
-        return files
-    else
+    if uv then
         local files = {}
         local handle = uv.fs_scandir(dir)
         while handle do
@@ -273,16 +258,58 @@ local function read_dir(dir, filter)
         end
         return files
     end
+
+    local ok, lfs = pcall(require, "lfs")
+    if ok then
+        local files = {}
+        for name in lfs.dir(dir) do
+            if name ~= "." and name ~= ".." then
+                local path = dir .. name
+                local attr = lfs.attributes(path)
+
+                if attr and (attr.mode == "file" or attr.mode == "link") then
+                    if not filter or filter(name) then
+                        table.insert(files, name)
+                    end
+                end
+            end
+        end
+        return files
+    end
+
+    local command = package.config:sub(1, 1) == "\\" and ('dir "' .. dir .. '" /b') or ('ls -1 "' .. dir .. '"')
+    local handle = io.popen(command)
+    local files = {}
+    if not handle then
+        return files
+    end
+    for filename in handle:lines() do
+        if not filter or filter(filename) then
+            table.insert(files, filename)
+        end
+    end
+    handle:close()
+    return files
 end
 
-local dir, name = cwd()
+local dir, filter
+if select("#", ...) == 2 then
+    dir, filter = ...
+else
+    dir = cwd()
+    filter = function(filename)
+        return filename:match("_test%.lua$")
+    end
+end
 
---TODO: include/exclude arguments
-local files = read_dir(dir, function(filename)
-    return filename:match("%.lua$") and filename ~= name
-end)
+local files = read_dir(dir, filter)
+local test = require("gambiarra")
 for _, file in ipairs(files) do
-    local success, msg = pcall(dofile, dir .. file)
+    local success, msg = pcall(loadfile, dir .. file)
+    if success then
+        ---@cast msg function
+        success, msg = pcall(msg, test)
+    end
     io.write((success and "[32m✔[0m " or "[31m✘[0m ") .. file .. (msg and ": " .. tostring(msg) or "") .. "\n")
 end
 

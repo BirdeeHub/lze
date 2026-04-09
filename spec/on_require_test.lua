@@ -1,5 +1,5 @@
 local lze = require("lze")
-local test = require("gambiarra")
+local test = ...
 local dummy = function(name)
     return name
 end

@@ -3,7 +3,7 @@ vim.g.lze = {
 }
 local lze = require("lze")
 local loader = require("lze.c.loader")
-local test = require("gambiarra")
+local test = ...
 
 test("Colorscheme only loads plugin once", function()
     ---@type lze.Plugin
