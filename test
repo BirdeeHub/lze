@@ -1,10 +1,10 @@
 #!/usr/bin/env -S nvim -l
-local realpath = ((vim or {}).uv or (vim or {}).loop or {}).fs_realpath
 local function cwd()
     local sep = package.config:sub(1, 1)
     local info = debug.getinfo(1, "S")
     local source = info.source
     if source:sub(1, 1) == "@" then
+        local realpath = ((vim or {}).uv or (vim or {}).loop or {}).fs_realpath
         local path = source:sub(2)
         path = realpath and realpath(path) or path
         local dir, file = path:match("^(.*[" .. sep .. "])([^" .. sep .. "]+)$")

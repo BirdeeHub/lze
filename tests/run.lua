@@ -225,7 +225,15 @@ local function cwd()
     local info = debug.getinfo(1, "S")
     local source = info.source
     if source:sub(1, 1) == "@" then
+        local realpath = ((vim or {}).uv or (vim or {}).loop or {}).fs_realpath
+        if not realpath then
+            local ok, luv = pcall(require, "luv")
+            if ok then
+                realpath = luv.fs_realpath
+            end
+        end
         local path = source:sub(2)
+        path = realpath and realpath(path) or path
         local dir, file = path:match("^(.*[" .. sep .. "])([^" .. sep .. "]+)$")
         return dir or ("." .. sep), file
     end
