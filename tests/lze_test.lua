@@ -7,7 +7,7 @@ local lz = require("lze")
 local loader = require("lze.c.loader")
 local test = ...
 
-test("lze load __len works", function()
+test("lze.state returns correct initial length", function()
     ok(0 == #lz.state, "initial state length is 0")
     lz.load({
         {
@@ -18,7 +18,7 @@ test("lze load __len works", function()
     ok(1 == #lz.state, "state length is 1 after load")
 end)
 
-test("lze load list of plugin specs", function()
+test("Loading list of plugin specs triggers load on appropriate events", function()
     local spy_load = spy.on(loader, "load")
     lz.load({
         {
@@ -34,34 +34,34 @@ test("lze load list of plugin specs", function()
             cmd = "Telescope",
         },
     })
-    ok(1 == #spy_load.called, "load called once")
+    ok(1 == #spy_load.called, "plugin loaded on startup")
     vim.api.nvim_exec_autocmds("FileType", { pattern = "toml" })
-    ok(2 == #spy_load.called, "load called twice")
+    ok(2 == #spy_load.called, "plugin loaded on filetype event")
     vim.cmd.Telescope()
-    ok(3 == #spy_load.called, "load called three times")
+    ok(3 == #spy_load.called, "plugin loaded on command")
     spy_load.off()
 end)
 
-test("lze load individual plugin specs", function()
+test("Loading individual plugin specs works correctly", function()
     local spy_load = spy.on(loader, "load")
     lz.load({
         "foo.nvim",
         keys = "<leader>ff",
     })
-    ok(0 == #spy_load.called, "load not called initially")
+    ok(0 == #spy_load.called, "plugin not loaded initially")
     local feed = vim.api.nvim_replace_termcodes("<Ignore><leader>ff", true, true, true)
     vim.api.nvim_feedkeys(feed, "ix", false)
-    ok(1 == #spy_load.called, "load called after keypress")
+    ok(1 == #spy_load.called, "plugin loaded after keypress")
     lz.load({
         "bar.nvim",
         cmd = "Bar",
     })
     vim.cmd.Bar()
-    ok(2 == #spy_load.called, "load called after cmd")
+    ok(2 == #spy_load.called, "plugin loaded after command")
     spy_load.off()
 end)
 
-test("lze load can override load implementation via plugin spec", function()
+test("Custom load function can be specified in plugin spec", function()
     local loaded = false
     lz.load({
         "baz.nvim",
@@ -70,13 +70,13 @@ test("lze load can override load implementation via plugin spec", function()
             loaded = true
         end,
     })
-    ok(false == loaded, "loaded is false initially")
+    ok(false == loaded, "custom load function not called initially")
     local feed = vim.api.nvim_replace_termcodes("<Ignore><leader>bb", true, true, true)
     vim.api.nvim_feedkeys(feed, "ix", false)
-    ok(true == loaded, "loaded is true after keypress")
+    ok(true == loaded, "custom load function called after keypress")
 end)
 
-test("lze load list with a single plugin spec", function()
+test("Loading list with single plugin spec works correctly", function()
     local spy_load = spy.on(loader, "load")
     lz.load({
         {
@@ -84,26 +84,26 @@ test("lze load list with a single plugin spec", function()
             cmd = "Single",
         },
     })
-    ok(0 == #spy_load.called, "load not called initially")
+    ok(0 == #spy_load.called, "plugin not loaded initially")
     pcall(vim.cmd.Single)
-    ok(1 == #spy_load.called, "load called after cmd")
+    ok(1 == #spy_load.called, "plugin loaded after command")
     spy_load.off()
 end)
 
-test("lze load can disable plugin specs as specified", function()
+test("Plugin specs can be disabled via enabled field", function()
     lz.load({
         "fool.nvim",
         keys = "<leader>ff",
         enabled = false,
     })
-    ok(nil == lz.state("fool.nvim"), "fool.nvim state is nil")
+    ok(nil == lz.state("fool.nvim"), "disabled plugin has nil state")
     lz.load({
         "bard.nvim",
         enabled = function()
             return false
         end,
     })
-    ok(nil == lz.state("bard.nvim"), "bard.nvim state is nil")
+    ok(nil == lz.state("bard.nvim"), "plugin with false function has nil state")
     local checked = 0
     lz.load({
         "barz.nvim",
@@ -124,16 +124,16 @@ test("lze load can disable plugin specs as specified", function()
             end
         end,
     })
-    ok("table" == type(lz.state["barz.nvim"]), "barz.nvim state is table")
+    ok("table" == type(lz.state["barz.nvim"]), "plugin with enabled=true has table state")
     lz.trigger_load("barz.nvim")
-    ok("table" == type(lz.state["barz.nvim"]), "barz.nvim state is table after trigger")
+    ok("table" == type(lz.state["barz.nvim"]), "plugin still has table state after first trigger")
     lz.trigger_load("barz.nvim")
-    ok("table" == type(lz.state["barz.nvim"]), "barz.nvim state is table after 2nd trigger")
+    ok("table" == type(lz.state["barz.nvim"]), "plugin still has table state after second trigger")
     lz.trigger_load("barz.nvim")
-    ok(false == lz.state("barz.nvim"), "barz.nvim state is false after 3rd trigger")
+    ok(false == lz.state("barz.nvim"), "plugin removed from state after third trigger")
 end)
 
-test("lze load handles errors in startup plugins without stopping", function()
+test("Errors in startup plugins don't stop other plugins from loading", function()
     local spy_load = spy.on(loader, "load")
     pcall(lz.load, {
         {
@@ -149,6 +149,6 @@ test("lze load handles errors in startup plugins without stopping", function()
             "noscope.nvim",
         },
     })
-    ok(3 == #spy_load.called, "load called 3 times despite error")
+    ok(3 == #spy_load.called, "all plugins loaded despite error in one")
     spy_load.off()
 end)

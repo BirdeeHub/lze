@@ -8,12 +8,12 @@ local lze = require("lze")
 local loader = require("lze.c.loader")
 local test = ...
 
-test("handlers.ft can parse from string", function()
+test("Filetype handler parses filetype string correctly", function()
     local f = function(inspec, ft)
         local res = lze.h.ft.parse(ft)
-        ok(eq(inspec.event, res.event), "event matches")
-        ok(eq(inspec.pattern, res.pattern), "pattern matches")
-        ok(eq(inspec.id, res.id), "id matches")
+        ok(eq(inspec.event, res.event), "parsed event matches expected event")
+        ok(eq(inspec.pattern, res.pattern), "parsed pattern matches expected pattern")
+        ok(eq(inspec.id, res.id), "parsed id matches expected id")
     end
     f({
         event = "FileType",
@@ -22,7 +22,7 @@ test("handlers.ft can parse from string", function()
     }, "rust")
 end)
 
-test("handlers.ft filetype event loads plugins", function()
+test("Filetype event loads plugin when filetype is triggered", function()
     ---@type lze.Plugin
     local plugin = {
         name = "Foo",
@@ -32,6 +32,6 @@ test("handlers.ft filetype event loads plugins", function()
     lze.load(plugin)
     vim.api.nvim_exec_autocmds("FileType", { pattern = "rust" })
     vim.api.nvim_exec_autocmds("FileType", { pattern = "rust" })
-    ok(eq(1, #spy_load.called), "load called once")
+    ok(eq(1, #spy_load.called), "plugin loaded exactly once when filetype triggers")
     spy_load.off()
 end)

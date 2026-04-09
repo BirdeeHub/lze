@@ -30,8 +30,8 @@
     perSystem = nixpkgs.lib.genAttrs nixpkgs.lib.platforms.all;
     testshook = pkgs: {
       enable = true;
-      name = "run-tests";
-      entry = "${pkgs.writeShellScript "run-tests" ''
+      name = "run-${name}-tests";
+      entry = "${pkgs.writeShellScript "run-${name}-tests" ''
         set -e
         export HOME="$(mktemp -d)"
         gitroot="$(git rev-parse --show-toplevel)"

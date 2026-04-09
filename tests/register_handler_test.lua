@@ -59,28 +59,25 @@ local test_plugin3_loaded = vim.tbl_extend("error", test_plugin3, { lazy = true 
 test_plugin3_loaded.name = test_plugin3_loaded[1]
 test_plugin3_loaded[1] = nil
 
-test("register_handler tests", function()
+test("Handler registration works correctly", function()
     local addspy = spy.on(hndl, "add")
     local delspy = spy.on(hndl, "before")
     local afterspy = spy.on(hndl, "after")
 
-    ok(eq({}, lze.register_handlers(require("lze.h.ft"))), "Duplicate handlers fail to register")
-    ok(eq({ hndl.spec_field }, lze.register_handlers(hndl)), "It can register a handler")
-    ok(eq({ hndl2.spec_field }, lze.register_handlers(hndl2)), "It can register another handler")
+    ok(eq({}, lze.register_handlers(require("lze.h.ft"))), "registering same handler twice returns empty")
+    ok(eq({ hndl.spec_field }, lze.register_handlers(hndl)), "registering handler returns its spec field")
+    ok(eq({ hndl2.spec_field }, lze.register_handlers(hndl2)), "registering another handler returns its spec field")
 
     lze.load(test_plugin)
-    ok(addspy.called_with(test_plugin_loaded), "can add plugins to the handler")
+    ok(addspy.called_with(test_plugin_loaded), "handler add was called with plugin spec")
     lze.trigger_load("testplugin")
-    ok(delspy.called_with("testplugin"), "loading a plugin calls before")
+    ok(delspy.called_with("testplugin"), "handler before was called with plugin name")
 
-    ok(afterspy.called_with("testplugin"), "called with the correct plugin name")
+    ok(afterspy.called_with("testplugin"), "handler after was called with correct plugin name")
     ok(true == plugin_state["testplugin"].load_called, "load hook was called for the plugin")
     ok(true == plugin_state["testplugin"].after_load_called_after, "handler after was called after load")
 
     lze.load({ test_plugin2, test_plugin3 })
-    ok(false == lze.state(test_plugin2.name), "handler can choose if it affects lazy setting (no effect)")
-    ok(
-        eq(lze.state[test_plugin3.name], test_plugin3_loaded),
-        "handler can choose if it affects lazy setting (yes effect)"
-    )
+    ok(false == lze.state(test_plugin2.name), "handler with set_lazy=false does not make plugin lazy")
+    ok(eq(lze.state[test_plugin3.name], test_plugin3_loaded), "handler with set_lazy=true makes plugin lazy")
 end)

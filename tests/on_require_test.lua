@@ -20,7 +20,7 @@ local function mkmktestplug(loadspy, reqspy)
         }
     end
 end
-test("handlers.on_require require loads plugins", function()
+test("Require handler loads plugin when module is required", function()
     local reqspy = spy(dummy)
     local loadspy = spy(dummy)
     local mktestplug = mkmktestplug(loadspy, reqspy)
@@ -28,13 +28,13 @@ test("handlers.on_require require loads plugins", function()
     ---@type lze.Plugin
     lze.load(mktestplug(name))
     require(name)
-    ok(eq(name, loadspy.called[1][1]), "loadspy called with name")
-    ok(eq(name, reqspy.called[1][1]), "reqspy called with name")
+    ok(eq(name, loadspy.called[1][1]), "load hook called with correct module name")
+    ok(eq(name, reqspy.called[1][1]), "require hook called with correct module name")
     package.preload[name] = nil
     package.loaded[name] = nil
 end)
 
-test("handlers.on_require handles nested plugins", function()
+test("Require handler handles nested plugin dependencies", function()
     local reqspy = spy(dummy)
     local loadspy = spy(dummy)
     local mktestplug = mkmktestplug(loadspy, reqspy)
@@ -47,7 +47,7 @@ test("handlers.on_require handles nested plugins", function()
         mktestplug(name2, name),
         mktestplug(name3, name2),
     })
-    ok(eq(name3, require(name3)), "name3 equals require(name3)")
+    ok(eq(name3, require(name3)), "module can be required successfully")
     local function find_call(spy_tbl, search_name)
         for _, call in ipairs(spy_tbl.called) do
             if call[1] == search_name then
@@ -57,8 +57,8 @@ test("handlers.on_require handles nested plugins", function()
         return false
     end
     for _, n in ipairs({ name, name2, name3 }) do
-        ok(find_call(loadspy, n), "loadspy called with " .. n)
-        ok(find_call(reqspy, n), "reqspy called with " .. n)
+        ok(find_call(loadspy, n), "load hook called for " .. n)
+        ok(find_call(reqspy, n), "require hook called for " .. n)
         package.preload[n] = nil
         package.loaded[n] = nil
     end

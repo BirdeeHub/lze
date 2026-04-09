@@ -6,7 +6,7 @@ local lze = require("lze")
 local loader = require("lze.c.loader")
 local test = ...
 
-test("Command only loads plugin once and executes plugin command", function()
+test("Command handler loads plugin once and executes plugin command", function()
     local counter = 0
     ---@type lze.Plugin
     local plugin = {
@@ -20,10 +20,10 @@ test("Command only loads plugin once and executes plugin command", function()
     }
     local spy_load = spy.on(loader, "load")
     lze.load({ plugin })
-    ok(vim.cmd.Foos ~= nil, "Foos command created")
+    ok(vim.cmd.Foos ~= nil, "command was created")
     vim.cmd.Foos()
     vim.cmd.Foos()
-    ok(#spy_load.called == 1, "plugin loaded once")
+    ok(#spy_load.called == 1, "plugin loaded exactly once")
     ok(2 == counter, "command executed twice")
     spy_load.off()
 end)
@@ -43,13 +43,13 @@ test("Multiple commands only load plugin once", function()
         lze.load({ plugin })
         vim.cmd[commands[1]]()
         vim.cmd[commands[2]]()
-        ok(#spy_load.called == 1, "plugin loaded once")
+        ok(#spy_load.called == 1, "plugin loaded exactly once")
         spy_load.off()
     end
     itt({ "Foo", "Bar" }, "foo5")
     itt({ "Bar", "Foo" }, "foo4")
 end)
-test("Deletes command before loading the plugin when other specs load it", function()
+test("Command handler deletes command before loading plugin when other specs load it", function()
     local should_be_inc = 0
     local plugin = {
         name = "my_other_plus_cmd",
@@ -65,9 +65,9 @@ test("Deletes command before loading the plugin when other specs load it", funct
     lze.load(plugin)
     lze.trigger_load(plugin.name)
     vim.cmd[plugin.cmd]()
-    ok(1 == should_be_inc, "test value was incremented")
+    ok(1 == should_be_inc, "command executed after plugin load")
 end)
-test("Doesn't error when deleting command if the command doesn't exist", function()
+test("No error when deleting non-existent command", function()
     local plugin = {
         name = "my_test_cmd",
         cmd = "TestCMD",

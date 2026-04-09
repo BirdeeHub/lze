@@ -8,7 +8,7 @@ local lze = require("lze")
 local loader = require("lze.c.loader")
 local test = ...
 
-test("handlers.keys parses ids correctly", function()
+test("Keymap handler parses key identifiers case-insensitively", function()
     local tests = {
         { "<C-/>", "<c-/>", true },
         { "<C-h>", "<c-H>", true },
@@ -16,14 +16,20 @@ test("handlers.keys parses ids correctly", function()
     }
     for _, t in ipairs(tests) do
         if t[3] then
-            ok(eq(lze.h.keys.parse(t[1])[1].id, lze.h.keys.parse(t[2])[1].id), "ids match")
+            ok(
+                eq(lze.h.keys.parse(t[1])[1].id, lze.h.keys.parse(t[2])[1].id),
+                "parsed key identifiers match regardless of case"
+            )
         else
-            ok(not eq(lze.h.keys.parse(t[1])[1].id, lze.h.keys.parse(t[2])[1].id), "ids differ")
+            ok(
+                not eq(lze.h.keys.parse(t[1])[1].id, lze.h.keys.parse(t[2])[1].id),
+                "parsed key identifiers differ as expected"
+            )
         end
     end
 end)
 
-test("handlers.keys Key only loads plugin once", function()
+test("Keymap handler only loads plugin once when key is pressed", function()
     local lhs = "<leader>tt"
     ---@type lze.Plugin
     local plugin = {
@@ -35,12 +41,12 @@ test("handlers.keys Key only loads plugin once", function()
     local feed = vim.api.nvim_replace_termcodes("<Ignore>" .. lhs, true, true, true)
     vim.api.nvim_feedkeys(feed, "ix", false)
     vim.api.nvim_feedkeys(feed, "ix", false)
-    ok(eq(1, #spy_load.called), "load called once")
-    ok(eq(false, lze.state(plugin.name)), "plugin not loaded")
+    ok(eq(1, #spy_load.called), "plugin loaded exactly once")
+    ok(eq(false, lze.state(plugin.name)), "plugin is marked as removed from lze state")
     spy_load.off()
 end)
 
-test("handlers.keys Multiple keys only load plugin once", function()
+test("Multiple keymaps only load plugin once", function()
     ---@param lzkeys string[]|lze.KeysSpec[]
     local function itt(lzkeys, name)
         local timesloaded = 0
@@ -61,14 +67,14 @@ test("handlers.keys Multiple keys only load plugin once", function()
         vim.api.nvim_feedkeys(feed1, "ix", false)
         local feed2 = vim.api.nvim_replace_termcodes("<Ignore>" .. parsed_keys[2].lhs, true, true, true)
         vim.api.nvim_feedkeys(feed2, "ix", false)
-        ok(eq(1, timesloaded), "loaded once")
-        ok(eq(false, lze.state(plugin.name)), "plugin not loaded")
+        ok(eq(1, timesloaded), "plugin loaded exactly once")
+        ok(eq(false, lze.state(plugin.name)), "plugin is marked as removed from lze state")
     end
     itt({ "<leader>tt", "<leader>ff" }, "foody1")
     itt({ "<leader>ff", "<leader>tt" }, "foody2")
 end)
 
-test("handlers.keys Plugins' keymaps are triggered", function()
+test("Keymaps defined by plugin are triggered correctly", function()
     local lhs = "<leader>xy"
     local triggered = false
     ---@type lze.Plugin
@@ -85,6 +91,6 @@ test("handlers.keys Plugins' keymaps are triggered", function()
     local feed = vim.api.nvim_replace_termcodes("<Ignore>" .. lhs, true, true, true)
     vim.api.nvim_feedkeys(feed, "ix", false)
     vim.api.nvim_feedkeys(feed, "x", false)
-    ok(eq(true, triggered), "triggered is true")
-    ok(eq(false, lze.state(plugin.name)), "plugin not loaded")
+    ok(eq(true, triggered), "plugin's keymap was triggered")
+    ok(eq(false, lze.state(plugin.name)), "plugin is marked as removed from lze state")
 end)
