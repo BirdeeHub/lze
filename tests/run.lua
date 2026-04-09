@@ -4,7 +4,7 @@ local passmark = "[32m✔[0m"
 local failmark = "[31m✘[0m"
 local exceptmark = "[35m‼[0m"
 local sectionmark = "[36m▶[0m"
--- local endsectionmark = "[36m◀[0m"
+local endsectionmark = "[36m◀[0m"
 
 ---@class ConstructedSpyType
 ---@field off? fun()
@@ -165,7 +165,7 @@ package.preload.gambiarra = function()
             elseif key == "report" then
                 return function()
                     io.stdout:write(
-                        "Tests ran: " .. tostring(self.tests_failed or 0) + tostring(self.tests_passed or 0) .. "\n"
+                        "Tests ran: " .. tostring((self.tests_failed or 0) + (self.tests_passed or 0)) .. "\n"
                     )
                     io.stdout:write("Tests passed: " .. tostring(self.tests_passed) .. "\n")
                     io.stdout:write("Tests failed: " .. tostring(self.tests_failed) .. "\n")
@@ -356,8 +356,16 @@ for _, file in ipairs(files) do
         ---@cast msg function
         success, msg = pcall(msg, test)
     end
-    local icon = (success and passmark or failmark)
-    io.write(" " .. icon .. " " .. file .. " " .. icon .. (msg and " : " .. tostring(msg) or "") .. "\n")
+    io.write(
+        " "
+            .. endsectionmark
+            .. " "
+            .. file
+            .. " "
+            .. (success and passmark or failmark)
+            .. (msg and " : " .. tostring(msg) or "")
+            .. "\n"
+    )
 end
 
 test.report()
