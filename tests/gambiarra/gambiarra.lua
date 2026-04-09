@@ -313,12 +313,13 @@ return setmetatable({
                     else
                         handler(self, "except", async, name, res[2])
                     end
+                else
+                    handler(self, "end", async, name)
                 end
                 was_restored = true
                 env.ok = prev.ok
                 env.spy = prev.spy
                 env.eq = prev.eq
-                handler(self, "end", async, name)
                 table.remove(pendingtests, 1)
                 if next then
                     next()
