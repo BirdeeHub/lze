@@ -28,8 +28,8 @@ test("Require handler loads plugin when module is required", function()
     ---@type lze.Plugin
     lze.load(mktestplug(name))
     require(name)
-    ok(eq(name, loadspy.called[1][1]), "load hook called with correct module name")
-    ok(eq(name, reqspy.called[1][1]), "require hook called with correct module name")
+    ok(name == loadspy.called[1][1], "load hook called with correct module name")
+    ok(name == reqspy.called[1][1], "require hook called with correct module name")
     package.preload[name] = nil
     package.loaded[name] = nil
 end)
@@ -47,7 +47,7 @@ test("Require handler handles nested plugin dependencies", function()
         mktestplug(name2, name),
         mktestplug(name3, name2),
     })
-    ok(eq(name3, require(name3)), "module can be required successfully")
+    ok(name3 == require(name3), "module can be required successfully")
     local function find_call(spy_tbl, search_name)
         for _, call in ipairs(spy_tbl.called) do
             if call[1] == search_name then

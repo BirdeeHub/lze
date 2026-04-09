@@ -14,13 +14,13 @@
 ---@class GambiarraTestEnv
 ---@field ok fun(cond: boolean, msg?: string, should_fail?: boolean)
 ---@field spy GambiarraSpyType
----@field eq fun(a: any, b: any): boolean, string?
+---@field eq fun(a: any, b: any, msg?: string): boolean, string?
 
 ---@type GambiarraSpyType
 _G.spy = nil
 ---@type fun(cond: boolean, msg?: string, should_fail?: boolean)
 _G.ok = nil
----@type fun(a: any, b: any): boolean, string?
+---@type fun(a: any, b: any, msg?: string): boolean, string?
 _G.eq = nil
 
 local function printable(typename)
@@ -32,9 +32,9 @@ local function printable(typename)
 end
 
 -- https://github.com/luvit/luvit/blob/master/tests/libs/deep-equal.lua
-local function deepeq(expected, actual, path)
+local function deepeq(expected, actual, path, msg)
     if expected == actual then
-        return true
+        return true, msg
     end
     local prefix = path and (path .. ": ") or ""
     local expectedType = type(expected)
@@ -61,7 +61,7 @@ local function deepeq(expected, actual, path)
             return false, prefix .. "Missing table key " .. key
         end
         local newPath = path and (path .. "." .. key) or key
-        local same, message = deepeq(expected[key], actual[key], newPath)
+        local same, message = deepeq(expected[key], actual[key], newPath, msg)
         if not same then
             return same, message
         end
@@ -74,7 +74,7 @@ local function deepeq(expected, actual, path)
             return false, prefix .. "Unexpected table key " .. key
         end
     end
-    return true
+    return true, msg
 end
 
 -- Compatibility for Lua 5.1 and Lua 5.2
@@ -227,8 +227,8 @@ return setmetatable({
     read_dir = read_dir,
     cwd = cwd,
     spy = spy,
-    eq = function(a, b)
-        return deepeq(a, b)
+    eq = function(a, b, msg)
+        return deepeq(a, b, nil, msg)
     end,
     icons = {
         pass = "[32m✔[0m",
@@ -357,8 +357,8 @@ return setmetatable({
                 restore()
             end
 
-            self.env.eq = function(a, b)
-                return deepeq(a, b)
+            self.env.eq = function(a, b, msg)
+                return deepeq(a, b, nil, msg)
             end
             self.env.spy = spy
             self.env.ok = function(cond, msg, should_fail)
