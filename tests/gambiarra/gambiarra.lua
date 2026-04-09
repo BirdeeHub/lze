@@ -1,22 +1,22 @@
 -- https://zserge.com/posts/minimal-testing/
 
----@class ConstructedSpyType
+---@class GambiarraConstructedSpyType
 ---@field off? fun()
 ---@field called table[]
 ---@field errors table[]
 ---@field called_with fun(...): boolean
 ---@operator call(...): any
 
----@class SpyType
----@field on fun(t: table, k: any): ConstructedSpyType
----@operator call(function): ConstructedSpyType
+---@class GambiarraSpyType
+---@field on fun(t: table, k: any): GambiarraConstructedSpyType
+---@operator call(function): GambiarraConstructedSpyType
 
----@class TestEnv
+---@class GambiarraTestEnv
 ---@field ok fun(cond: boolean, msg?: string, should_fail?: boolean)
----@field spy SpyType
+---@field spy GambiarraSpyType
 ---@field eq fun(a: any, b: any): boolean
 
----@type SpyType
+---@type GambiarraSpyType
 _G.spy = nil
 ---@type fun(cond: boolean, msg?: string, should_fail?: boolean)
 _G.ok = nil
@@ -128,7 +128,7 @@ local spy = setmetatable({}, {
 
 local pendingtests = {}
 local await_callbacks = {}
----@type TestEnv|any
+---@type GambiarraTestEnv|any
 local env = _G
 
 local function runpending()
