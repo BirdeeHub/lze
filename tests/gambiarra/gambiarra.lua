@@ -12,13 +12,13 @@
 ---@operator call(function): GambiarraConstructedSpyType
 
 ---@class GambiarraTestEnv
----@field ok fun(cond: boolean, msg?: string, should_fail?: boolean)
+---@field ok fun(cond:(boolean|fun():string), msg?: string, should_fail?: boolean)
 ---@field spy GambiarraSpyType
----@field eq fun(a: any, b: any, msg?: string): boolean, string?
+---@field eq fun(a: any, b: any, msg?: string?): boolean, string?
 
 ---@type GambiarraSpyType
 _G.spy = nil
----@type fun(cond: boolean, msg?: string, should_fail?: boolean)
+---@type fun(cond: (boolean|fun():string?), msg?: string, should_fail?: boolean)
 _G.ok = nil
 ---@type fun(a: any, b: any, msg?: string): boolean, string?
 _G.eq = nil
@@ -243,16 +243,18 @@ return setmetatable({
     await_callbacks = {},
     ---@type GambiarraTestEnv|any
     env = _G,
-    gambiarrahandler = function(self, e, async, desc, msg, err)
-        local suffix = (async and (desc .. " ") or "")
-            .. tostring(msg)
-            .. (err and "\n   (with error: " .. err .. ")" or "")
+    gambiarrahandler = function(self, e, async, desc, msg, extra)
+        local suffix = (async and (desc .. " ") or "") .. tostring(msg)
         if e == "pass" then
-            io.stdout:write("\n   " .. self.icons.pass .. " " .. suffix)
+            io.stdout:write("\n   " .. self.icons.pass .. " " .. suffix .. (extra and ("\n   " .. extra) or ""))
         elseif e == "fail" then
-            io.stdout:write("\n   " .. self.icons.fail .. " " .. suffix)
+            io.stdout:write(
+                "\n   " .. self.icons.fail .. " " .. suffix .. (extra and "\n   (with error: " .. extra .. ")" or "")
+            )
         elseif e == "except" then
-            io.stdout:write("\n " .. self.icons.except .. " " .. suffix)
+            io.stdout:write(
+                "\n " .. self.icons.except .. " " .. suffix .. (extra and "\n   (with error: " .. extra .. ")" or "")
+            )
         elseif e == "begin" then
             io.stdout:write("\n " .. self.icons.begin .. " " .. desc .. " " .. self.icons.begin)
             -- elseif e == "end" then
@@ -368,7 +370,7 @@ return setmetatable({
                 if type(cond) == "function" then
                     local ok, value = pcall(cond)
                     if should_fail and not ok or not should_fail and ok then
-                        handler(self, "pass", async, name, msg)
+                        handler(self, "pass", async, name, msg, value)
                     else
                         handler(
                             self,
