@@ -1,5 +1,11 @@
 #!/usr/bin/env lua
 
+local passmark = "[32m✔[0m"
+local failmark = "[31m✘[0m"
+local exceptmark = "[35m‼[0m"
+local sectionmark = "[36m▶[0m"
+-- local endsectionmark = "[36m◀[0m"
+
 ---@class ConstructedSpyType
 ---@field off? fun()
 ---@field called table[]
@@ -12,28 +18,18 @@
 ---@operator call(function): ConstructedSpyType
 
 ---@class TestEnv
----@field ok fun(cond: boolean, msg?: string)
+---@field ok fun(cond: boolean, msg?: string, should_fail?: boolean)
 ---@field spy SpyType
 ---@field eq fun(a: any, b: any): boolean
 
 ---@type SpyType
 _G.spy = nil
----@type fun(cond: boolean, msg?: string)
+---@type fun(cond: boolean, msg?: string, should_fail?: boolean)
 _G.ok = nil
 ---@type fun(a: any, b: any): boolean
 _G.eq = nil
 
 package.preload.gambiarra = function()
-    local function TERMINAL_HANDLER(e, test, msg)
-        if e == "pass" then
-            io.write("[32m✔[0m " .. test .. ": " .. msg .. "\n")
-        elseif e == "fail" then
-            io.write("[31m✘[0m " .. test .. ": " .. msg .. "\n")
-        elseif e == "except" then
-            io.write("[31m✘[0m " .. test .. ": " .. msg .. "\n")
-        end
-    end
-
     local function deepeq(a, b)
         -- Different types: false
         if type(a) ~= type(b) then
@@ -132,7 +128,6 @@ package.preload.gambiarra = function()
     local pendingtests = {}
     ---@type TestEnv|any
     local env = _G
-    local gambiarrahandler = TERMINAL_HANDLER
 
     local function runpending()
         if pendingtests[1] ~= nil then
@@ -140,85 +135,128 @@ package.preload.gambiarra = function()
         end
     end
 
-    return function(name, f, async)
-        if type(name) == "function" then
-            gambiarrahandler = name
-            env = f or _G
-            return
-        end
+    return setmetatable({
+        tests_passed = 0,
+        tests_failed = 0,
+        gambiarrahandler = function(self, e, desc, msg, err)
+            local suffix = tostring(msg) .. (err and "\n   (with error: " .. err .. ")" or "")
+            if e == "pass" then
+                io.stdout:write("   " .. passmark .. " " .. suffix .. "\n")
+                self.tests_passed = self.tests_passed + 1
+            elseif e == "fail" then
+                io.stdout:write("   " .. failmark .. " " .. suffix .. "\n")
+                self.tests_failed = self.tests_failed + 1
+            elseif e == "except" then
+                io.stdout:write(" " .. exceptmark .. " " .. suffix .. "\n")
+                self.tests_failed = self.tests_failed + 1
+            elseif e == "begin" then
+                io.stdout:write(" " .. sectionmark .. " " .. desc .. " " .. sectionmark .. "\n")
+                -- elseif e == "end" then
+                --     io.stdout:write(" " .. endsectionmark .. " " .. desc .. " " .. endsectionmark ..  "\n")
+            end
+        end,
+    }, {
+        __index = function(self, key)
+            if key == "reset_count" then
+                return function()
+                    self.tests_passed = 0
+                    self.tests_failed = 0
+                end
+            elseif key == "report" then
+                return function()
+                    io.stdout:write(
+                        "Tests ran: " .. tostring(self.tests_failed or 0) + tostring(self.tests_passed or 0) .. "\n"
+                    )
+                    io.stdout:write("Tests passed: " .. tostring(self.tests_passed) .. "\n")
+                    io.stdout:write("Tests failed: " .. tostring(self.tests_failed) .. "\n")
+                end
+            elseif key == "assert_passing" then
+                return function()
+                    if (self.tests_failed or 0) > 0 then
+                        os.exit(1)
+                    end
+                end
+            end
+        end,
+        __call = function(self, name, f, async)
+            if type(name) == "function" then
+                self.gambiarrahandler = name
+                env = f or _G
+                return
+            end
 
-        local testfn = function(next)
-            local prev = {
-                ok = env.ok,
-                spy = env.spy,
-                eq = env.eq,
-            }
+            local testfn = function(next)
+                local prev = {
+                    ok = env.ok,
+                    spy = env.spy,
+                    eq = env.eq,
+                }
 
-            local restore = function()
-                env.ok = prev.ok
-                env.spy = prev.spy
-                env.eq = prev.eq
-                gambiarrahandler("end", name)
-                table.remove(pendingtests, 1)
-                if next then
-                    next()
+                local restore = function()
+                    env.ok = prev.ok
+                    env.spy = prev.spy
+                    env.eq = prev.eq
+                    self.gambiarrahandler(self, "end", name)
+                    table.remove(pendingtests, 1)
+                    if next then
+                        next()
+                    end
+                end
+
+                local handler = self.gambiarrahandler
+
+                env.eq = deepeq
+                env.spy = spy
+                env.ok = function(cond, msg, should_fail)
+                    if not msg then
+                        msg = debug.getinfo(2, "S").short_src .. ":" .. debug.getinfo(2, "l").currentline
+                    end
+                    if type(cond) == "function" then
+                        local ok, value = pcall(cond)
+                        if should_fail and not ok or not should_fail and ok then
+                            handler(self, "pass", name, msg)
+                        else
+                            handler(
+                                self,
+                                "fail",
+                                name,
+                                msg,
+                                not should_fail and tostring(value)
+                                    or "Task failed successfully. No error, that is the problem."
+                            )
+                        end
+                    elseif should_fail and not cond or not should_fail and cond then
+                        handler(self, "pass", name, msg)
+                    else
+                        handler(self, "fail", name, msg)
+                    end
+                end
+
+                handler(self, "begin", name)
+                local ok, err = pcall(f, restore)
+                if not ok then
+                    handler(self, "except", name, err)
+                end
+
+                if not async then
+                    handler(self, "end", name)
+                    env.ok = prev.ok
+                    env.spy = prev.spy
+                    env.eq = prev.eq
                 end
             end
 
-            local handler = gambiarrahandler
-
-            env.eq = deepeq
-            env.spy = spy
-            env.ok = function(cond, msg)
-                if not msg then
-                    msg = debug.getinfo(2, "S").short_src .. ":" .. debug.getinfo(2, "l").currentline
+            if async then
+                table.insert(pendingtests, testfn)
+                if #pendingtests == 1 then
+                    runpending()
                 end
-                if cond then
-                    handler("pass", name, msg)
-                else
-                    handler("fail", name, msg)
-                end
+            else
+                testfn()
             end
-
-            handler("begin", name)
-            local ok, err = pcall(f, restore)
-            if not ok then
-                handler("except", name, err)
-            end
-
-            if not async then
-                handler("end", name)
-                env.ok = prev.ok
-                env.spy = prev.spy
-                env.eq = prev.eq
-            end
-        end
-
-        if not async then
-            testfn()
-        else
-            table.insert(pendingtests, testfn)
-            if #pendingtests == 1 then
-                runpending()
-            end
-        end
-    end
+        end,
+    })
 end
-
-local tests_passed = 0
-local tests_failed = 0
-require("gambiarra")(function(e, test, msg)
-    if e == "pass" then
-        io.write("[32m✔[0m " .. test .. ": " .. msg .. "\n")
-        tests_passed = tests_passed + 1
-    elseif e == "fail" then
-        io.write("[31m✘[0m " .. test .. ": " .. msg .. "\n")
-        tests_failed = tests_failed + 1
-    elseif e == "except" then
-        io.write("[31m✘[0m " .. test .. ": " .. msg .. "\n")
-        tests_failed = tests_failed + 1
-    end
-end)
 
 local function cwd()
     local sep = package.config:sub(1, 1)
@@ -318,11 +356,10 @@ for _, file in ipairs(files) do
         ---@cast msg function
         success, msg = pcall(msg, test)
     end
-    io.write((success and "[32m✔[0m " or "[31m✘[0m ") .. file .. (msg and ": " .. tostring(msg) or "") .. "\n")
+    local icon = (success and passmark or failmark)
+    io.write(icon .. " " .. file .. " " .. icon .. (msg and " : " .. tostring(msg) or "") .. "\n")
 end
 
-if tests_failed > 0 then
-    os.exit(1)
-else
-    os.exit(0)
-end
+test.report()
+test.assert_passing()
+os.exit(0)
