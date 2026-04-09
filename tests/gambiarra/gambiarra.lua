@@ -292,8 +292,6 @@ return setmetatable({
                     end)
                 end
             end
-        elseif key == "pending" then
-            return #self.pendingtests
         elseif key == "runpending" then
             return function()
                 if self.pendingtests[1] ~= nil then
