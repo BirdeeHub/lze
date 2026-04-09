@@ -368,10 +368,11 @@ return setmetatable({
                 if async and not was_restored then
                     restore()
                 end
+            elseif not async then
+                handler(self, "end", async, name)
             end
 
             if not async then
-                handler(self, "end", async, name)
                 env.ok = prev.ok
                 env.spy = prev.spy
                 env.eq = prev.eq
