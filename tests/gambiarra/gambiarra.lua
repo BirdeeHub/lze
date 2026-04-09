@@ -253,9 +253,15 @@ return setmetatable({
             end
         elseif key == "report" then
             return function()
-                io.stdout:write("Tests ran: " .. tostring((self.tests_failed or 0) + (self.tests_passed or 0)) .. "\n")
-                io.stdout:write("Tests passed: " .. tostring(self.tests_passed) .. "\n")
-                io.stdout:write("Tests failed: " .. tostring(self.tests_failed) .. "\n")
+                io.stdout:write(
+                    " "
+                        .. self.sectionmark
+                        .. " Tests ran: "
+                        .. tostring((self.tests_failed or 0) + (self.tests_passed or 0))
+                        .. "\n"
+                )
+                io.stdout:write(" " .. self.passmark .. " Tests passed: " .. tostring(self.tests_passed) .. "\n")
+                io.stdout:write(" " .. self.failmark .. " Tests failed: " .. tostring(self.tests_failed) .. "\n")
             end
         elseif key == "await" then
             return function(f)

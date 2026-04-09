@@ -41,6 +41,7 @@ for _, file in ipairs(files) do
 end
 
 test.await(function(self)
+    print()
     self.report()
     if (self.tests_failed or 0) > 0 then
         os.exit(1)
