@@ -39,7 +39,7 @@
           echo "Error: Unable to determine Git root."
           exit 1
         fi
-        ${pkgs.lib.getExe pkgs.neovim-unwrapped} --headless --cmd "luafile $gitroot/test.nvim.lua" +qall!
+        ${pkgs.lib.getExe pkgs.neovim-unwrapped} --headless --cmd "luafile $gitroot/test.nvim" +qall!
       ''}";
     };
     pre-commit-check = pkgs: luarc:
@@ -124,7 +124,7 @@
               checkPhase = ''
                 runHook preInstallCheck
                 export HOME=$(mktemp -d)
-                ${final.lib.getExe final.neovim-unwrapped} --headless --cmd "luafile $src/test.nvim.lua" +qall!
+                ${final.lib.getExe final.neovim-unwrapped} --headless --cmd "luafile $src/test.nvim" +qall!
                 runHook postInstallCheck
               '';
             }
