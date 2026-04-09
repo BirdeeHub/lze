@@ -305,7 +305,17 @@ return setmetatable({
                 self.gambiarrahandler(...)
             end
             local was_restored = false
-            local restore = function(fn, ...)
+            local function restore()
+                was_restored = true
+                env.ok = prev.ok
+                env.spy = prev.spy
+                env.eq = prev.eq
+                table.remove(pendingtests, 1)
+                if next then
+                    next()
+                end
+            end
+            local usernext = function(fn, ...)
                 if fn then
                     local res = args(pcall(fn, ...))
                     if res[1] then
@@ -316,14 +326,7 @@ return setmetatable({
                 else
                     handler(self, "end", async, name)
                 end
-                was_restored = true
-                env.ok = prev.ok
-                env.spy = prev.spy
-                env.eq = prev.eq
-                table.remove(pendingtests, 1)
-                if next then
-                    next()
-                end
+                restore()
             end
 
             env.eq = function(a, b)
@@ -359,20 +362,14 @@ return setmetatable({
             handler(self, "begin", async, name)
             local ok, err
             if async then
-                ok, err = pcall(f, restore)
+                ok, err = pcall(f, usernext)
             else
                 ok, err = pcall(f)
             end
             if not ok then
                 handler(self, "except", async, name, err)
                 if async and not was_restored then
-                    env.ok = prev.ok
-                    env.spy = prev.spy
-                    env.eq = prev.eq
-                    table.remove(pendingtests, 1)
-                    if next then
-                        next()
-                    end
+                    restore()
                 end
             elseif not async then
                 handler(self, "end", async, name)
