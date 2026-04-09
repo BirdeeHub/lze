@@ -293,7 +293,7 @@ local function read_dir(dir, filter)
 end
 
 local dir, filter
-if select("#", ...) == 2 then
+if select("#", ...) == 2 and type(({ ... })[2]) == "function" then
     dir, filter = ...
 else
     dir = cwd()
