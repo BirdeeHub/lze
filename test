@@ -15,6 +15,36 @@ end
 local here = cwd()
 vim.opt.runtimepath:prepend(here)
 local testdir = here .. "tests/"
-loadfile(testdir .. "run.lua")(testdir, function(filename)
+package.path = testdir .. "gambiarra/?.lua;" .. package.path
+
+local test = require("gambiarra")
+
+local files = test.read_dir(testdir, function(filename)
     return filename:match("_test%.lua$")
+end)
+for _, file in ipairs(files) do
+    local success, msg = pcall(loadfile, testdir .. file)
+    if success then
+        ---@cast msg function
+        success, msg = pcall(msg, test)
+    end
+    io.write(
+        " "
+            .. test.endsectionmark
+            .. " "
+            .. file
+            .. " "
+            .. (success and test.passmark or test.failmark)
+            .. (msg and " : " .. tostring(msg) or "")
+            .. "\n"
+    )
+end
+
+test.await(function(self)
+    self.report()
+    if (self.tests_failed or 0) > 0 then
+        os.exit(1)
+    else
+        os.exit(0)
+    end
 end)
