@@ -33,7 +33,7 @@
       name = "run-tests";
       entry = "${pkgs.writeShellScript "run-tests" ''
         set -e
-        export HOME=''${HOME:-"$(mktemp -d)"}
+        export HOME="$(mktemp -d)"
         gitroot="$(git rev-parse --show-toplevel)"
         if [ -z "$gitroot" ]; then
           echo "Error: Unable to determine Git root."
