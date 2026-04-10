@@ -238,6 +238,22 @@ require("lze").load {
 This plugin is lua only!
 
 Any way you can add it to the runtimepath will allow you to use it!
+
+### Installation of plugins + lze
+
+Because `lze` does not handle installation, only lazy loading,
+it works with any package manager that works within the Neovim plugin system.
+
+By default, this means if you can call `vim.cmd.packadd` on the plugin,
+you can easily use `lze` to load it.
+
+But even that is not required.
+You can change the load function used both by default and individually.
+
+This means you could theoretically use it with any Neovim plugin manager.
+
+For a nix example, see [nix-wrapper-modules#neovim](https://github.com/BirdeeHub/nix-wrapper-modules/tree/main/templates/neovim)
+
 <!-- markdownlint-disable -->
 <details>
   <summary>
