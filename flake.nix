@@ -119,10 +119,10 @@
               knownRockspec = "${self}/${name}-scm-1.rockspec";
               src = self;
               checkPhase = ''
-                runHook preInstallCheck
+                runHook preCheck
                 export HOME=$(mktemp -d)
                 ${final.lib.getExe final.neovim-unwrapped} --headless --cmd "luafile $src/test.nvim" +qall!
-                runHook postInstallCheck
+                runHook postCheck
               '';
             }
         ) {};
